@@ -32,7 +32,7 @@ var prefix = (function () {
 var pre = (document.createElement('div').style['WebkitTransform'] != undefined) ? '-webkit-' : '';
 var useSwipe = true;
 var pageMode = 'flip';
-var pageW = 612, pageH = 792;
+var pageW = 600, pageH = 800;
 var multifile = false;
 if(multifile) { 
 	$('html').addClass('multifile'); 
@@ -55,14 +55,14 @@ var interactiveSelectors = 'a,button,input,select,textarea,.mejs-overlay-button,
 var sliderSettings = {}, nav = {}, in5 = {layouts:[
  	{
  		"class": "mq-none mq-default",
- 		"width": 612,
- 		"height": 792,
+ 		"width": 600,
+ 		"height": 800,
  		"default": true,
  		"trigger": "default",
  		"index": 0
  	}
  ]},
-viewOpts = {"title":0,"page":0,"zoom":0,"fs":0,"pdf":0,"toc":0,"thumbs":0,"progress":0,"bg":"#000","loadText":"loading content...","footer":1};
+viewOpts = {"title":0,"page":1,"zoom":0,"fs":1,"pdf":0,"toc":0,"thumbs":1,"progress":0,"showbar":1,"bg":"#000","loadText":"loading content...","footer":1};
 var uAgent = navigator.userAgent.toLowerCase();
 var isIOS = ((/iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream), 
 	isIPad = uAgent.indexOf("ipad") > -1 || (isIOS && window.devicePixelRatio < 3), isIPhone = uAgent.indexOf("iphone") > -1 || (isIOS && window.devicePixelRatio > 2),
@@ -591,7 +591,7 @@ function getOrientation() {
 }
 
 function addNavProps(){
-	if(nav.numPages === undefined) nav.numPages=45;
+	if(nav.numPages === undefined) nav.numPages=128;
 	nav.rtl = $('#slider').attr('data-dir') == 'rtl';
 	if(nav.rtl) $('html').attr('data-dir', 'rtl');
 	nav.init = function() { setTimeout(function(){nav.to(getStartPage());},1); };
