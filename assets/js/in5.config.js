@@ -33,14 +33,14 @@ var pre = (document.createElement('div').style['WebkitTransform'] != undefined) 
 var useSwipe = true;
 var pageMode = 'flip';
 var pageW = 600, pageH = 800;
-var multifile = true;
+var multifile = false;
 if(multifile) { 
 	$('html').addClass('multifile'); 
 	if(pageMode[0] == 'f') $('html').addClass('fade');
 }		
 var isLiquid = (pageMode.indexOf('liquid') != -1), flip = (pageMode.indexOf('flip') != -1) && !multifile;
 var arrowNav = true;
-var lazyLoad = false;
+var lazyLoad = true;
 var scaleMode = 'best_all';
 var webAppType = '';
 var useTracker = false;
@@ -62,7 +62,7 @@ var sliderSettings = {}, nav = {}, in5 = {layouts:[
  		"index": 0
  	}
  ]},
-viewOpts = {"title":0,"page":1,"zoom":1,"fs":1,"pdf":0,"toc":0,"thumbs":1,"progress":0,"showbar":1,"bg":"#000","loadText":"loading content...","footer":0};
+viewOpts = {"title":0,"page":1,"zoom":1,"fs":1,"pdf":0,"toc":128,"thumbs":1,"progress":0,"showbar":1,"bg":"#000","loadText":"loading content...","footer":0};
 var uAgent = navigator.userAgent.toLowerCase();
 var isIOS = ((/iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream), 
 	isIPad = uAgent.indexOf("ipad") > -1 || (isIOS && window.devicePixelRatio < 3), isIPhone = uAgent.indexOf("iphone") > -1 || (isIOS && window.devicePixelRatio > 2),
@@ -141,6 +141,7 @@ function onNewPage(e, data){
 		nav.previousPageIndex = (nav.current||1)-1;
 		nav.current = data.index+1;
 		setStoredPage(nav.current);
+				if(lazyLoad && !data.view) loadImages(data.index);
 			}
 	var activePages = [], $pages=$('.page').removeClass('activePage').attr('aria-hidden','true'),$active;
 	$pages.parents('.turn-page-wrapper').attr('aria-hidden','true');
@@ -149,6 +150,16 @@ function onNewPage(e, data){
 		if(data.view[0] > 0 && pageObjs[data.view[0]]) activePages.push(pageObjs[data.view[0]]);
 		if(data.view[1] > 0 && pageObjs[data.view[1]]) activePages.push(pageObjs[data.view[1]]);
 		nav.activeView = data.view, $active = $(activePages);
+				if(lazyLoad) {
+			loadPageImages(pageObjs[data.view[0]]); 
+			if(data.view[1]){
+				loadPageImages(pageObjs[data.view[1]]);
+				setTimeout(function(){loadPageImages(pageObjs[data.view[1]+1]); loadPageImages(pageObjs[data.view[1]+2]);},100);
+			} else {
+				setTimeout(function(){loadPageImages(pageObjs[data.view[0]+1]);},100);
+			}
+			if(data.view[0]>3){ setTimeout(function(){loadPageImages(pageObjs[data.view[0]-2]); loadPageImages(pageObjs[data.view[0]-1]);},250);}
+		}
 			} else { 
 		$active = $pages.eq(data.index);
 	}
@@ -171,6 +182,28 @@ function onNewPage(e, data){
 		});
 	}
 	$(document).trigger('pageRendered', data);
+}
+function loadImages(pageIndex) {
+	var pages = $('.page'), layoutIndex = window.currentLayout || 0;
+	loadPageImages(pages.eq(pageIndex).find('.page-scale-wrap').eq(layoutIndex));
+	loadPageImages(pages.eq(pageIndex+1).find('.page-scale-wrap').eq(layoutIndex));
+	if(pageIndex > 0){ loadPageImages(pages.eq(pageIndex-1).find('.page-scale-wrap').eq(layoutIndex)); }
+}
+
+function loadPageImages(targPage){
+	if(targPage && !targPage.data('loaded')){
+		targPage.find('img').filter('[data-src]').each(function(index,el){ 
+			var $el = $(el);
+			if((!isWebkit || !isLocal) && $el.hasClass('svg-img')){
+				if ($el.siblings().length) $el.wrap('<div class="pageItem"/>');
+				$el.parent().load($el.attr('data-src')+' svg',function(resp,status,xhr){
+					if(status==='error'){$el.attr('src', $el.attr('data-src'));}
+				});
+			} else{$el.attr('src', $el.attr('data-src'));}
+			$el.removeAttr('data-src');
+		});
+		targPage.data('loaded',!0);
+	}
 }
 
 /*to do:check for when multiple pages are visible*/
