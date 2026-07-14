@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing...</title>
+    <script>
+        window.onload = function() {
+            // 1. Parse the variables from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Get 'g' (gallery) and 'd' (design). If missing, use a fallback.
+            const gallery = urlParams.get('g') || 'ws';
+            const design = urlParams.get('d') || 'Kinetic%20Works%20';
+
+            // 2. Format the message exactly how your database/system expects it
+            const messageBody = `-${gallery}- ${design}`;
+
+            // 3. Build the final SMS link (encoding the spaces and special characters)
+            const phone = "+14352362244";
+            const finalSmsLink = `sms:${phone}?body=${encodeURIComponent(messageBody)}`;
+
+            // 4. Update the fallback button just in case the auto-redirect is blocked
+            document.getElementById('smsButton').href = finalSmsLink;
+
+            // 5. Trigger the automatic redirect
+            window.location.href = finalSmsLink;
+        };
+    </script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        .button {
+            display: inline-block; padding: 15px 25px; 
+            background-color: #007bff; color: white; 
+            text-decoration: none; border-radius: 5px; font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Opening your messaging app...</h2>
+    <p>If it doesn't open automatically within a few seconds, tap the button below.</p>
+    
+    <a id="smsButton" href="#" class="button">Send us a Text</a>
+</body>
+</html>
