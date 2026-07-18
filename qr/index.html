@@ -2,44 +2,306 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Routing...</title>
-    <script>
-        window.onload = function() {
-            // 1. Parse the variables from the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Get 'g' (gallery) and 'd' (design). If missing, use a fallback.
-            const gallery = urlParams.get('g') || 'ws';
-            const design = urlParams.get('d') || 'Kinetic%20Works%20';
 
-            // 2. Format the message exactly how your database/system expects it
-            const messageBody = `-${gallery}- ${design}`;
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-            // 3. Build the final SMS link (encoding the spaces and special characters)
-            const phone = "+14352362244";
-            const finalSmsLink = `sms:${phone}?body=${encodeURIComponent(messageBody)}`;
+    <title>Opening Messaging App...</title>
 
-            // 4. Update the fallback button just in case the auto-redirect is blocked
-            document.getElementById('smsButton').href = finalSmsLink;
-
-            // 5. Trigger the automatic redirect
-            window.location.href = finalSmsLink;
-        };
-    </script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 125px 30px 50px;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 50px;
+            font-size: 64px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        p {
+            margin: 0 auto 35px;
+            max-width: 760px;
+            font-size: 32px;
+            line-height: 1.4;
+        }
+
         .button {
-            display: inline-block; padding: 15px 25px; 
-            background-color: #007bff; color: white; 
-            text-decoration: none; border-radius: 5px; font-size: 18px;
+            display: inline-block;
+            padding: 30px 50px;
+            background-color: #2459a6;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 42px;
+            line-height: 1.2;
+        }
+
+        .button:hover,
+        .button:focus {
+            background-color: #184887;
+        }
+
+        .selection-link {
+            margin-top: 40px;
+            margin-bottom: 0;
+            font-size: 24px;
+            line-height: 1.5;
+        }
+
+        .selection-link a {
+            color: #2459a6;
+            text-decoration: underline;
+        }
+
+        .selection-link a:hover,
+        .selection-link a:focus {
+            color: #184887;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 100px 20px 40px;
+            }
+
+            h2 {
+                margin-bottom: 40px;
+                font-size: 42px;
+            }
+
+            p {
+                margin-bottom: 30px;
+                font-size: 24px;
+            }
+
+            .button {
+                padding: 22px 35px;
+                font-size: 28px;
+            }
+
+            .selection-link {
+                margin-top: 35px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 90px 20px 35px;
+            }
+
+            h2 {
+                font-size: 34px;
+            }
+
+            p {
+                font-size: 21px;
+            }
+
+            .button {
+                width: 100%;
+                max-width: 360px;
+                padding: 22px 20px;
+                font-size: 27px;
+            }
         }
     </style>
 </head>
+
 <body>
-    <h2>Opening your messaging app...</h2>
-    <p>If it doesn't open automatically within a few seconds, tap the button below.</p>
-    
-    <a id="smsButton" href="#" class="button">Send us a Text</a>
+    <main class="content">
+        <h2 id="openingMessage">
+            Opening your messaging app...
+        </h2>
+
+        <p>
+            Send the prepared message to receive automated, interactive
+            information about this kinetic wind sculpture.
+        </p>
+
+        <p>
+            If it does not open automatically within a few seconds,
+            tap the button below.
+        </p>
+
+        <a id="smsButton" href="#" class="button">
+            Send Us a Text
+        </a>
+
+        <p class="selection-link">
+            Prefer to browse instead? Click
+            <a href="https://kiosk.whitakerstudio.com/">
+                here
+            </a>
+            to view the complete collection of Lyman Whitaker's kinetic works.
+        </p>
+    </main>
+
+    <script>
+        function getOSTag() {
+            const userAgent = navigator.userAgent || "";
+
+            const platform =
+                (navigator.userAgentData &&
+                    navigator.userAgentData.platform) ||
+                navigator.platform ||
+                "";
+
+            const touchPoints = navigator.maxTouchPoints || 0;
+
+            if (
+                /Android/i.test(userAgent) ||
+                /Android/i.test(platform)
+            ) {
+                return "(A)";
+            }
+
+            const standardIOS =
+                /iPad|iPhone|iPod/i.test(userAgent);
+
+            const modernIPad =
+                /Mac/i.test(platform) &&
+                touchPoints > 1;
+
+            if (standardIOS || modernIPad) {
+                return "(I)";
+            }
+
+            return "(O)";
+        }
+
+        function cleanParameter(value, fallback, maxLength) {
+            return (value || fallback)
+                .replace(/[\r\n\t]+/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+                .substring(0, maxLength);
+        }
+
+        function removeMessageInstruction(value) {
+            return value
+                .replace(
+                    /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
+                    ""
+                )
+                .trim();
+        }
+
+        function formatDesignName(value) {
+            const uppercaseWords = [
+                "sm",
+                "med",
+                "lg",
+                "xl",
+                "xxl"
+            ];
+
+            return value
+                .toLowerCase()
+                .split(/\s+/)
+                .map(function (word) {
+                    if (uppercaseWords.indexOf(word) !== -1) {
+                        return word.toUpperCase();
+                    }
+
+                    return word.charAt(0).toUpperCase() +
+                        word.slice(1);
+                })
+                .join(" ");
+        }
+
+        function openMessagingApp() {
+            const urlParams =
+                new URLSearchParams(window.location.search);
+
+            const gallery = cleanParameter(
+                urlParams.get("g"),
+                "ws",
+                30
+            );
+
+            /*
+             * Preserve the complete d parameter in the outgoing
+             * text message, including:
+             * "Send this message for details."
+             */
+            const rawDesign = cleanParameter(
+                urlParams.get("d"),
+                "Artist",
+                200
+            );
+
+            /*
+             * Remove the instruction only from the sculpture name
+             * displayed on this webpage.
+             */
+            const cleanedDisplayDesign =
+                removeMessageInstruction(rawDesign);
+
+            const displayDesign = cleanedDisplayDesign
+                ? formatDesignName(cleanedDisplayDesign)
+                : "Kinetic Wind Sculpture";
+
+            const openingMessage =
+                document.getElementById("openingMessage");
+
+            openingMessage.textContent =
+                "Opening your messaging app for automated, " +
+                "interactive information about the " +
+                displayDesign +
+                "...";
+
+            const osTag = getOSTag();
+
+            const messageBody =
+                "-" + gallery + "- " +
+                rawDesign + " " +
+                osTag;
+
+            const phone = "+14352362244";
+
+            const finalSmsLink =
+                "sms:" +
+                phone +
+                "?body=" +
+                encodeURIComponent(messageBody);
+
+            const smsButton =
+                document.getElementById("smsButton");
+
+            smsButton.href = finalSmsLink;
+
+            /*
+             * Give Safari a moment to display the dynamic sculpture
+             * name before showing its Messages confirmation prompt.
+             */
+            window.setTimeout(function () {
+                window.location.href = finalSmsLink;
+            }, 500);
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            openMessagingApp
+        );
+    </script>
 </body>
 </html>
