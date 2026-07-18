@@ -196,6 +196,10 @@
                 .substring(0, maxLength);
         }
 
+        /*
+         * Removes "Send this message for details." from the value
+         * used in the visible webpage heading.
+         */
         function removeMessageInstruction(value) {
             return value
                 .replace(
@@ -203,6 +207,32 @@
                     ""
                 )
                 .trim();
+        }
+
+        /*
+         * Ensures the outgoing SMS always contains the instruction.
+         *
+         * If it is already included, this avoids duplicating it.
+         * It also standardizes the capitalization and final period.
+         */
+        function ensureMessageInstruction(value) {
+            const instruction =
+                "Send this message for details.";
+
+            const instructionPattern =
+                /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
+
+            if (instructionPattern.test(value)) {
+                return value
+                    .replace(instructionPattern, " " + instruction)
+                    .trim();
+            }
+
+            return (
+                value.trim() +
+                " " +
+                instruction
+            ).trim();
         }
 
         function formatDesignName(value) {
@@ -239,9 +269,8 @@
             );
 
             /*
-             * Preserve the complete d parameter in the outgoing
-             * text message, including:
-             * "Send this message for details."
+             * Read the original design value from the QR URL.
+             * It may or may not include the instruction.
              */
             const rawDesign = cleanParameter(
                 urlParams.get("d"),
@@ -250,8 +279,7 @@
             );
 
             /*
-             * Remove the instruction only from the sculpture name
-             * displayed on this webpage.
+             * Strip the instruction from the webpage display name.
              */
             const cleanedDisplayDesign =
                 removeMessageInstruction(rawDesign);
@@ -269,11 +297,18 @@
                 displayDesign +
                 "...";
 
+            /*
+             * Add the instruction to the outgoing text when it
+             * was omitted from the QR URL.
+             */
+            const smsDesign =
+                ensureMessageInstruction(rawDesign);
+
             const osTag = getOSTag();
 
             const messageBody =
                 "-" + gallery + "- " +
-                rawDesign + " " +
+                smsDesign + " " +
                 osTag;
 
             const phone = "+14352362244";
