@@ -1,26 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Opening Messaging App...</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            color: #222222;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 750px;
+        }
+
+        h2 {
+            margin: 0 0 24px;
+            font-size: 32px;
+            line-height: 1.3;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0 0 24px;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 20px 36px;
+
+            background-color: #007bff;
+            color: #ffffff;
+
+            text-decoration: none;
+            border-radius: 8px;
+
+            font-size: 24px;
+            font-weight: bold;
+
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover,
+        .button:focus {
+            background-color: #0056b3;
+        }
+
+        .selection-link {
+            margin-top: 32px;
+            margin-bottom: 0;
+            font-size: 18px;
+        }
+
+        .selection-link a {
+            color: #333333;
+            text-decoration: underline;
+        }
+
+        .selection-link a:hover,
+        .selection-link a:focus {
+            color: #007bff;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 24px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            p {
+                font-size: 18px;
+            }
+
+            .button {
+                width: 100%;
+                padding: 18px 20px;
+                font-size: 22px;
+            }
+
+            .selection-link {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+
 <body>
-    <h2 id="openingMessage">
-        Opening your messaging app...
-    </h2>
+    <main class="content">
+        <h2 id="openingMessage">
+            Opening your messaging app...
+        </h2>
 
-    <p>
-        Send the prepared message to receive automated, interactive information
-        about this kinetic wind sculpture.
-    </p>
+        <p>
+            Send the prepared message to receive automated, interactive
+            information about this kinetic wind sculpture.
+        </p>
 
-    <p>
-        If your messaging app does not open automatically, tap the button below.
-    </p>
+        <p>
+            If your messaging app does not open automatically, tap the button below.
+        </p>
 
-    <a id="smsButton" href="#" class="button">
-        Send Us a Text
-    </a>
-
-    <p class="selection-link">
-        <a href="https://kiosk.whitakerstudio.com/">
-            Click here to view the full selection of Lyman Whitaker’s kinetic works.
+        <a id="smsButton" href="#" class="button">
+            Send Us a Text
         </a>
-    </p>
+
+        <p class="selection-link">
+            <a href="https://kiosk.whitakerstudio.com/">
+                Click here to view the full selection of Lyman Whitaker’s kinetic works.
+            </a>
+        </p>
+    </main>
 
     <script>
         function getOSTag() {
@@ -64,7 +179,6 @@
 
         function removeMessageInstruction(value) {
             return value
-                // Removes the instruction only when it appears at the end
                 .replace(
                     /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
                     ""
@@ -76,11 +190,16 @@
             return value
                 .toLowerCase()
                 .split(/\s+/)
-                .map(word => {
-                    // Keep common size abbreviations uppercase
-                    if (
-                        ["sm", "med", "lg", "xl", "xxl"].includes(word)
-                    ) {
+                .map(function (word) {
+                    const uppercaseWords = [
+                        "sm",
+                        "med",
+                        "lg",
+                        "xl",
+                        "xxl"
+                    ];
+
+                    if (uppercaseWords.includes(word)) {
                         return word.toUpperCase();
                     }
 
@@ -100,8 +219,8 @@
             );
 
             /*
-             * Keep the complete parameter for the outgoing SMS,
-             * including "Send this message for details." when present.
+             * Preserve the full design parameter in the outgoing
+             * message, including the legacy instruction when present.
              */
             const rawDesign = cleanParameter(
                 urlParams.get("d"),
@@ -110,25 +229,34 @@
             );
 
             /*
-             * Remove the instruction only from the version shown
-             * on the webpage.
+             * Remove "Send this message for details." only from
+             * the design name displayed on the webpage.
              */
-            const displayDesign = formatDesignName(
-                removeMessageInstruction(rawDesign)
-            );
+            const cleanedDisplayDesign =
+                removeMessageInstruction(rawDesign);
+
+            const displayDesign = cleanedDisplayDesign
+                ? formatDesignName(cleanedDisplayDesign)
+                : "Kinetic Wind Sculpture";
 
             const osTag = getOSTag();
 
             document.getElementById("openingMessage").textContent =
-                `Opening your messaging app for automated, interactive information about the ${displayDesign}...`;
+                "Opening your messaging app for automated, interactive " +
+                "information about the " +
+                displayDesign +
+                "...";
 
             const messageBody =
-                `*${gallery}* ${rawDesign} ${osTag}`;
+                "*" + gallery + "* " + rawDesign + " " + osTag;
 
             const phone = "+14352362244";
 
             const finalSmsLink =
-                `sms:${phone}?body=${encodeURIComponent(messageBody)}`;
+                "sms:" +
+                phone +
+                "?body=" +
+                encodeURIComponent(messageBody);
 
             document.getElementById("smsButton").href =
                 finalSmsLink;
@@ -142,3 +270,4 @@
         );
     </script>
 </body>
+</html>
