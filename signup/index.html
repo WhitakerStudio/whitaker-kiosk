@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Opening Messaging App...</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 125px 30px 50px;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 50px;
+            font-size: 48px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        p {
+            margin: 0 auto 35px;
+            max-width: 760px;
+            font-size: 32px;
+            line-height: 1.4;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 30px 50px;
+            background-color: #2459a6;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 42px;
+            line-height: 1.2;
+        }
+
+        .button:hover,
+        .button:focus {
+            background-color: #184887;
+        }
+
+        .selection-link {
+            margin-top: 40px;
+            margin-bottom: 0;
+            font-size: 24px;
+            line-height: 1.5;
+        }
+
+        .selection-link a {
+            color: #2459a6;
+            text-decoration: underline;
+        }
+
+        .selection-link a:hover,
+        .selection-link a:focus {
+            color: #184887;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 100px 20px 40px;
+            }
+
+            h2 {
+                margin-bottom: 40px;
+                font-size: 42px;
+            }
+
+            p {
+                margin-bottom: 30px;
+                font-size: 24px;
+            }
+
+            .button {
+                padding: 22px 35px;
+                font-size: 28px;
+            }
+
+            .selection-link {
+                margin-top: 35px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 90px 20px 35px;
+            }
+
+            h2 {
+                font-size: 34px;
+            }
+
+            p {
+                font-size: 21px;
+            }
+
+            .button {
+                width: 100%;
+                max-width: 360px;
+                padding: 22px 20px;
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="content">
+        <h2 id="openingMessage">
+            Opening your messaging app...
+        </h2>
+
+        <p>
+            Send the prepared message to receive automated, interactive
+            information about this kinetic wind sculpture.
+        </p>
+
+        <p>
+            If it does not open automatically within a few seconds,
+            tap the button below.
+        </p>
+
+        <a id="smsButton" href="#" class="button">
+            Send Us a Text
+        </a>
+
+        <p class="selection-link">
+            Prefer to browse instead? Click
+            <a href="https://kiosk.whitakerstudio.com/">
+                here
+            </a>
+            to view the complete collection of Lyman Whitaker's kinetic works.
+        </p>
+    </main>
+
+    <script>
+        function getOSTag() {
+            const userAgent = navigator.userAgent || "";
+
+            const platform =
+                (navigator.userAgentData &&
+                    navigator.userAgentData.platform) ||
+                navigator.platform ||
+                "";
+
+            const touchPoints = navigator.maxTouchPoints || 0;
+
+            if (
+                /Android/i.test(userAgent) ||
+                /Android/i.test(platform)
+            ) {
+                return "(A)";
+            }
+
+            const standardIOS =
+                /iPad|iPhone|iPod/i.test(userAgent);
+
+            const modernIPad =
+                /Mac/i.test(platform) &&
+                touchPoints > 1;
+
+            if (standardIOS || modernIPad) {
+                return "(I)";
+            }
+
+            return "(O)";
+        }
+
+        function cleanParameter(value, fallback, maxLength) {
+            return (value || fallback)
+                .replace(/[\r\n\t]+/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+                .substring(0, maxLength);
+        }
+
+        /*
+         * Removes "Send this message for details." from the value
+         * used in the visible webpage heading.
+         */
+        function removeMessageInstruction(value) {
+            return value
+                .replace(
+                    /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
+                    ""
+                )
+                .trim();
+        }
+
+        /*
+         * Ensures the outgoing SMS always contains the instruction.
+         *
+         * If it is already included, this avoids duplicating it.
+         * It also standardizes the capitalization and final period.
+         */
+        function ensureMessageInstruction(value) {
+            const instruction =
+                "Send this message for details.";
+
+            const instructionPattern =
+                /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
+
+            if (instructionPattern.test(value)) {
+                return value
+                    .replace(instructionPattern, " " + instruction)
+                    .trim();
+            }
+
+            return (
+                value.trim() +
+                " " +
+                instruction
+            ).trim();
+        }
+
+        function formatDesignName(value) {
+            const uppercaseWords = [
+                "sm",
+                "med",
+                "lg",
+                "xl",
+                "xxl"
+            ];
+
+            return value
+                .toLowerCase()
+                .split(/\s+/)
+                .map(function (word) {
+                    if (uppercaseWords.indexOf(word) !== -1) {
+                        return word.toUpperCase();
+                    }
+
+                    return word.charAt(0).toUpperCase() +
+                        word.slice(1);
+                })
+                .join(" ");
+        }
+
+        function openMessagingApp() {
+            const urlParams =
+                new URLSearchParams(window.location.search);
+
+            const gallery = cleanParameter(
+                urlParams.get("g"),
+                "ws",
+                30
+            );
+
+            /*
+             * Read the original design value from the QR URL.
+             * It may or may not include the instruction.
+             */
+            const rawDesign = cleanParameter(
+                urlParams.get("d"),
+                "Artist",
+                200
+            );
+
+            /*
+             * Strip the instruction from the webpage display name.
+             */
+            const cleanedDisplayDesign =
+                removeMessageInstruction(rawDesign);
+
+            const displayDesign = cleanedDisplayDesign
+                ? formatDesignName(cleanedDisplayDesign)
+                : "Kinetic Wind Sculpture";
+
+            const openingMessage =
+                document.getElementById("openingMessage");
+
+            openingMessage.textContent =
+                "Opening your messaging app for automated, " +
+                "interactive information about the " +
+                displayDesign +
+                "...";
+
+            /*
+             * Add the instruction to the outgoing text when it
+             * was omitted from the QR URL.
+             */
+            const smsDesign =
+                ensureMessageInstruction(rawDesign);
+
+            const osTag = getOSTag();
+
+	    /*
+ * Notify the Whitaker Flask server that the NFC page
+ * was opened.
+ */
+fetch(
+    "https://whitakerstudio.net/api/qrnfclog",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        keepalive: true,
+        body: JSON.stringify({
+            gallery: gallery,
+            design: cleanedDisplayDesign,
+            os: osTag,
+            nfc: false,
+            qr: true,
+            userAgent: navigator.userAgent
+        })
+    }
+)
+.then(function (response) {
+    if (!response.ok) {
+        console.error(
+            "QR/NFC logging failed with status:",
+            response.status
+        );
+    }
+})
+.catch(function (error) {
+    console.error(
+        "QR/NFC logging request failed:",
+        error
+    );
+});
+
+            const messageBody =
+                "!" + gallery + "! " +
+                smsDesign
+
+            const phone = "+14352362244";
+
+            const finalSmsLink =
+                "sms:" +
+                phone +
+                "?body=" +
+                encodeURIComponent(messageBody);
+
+            const smsButton =
+                document.getElementById("smsButton");
+
+            smsButton.href = finalSmsLink;
+
+            /*
+             * Give Safari a moment to display the dynamic sculpture
+             * name before showing its Messages confirmation prompt.
+             */
+            window.setTimeout(function () {
+                window.location.href = finalSmsLink;
+            }, 500);
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            openMessagingApp
+        );
+    </script>
+</body>
+</html>
