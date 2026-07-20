@@ -133,8 +133,7 @@
         </h2>
 
         <p>
-            Send the prepared message to receive automated, interactive
-            information about this kinetic wind sculpture.
+            Send the prepared message to begin the gallery signup process.
         </p>
 
         <p>
@@ -196,45 +195,6 @@
                 .substring(0, maxLength);
         }
 
-        /*
-         * Removes "Send this message for details." from the value
-         * used in the visible webpage heading.
-         */
-        function removeMessageInstruction(value) {
-            return value
-                .replace(
-                    /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
-                    ""
-                )
-                .trim();
-        }
-
-        /*
-         * Ensures the outgoing SMS always contains the instruction.
-         *
-         * If it is already included, this avoids duplicating it.
-         * It also standardizes the capitalization and final period.
-         */
-        function ensureMessageInstruction(value) {
-            const instruction =
-                "Send this message for details.";
-
-            const instructionPattern =
-                /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
-
-            if (instructionPattern.test(value)) {
-                return value
-                    .replace(instructionPattern, " " + instruction)
-                    .trim();
-            }
-
-            return (
-                value.trim() +
-                " " +
-                instruction
-            ).trim();
-        }
-
         function formatDesignName(value) {
             const uppercaseWords = [
                 "sm",
@@ -281,28 +241,24 @@
             /*
              * Strip the instruction from the webpage display name.
              */
-            const cleanedDisplayDesign =
-                removeMessageInstruction(rawDesign);
+            const cleanedDisplayDesign = rawDesign;
 
-            const displayDesign = cleanedDisplayDesign
-                ? formatDesignName(cleanedDisplayDesign)
-                : "Kinetic Wind Sculpture";
+	    const displayDesign = cleanedDisplayDesign
+            ? formatDesignName(cleanedDisplayDesign)
+            : "Gallery Signup";
 
             const openingMessage =
                 document.getElementById("openingMessage");
 
             openingMessage.textContent =
                 "Opening your messaging app for automated, " +
-                "interactive information about the " +
-                displayDesign +
+                "to begin the sms sign up process" +
                 "...";
 
             /*
              * Add the instruction to the outgoing text when it
              * was omitted from the QR URL.
              */
-            const smsDesign =
-                ensureMessageInstruction(rawDesign);
 
             const osTag = getOSTag();
 
@@ -345,7 +301,7 @@ fetch(
 
             const messageBody =
                 "!" + gallery + "! " +
-                smsDesign
+                smsDesign;
 
             const phone = "+14352362244";
 
