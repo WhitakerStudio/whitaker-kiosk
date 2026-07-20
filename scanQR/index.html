@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Opening...</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            color: #222222;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        h1 {
+            margin: 0 0 24px;
+            font-size: 42px;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.5;
+        }
+
+        .fallback-link {
+            display: none;
+            margin-top: 30px;
+            font-size: 20px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+            p {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="content">
+        <h1>Opening artwork information...</h1>
+
+        <p>
+            Please wait while we take you to the requested page.
+        </p>
+
+        <p id="fallbackContainer" class="fallback-link">
+            The page did not open automatically.
+            <a id="fallbackLink" href="#">Continue here</a>.
+        </p>
+    </main>
+
+    <script>
+        const LOG_ENDPOINT =
+            "https://whitakerstudio.net/api/qrnfclog";
+
+        /*
+         * Limiting redirects to approved domains prevents this page
+         * from being misused to redirect visitors to unsafe websites.
+         *
+         * Add additional gallery or Whitaker domains as needed.
+         */
+        const ALLOWED_REDIRECT_HOSTS = [
+            "oenogallery.com",
+            "www.oenogallery.com",
+            "kiosk.whitakerstudio.com",
+            "whitakerstudio.com",
+            "www.whitakerstudio.com"
+        ];
+
+        function cleanParameter(value, fallback, maxLength) {
+            return (value || fallback)
+                .replace(/[\r\n\t]+/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+                .substring(0, maxLength);
+        }
+
+        function getOSTag() {
+            const userAgent = navigator.userAgent || "";
+
+            const platform =
+                (navigator.userAgentData &&
+                    navigator.userAgentData.platform) ||
+                navigator.platform ||
+                "";
+
+            const touchPoints =
+                navigator.maxTouchPoints || 0;
+
+            if (
+                /Android/i.test(userAgent) ||
+                /Android/i.test(platform)
+            ) {
+                return "(A)";
+            }
+
+            const standardIOS =
+                /iPad|iPhone|iPod/i.test(userAgent);
+
+            const modernIPad =
+                /Mac/i.test(platform) &&
+                touchPoints > 1;
+
+            if (standardIOS || modernIPad) {
+                return "(I)";
+            }
+
+            return "(O)";
+        }
+
+        function getVisitorID() {
+            const storageKey = "whitakerVisitorID";
+
+            try {
+                let visitorID =
+                    localStorage.getItem(storageKey);
+
+                if (!visitorID) {
+                    if (
+                        window.crypto &&
+                        typeof window.crypto.randomUUID ===
+                            "function"
+                    ) {
+                        visitorID =
+                            window.crypto.randomUUID();
+                    } else {
+                        visitorID =
+                            "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+                                .replace(
+                                    /[xy]/g,
+                                    function (character) {
+                                        const randomValue =
+                                            Math.random() * 16 | 0;
+
+                                        const value =
+                                            character === "x"
+                                                ? randomValue
+                                                : (
+                                                    randomValue &
+                                                    0x3
+                                                ) | 0x8;
+
+                                        return value.toString(16);
+                                    }
+                                );
+                    }
+
+                    localStorage.setItem(
+                        storageKey,
+                        visitorID
+                    );
+                }
+
+                return visitorID;
+
+            } catch (error) {
+                return "";
+            }
+        }
+
+        function getSafeRedirectURL(rawURL) {
+            if (!rawURL) {
+                return null;
+            }
+
+            try {
+                const parsedURL = new URL(rawURL);
+
+                if (parsedURL.protocol !== "https:") {
+                    return null;
+                }
+
+                const hostname =
+                    parsedURL.hostname.toLowerCase();
+
+                if (
+                    ALLOWED_REDIRECT_HOSTS.indexOf(
+                        hostname
+                    ) === -1
+                ) {
+                    return null;
+                }
+
+                return parsedURL.href;
+
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function sendScanLog(scanData) {
+            const formData = new URLSearchParams();
+
+            Object.keys(scanData).forEach(function (key) {
+                const value = scanData[key];
+
+                if (
+                    value !== null &&
+                    value !== undefined
+                ) {
+                    formData.append(
+                        key,
+                        String(value)
+                    );
+                }
+            });
+
+            /*
+             * sendBeacon is designed for sending analytics while
+             * the browser is leaving the page. It does not wait for
+             * or require a response from Flask.
+             */
+            if (
+                navigator.sendBeacon &&
+                navigator.sendBeacon(
+                    LOG_ENDPOINT,
+                    formData
+                )
+            ) {
+                return;
+            }
+
+            /*
+             * Fallback for browsers where sendBeacon is unavailable
+             * or could not queue the request.
+             */
+            fetch(
+                LOG_ENDPOINT,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
+                    body: formData.toString(),
+                    keepalive: true
+                }
+            ).catch(function () {
+                /*
+                 * Logging errors intentionally do not prevent or
+                 * delay the customer redirect.
+                 */
+            });
+        }
+
+        function processScan() {
+            const urlParams =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const gallery = cleanParameter(
+                urlParams.get("g"),
+                "",
+                50
+            );
+
+            const design = cleanParameter(
+                urlParams.get("d"),
+                "",
+                255
+            );
+
+            const requestedRedirect =
+                urlParams.get("l") || "";
+
+            const redirectURL =
+                getSafeRedirectURL(requestedRedirect);
+
+            if (!redirectURL) {
+                document.querySelector("h1").textContent =
+                    "Unable to open the requested page";
+
+                document.querySelector(
+                    ".content > p"
+                ).textContent =
+                    "The destination link is missing or is not an approved website.";
+
+                return;
+            }
+
+            const fallbackLink =
+                document.getElementById("fallbackLink");
+
+            fallbackLink.href = redirectURL;
+
+            const scanData = {
+                gallery: gallery,
+                design: design,
+                os: getOSTag(),
+
+                nfc: false,
+                qr: true,
+
+                url_scan: true,
+                redirect_link: redirectURL,
+
+                userAgent:
+                    navigator.userAgent || "",
+
+                visitorID:
+                    getVisitorID()
+            };
+
+            sendScanLog(scanData);
+
+            /*
+             * Redirect immediately. This does not wait for Flask,
+             * SQL Server, or the staff notification process.
+             *
+             * replace() also keeps the temporary scan page out of
+             * the visitor's Back-button history.
+             */
+            window.location.replace(redirectURL);
+
+            /*
+             * This normally never becomes visible, but provides a
+             * fallback if the browser prevents automatic navigation.
+             */
+            window.setTimeout(function () {
+                document.getElementById(
+                    "fallbackContainer"
+                ).style.display = "block";
+            }, 1500);
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            processScan
+        );
+    </script>
+</body>
+</html>
