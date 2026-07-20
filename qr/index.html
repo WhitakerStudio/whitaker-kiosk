@@ -306,6 +306,43 @@
 
             const osTag = getOSTag();
 
+	    /*
+ * Notify the Whitaker Flask server that the NFC page
+ * was opened.
+ */
+fetch(
+    "https://whitakerstudio.net/api/qrnfclog",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        keepalive: true,
+        body: JSON.stringify({
+            gallery: gallery,
+            design: cleanedDisplayDesign,
+            os: osTag,
+            nfc: false,
+            qr: true,
+            userAgent: navigator.userAgent
+        })
+    }
+)
+.then(function (response) {
+    if (!response.ok) {
+        console.error(
+            "QR/NFC logging failed with status:",
+            response.status
+        );
+    }
+})
+.catch(function (error) {
+    console.error(
+        "QR/NFC logging request failed:",
+        error
+    );
+});
+
             const messageBody =
                 "-" + gallery + "- " +
                 smsDesign + " " +
