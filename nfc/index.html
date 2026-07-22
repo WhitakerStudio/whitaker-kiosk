@@ -8,7 +8,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Opening Messaging App...</title>
+    <title>Lyman Whitaker Wind Sculpture</title>
 
     <style>
         * {
@@ -17,7 +17,7 @@
 
         body {
             margin: 0;
-            padding: 125px 30px 50px;
+            padding: 70px 30px 50px;
             font-family: Arial, Helvetica, sans-serif;
             text-align: center;
             background-color: #ffffff;
@@ -30,28 +30,78 @@
             margin: 0 auto;
         }
 
+        h1 {
+            margin: 0 0 30px;
+            font-size: 52px;
+            line-height: 1.15;
+            font-weight: 700;
+        }
+
         h2 {
-            margin: 0 0 50px;
-            font-size: 64px;
+            margin: 0 0 35px;
+            font-size: 42px;
             line-height: 1.2;
             font-weight: 700;
         }
 
-        p {
-            margin: 0 auto 35px;
-            max-width: 760px;
+        h3 {
+            margin: 0 0 22px;
             font-size: 32px;
-            line-height: 1.4;
+            line-height: 1.25;
+        }
+
+        p {
+            margin: 0 auto 30px;
+            max-width: 760px;
+            font-size: 28px;
+            line-height: 1.45;
+        }
+
+        /*
+         * Display the animated sculpture at approximately
+         * 70% of the screen width while keeping it centered.
+         */
+        .artwork-image {
+            display: block;
+            width: 70vw;
+            max-width: 700px;
+            height: auto;
+            max-height: 650px;
+            margin: 0 auto 35px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .artist-statement {
+            margin-bottom: 40px;
+        }
+
+        /*
+         * Enhanced mode:
+         * Only the Send Us a Text button remains between the lines.
+         *
+         * Fallback mode:
+         * The original SMS heading, instructions, and button remain.
+         */
+        .sms-section {
+            margin: 35px auto;
+            padding: 35px 25px;
+            border-top: 1px solid #d8d8d8;
+            border-bottom: 1px solid #d8d8d8;
+        }
+
+        .sms-section p {
+            font-size: 27px;
         }
 
         .button {
             display: inline-block;
-            padding: 30px 50px;
+            padding: 25px 45px;
             background-color: #2459a6;
             color: #ffffff;
             text-decoration: none;
             border-radius: 8px;
-            font-size: 42px;
+            font-size: 36px;
             line-height: 1.2;
         }
 
@@ -60,10 +110,48 @@
             background-color: #184887;
         }
 
-        .selection-link {
-            margin-top: 40px;
-            margin-bottom: 0;
+        .price {
+            margin-top: 35px;
+            margin-bottom: 35px;
+            font-size: 34px;
+            font-weight: 700;
+        }
+
+        .gallery-section {
+            margin-top: 35px;
+            padding-top: 15px;
+        }
+
+        .gallery-contact {
+            margin-bottom: 18px;
+            font-size: 25px;
+        }
+
+        .gallery-contact a {
+            color: #2459a6;
+            text-decoration: underline;
+        }
+
+        .gallery-website-button {
+            display: inline-block;
+            margin: 10px auto 25px;
+            padding: 18px 28px;
+            border: 2px solid #2459a6;
+            border-radius: 8px;
+            color: #2459a6;
             font-size: 24px;
+            text-decoration: none;
+        }
+
+        .gallery-website-button:hover,
+        .gallery-website-button:focus {
+            background-color: #f0f5fb;
+        }
+
+        .selection-link {
+            margin-top: 45px;
+            margin-bottom: 0;
+            font-size: 22px;
             line-height: 1.5;
         }
 
@@ -77,49 +165,85 @@
             color: #184887;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 100px 20px 40px;
-            }
-
-            h2 {
-                margin-bottom: 40px;
-                font-size: 42px;
-            }
-
-            p {
-                margin-bottom: 30px;
-                font-size: 24px;
-            }
-
-            .button {
-                padding: 22px 35px;
-                font-size: 28px;
-            }
-
-            .selection-link {
-                margin-top: 35px;
-                font-size: 18px;
-            }
+        .status-message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555555;
         }
 
-        @media (max-width: 420px) {
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
             body {
-                padding: 90px 20px 35px;
+                padding: 45px 20px 40px;
+            }
+
+            h1 {
+                font-size: 42px;
             }
 
             h2 {
                 font-size: 34px;
             }
 
+            h3 {
+                font-size: 28px;
+            }
+
             p {
+                font-size: 23px;
+            }
+
+            .sms-section p {
+                font-size: 22px;
+            }
+
+            .button {
+                padding: 22px 35px;
+                font-size: 29px;
+            }
+
+            .price {
+                font-size: 30px;
+            }
+
+            .gallery-contact,
+            .gallery-website-button {
                 font-size: 21px;
+            }
+
+            .selection-link {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 35px 18px 30px;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+            h2 {
+                font-size: 29px;
+            }
+
+            p {
+                font-size: 20px;
             }
 
             .button {
                 width: 100%;
                 max-width: 360px;
-                padding: 22px 20px;
+                padding: 20px 16px;
+                font-size: 26px;
+            }
+
+            .price {
                 font-size: 27px;
             }
         }
@@ -128,23 +252,94 @@
 
 <body>
     <main class="content">
-        <h2 id="openingMessage">
-            Opening your messaging app...
-        </h2>
 
-        <p>
-            Send the prepared message to receive automated, interactive
-            information about this kinetic wind sculpture.
-        </p>
+        <!--
+            Enhanced sculpture information appears only when both
+            the sculpture and gallery are found in the NFC JSON files.
+        -->
+        <section id="enhancedContent" hidden>
+            <h1 id="designName"></h1>
 
-        <p>
-            If it does not open automatically within a few seconds,
-            tap the button below.
-        </p>
+            <img
+                id="artworkImage"
+                class="artwork-image"
+                src=""
+                alt=""
+                hidden
+            >
 
-        <a id="smsButton" href="#" class="button">
-            Send Us a Text
-        </a>
+            <p
+                id="artistStatement"
+                class="artist-statement"
+            ></p>
+        </section>
+
+        <!--
+            Successful match:
+            Only the Send Us a Text button remains between the lines.
+
+            Failed match:
+            The original message remains and the SMS app opens automatically.
+        -->
+        <section class="sms-section">
+            <h2 id="openingMessage">
+                Opening your messaging app...
+            </h2>
+
+            <p id="smsDescription">
+                Send the prepared message to receive automated,
+                interactive information about this kinetic wind sculpture.
+            </p>
+
+            <p id="smsFallbackInstruction">
+                If it does not open automatically within a few seconds,
+                tap the button below.
+            </p>
+
+            <a
+                id="smsButton"
+                href="javascript:void(0)"
+                class="button"
+                aria-disabled="true"
+            >
+                Send Us a Text
+            </a>
+        </section>
+
+        <!--
+            Price and gallery information appear only after
+            a complete sculpture/gallery match.
+        -->
+        <section id="matchedDetails" hidden>
+            <p
+                id="retailPrice"
+                class="price"
+            ></p>
+
+            <div class="gallery-section">
+                <h3 id="galleryName"></h3>
+
+                <p
+                    id="galleryPhoneContainer"
+                    class="gallery-contact"
+                    hidden
+                >
+                    Call the gallery:
+                    <a id="galleryPhone" href="#"></a>
+                </p>
+
+                <a
+                    id="galleryWebsite"
+                    class="gallery-website-button"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hidden
+                >
+                    View This Gallery's Lyman Whitaker Collection
+                </a>
+            </div>
+        </section>
 
         <p class="selection-link">
             Prefer to browse instead? Click
@@ -153,19 +348,67 @@
             </a>
             to view the complete collection of Lyman Whitaker's kinetic works.
         </p>
+
+        <p
+            id="statusMessage"
+            class="status-message"
+            hidden
+        ></p>
     </main>
 
     <script>
+        /*
+         * NFC files are kept separate from the QR files.
+         *
+         * Expected structure:
+         *
+         * /nfc/assets/data/sculptures.json
+         * /nfc/assets/data/galleries.json
+         * /nfc/assets/images/*.gif
+         */
+        const NFC_ASSET_ROOT =
+            "/nfc/assets/";
+
+        /*
+         * Increment this value after replacing the JSON files
+         * when you need to discourage cached copies.
+         */
+        const ASSET_VERSION =
+            "?v=20260722-1";
+
+        const SCULPTURE_DATA_URL =
+            NFC_ASSET_ROOT +
+            "data/sculptures.json" +
+            ASSET_VERSION;
+
+        const GALLERY_DATA_URL =
+            NFC_ASSET_ROOT +
+            "data/galleries.json" +
+            ASSET_VERSION;
+
+        const LOG_ENDPOINT =
+            "https://whitakerstudio.net/api/qrnfclog";
+
+        /*
+         * This delay is used only when a complete sculpture/gallery
+         * match is not found and the original SMS fallback is used.
+         */
+        const AUTO_OPEN_DELAY_MS = 1000;
+
         function getOSTag() {
-            const userAgent = navigator.userAgent || "";
+            const userAgent =
+                navigator.userAgent || "";
 
             const platform =
-                (navigator.userAgentData &&
-                    navigator.userAgentData.platform) ||
+                (
+                    navigator.userAgentData &&
+                    navigator.userAgentData.platform
+                ) ||
                 navigator.platform ||
                 "";
 
-            const touchPoints = navigator.maxTouchPoints || 0;
+            const touchPoints =
+                navigator.maxTouchPoints || 0;
 
             if (
                 /Android/i.test(userAgent) ||
@@ -175,29 +418,65 @@
             }
 
             const standardIOS =
-                /iPad|iPhone|iPod/i.test(userAgent);
+                /iPad|iPhone|iPod/i.test(
+                    userAgent
+                );
 
             const modernIPad =
                 /Mac/i.test(platform) &&
                 touchPoints > 1;
 
-            if (standardIOS || modernIPad) {
+            if (
+                standardIOS ||
+                modernIPad
+            ) {
                 return "(I)";
             }
 
             return "(O)";
         }
 
-        function cleanParameter(value, fallback, maxLength) {
-            return (value || fallback)
-                .replace(/[\r\n\t]+/g, " ")
-                .replace(/\s+/g, " ")
-                .trim()
-                .substring(0, maxLength);
+        function isIOSDevice() {
+            return (
+                /iPad|iPhone|iPod/i.test(
+                    navigator.userAgent
+                ) ||
+                (
+                    /Mac/i.test(
+                        navigator.platform
+                    ) &&
+                    navigator.maxTouchPoints > 1
+                )
+            );
         }
 
-        function removeMessageInstruction(value) {
-            return value
+        function cleanParameter(
+            value,
+            fallback,
+            maxLength
+        ) {
+            return String(
+                value || fallback
+            )
+                .replace(
+                    /[\r\n\t]+/g,
+                    " "
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim()
+                .substring(
+                    0,
+                    maxLength
+                );
+        }
+
+        function removeMessageInstruction(
+            value
+        ) {
+            return String(value || "")
                 .replace(
                     /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
                     ""
@@ -211,128 +490,717 @@
                 "med",
                 "lg",
                 "xl",
-                "xxl"
+                "xxl",
+                "ss"
             ];
 
-            return value
+            return String(value || "")
                 .toLowerCase()
                 .split(/\s+/)
                 .map(function (word) {
-                    if (uppercaseWords.indexOf(word) !== -1) {
+                    const plainWord =
+                        word.replace(
+                            /[()]/g,
+                            ""
+                        );
+
+                    if (
+                        uppercaseWords.indexOf(
+                            plainWord
+                        ) !== -1
+                    ) {
                         return word.toUpperCase();
                     }
 
-                    return word.charAt(0).toUpperCase() +
-                        word.slice(1);
+                    return (
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1)
+                    );
                 })
                 .join(" ");
         }
 
-        function openMessagingApp() {
-            const urlParams =
-                new URLSearchParams(window.location.search);
+        function normalizeSculptureKey(
+            value
+        ) {
+            return String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(
+                    /\s+/g,
+                    " "
+                );
+        }
 
-            const gallery = cleanParameter(
-                urlParams.get("g"),
-                "ws",
-                30
+        function normalizeGalleryKey(
+            value
+        ) {
+            return String(value || "")
+                .trim()
+                .toUpperCase();
+        }
+
+        function formatPrice(value) {
+            const numericValue =
+                Number(value);
+
+            if (
+                !Number.isFinite(
+                    numericValue
+                )
+            ) {
+                return "";
+            }
+
+            return numericValue.toLocaleString(
+                "en-US",
+                {
+                    style: "currency",
+                    currency: "USD",
+                    maximumFractionDigits: 0
+                }
             );
+        }
+
+        function createSmsLink(
+            phone,
+            messageBody
+        ) {
+            const separator =
+                isIOSDevice()
+                    ? "&body="
+                    : "?body=";
+
+            return (
+                "sms:" +
+                phone +
+                separator +
+                encodeURIComponent(
+                    messageBody
+                )
+            );
+        }
+
+        function findSculpture(
+            sculptureRecords,
+            sculptureKey
+        ) {
+            return sculptureRecords.find(
+                function (item) {
+                    return (
+                        normalizeSculptureKey(
+                            item.lookupKey
+                        ) ===
+                        sculptureKey
+                    );
+                }
+            );
+        }
+
+        function findGallery(
+            galleryRecords,
+            galleryKey
+        ) {
+            return galleryRecords.find(
+                function (item) {
+                    return (
+                        normalizeGalleryKey(
+                            item.lookupKey
+                        ) ===
+                        galleryKey
+                    );
+                }
+            );
+        }
+
+        function setEnhancedSmsLayout(
+            isEnhanced
+        ) {
+            const openingMessage =
+                document.getElementById(
+                    "openingMessage"
+                );
+
+            const smsDescription =
+                document.getElementById(
+                    "smsDescription"
+                );
+
+            const smsFallbackInstruction =
+                document.getElementById(
+                    "smsFallbackInstruction"
+                );
+
+            openingMessage.hidden =
+                isEnhanced;
+
+            smsDescription.hidden =
+                isEnhanced;
+
+            smsFallbackInstruction.hidden =
+                isEnhanced;
+        }
+
+        function normalizeWebsiteURL(
+            value
+        ) {
+            const website =
+                String(value || "")
+                    .trim();
+
+            if (!website) {
+                return "";
+            }
+
+            if (
+                /^https?:\/\//i.test(
+                    website
+                )
+            ) {
+                return website;
+            }
+
+            return (
+                "https://" +
+                website
+            );
+        }
+
+        function populateEnhancedPage(
+            sculpture,
+            galleryInfo
+        ) {
+            const enhancedContent =
+                document.getElementById(
+                    "enhancedContent"
+                );
+
+            const matchedDetails =
+                document.getElementById(
+                    "matchedDetails"
+                );
+
+            const designName =
+                document.getElementById(
+                    "designName"
+                );
+
+            const artworkImage =
+                document.getElementById(
+                    "artworkImage"
+                );
+
+            const artistStatement =
+                document.getElementById(
+                    "artistStatement"
+                );
+
+            const retailPrice =
+                document.getElementById(
+                    "retailPrice"
+                );
+
+            const galleryName =
+                document.getElementById(
+                    "galleryName"
+                );
+
+            const galleryPhoneContainer =
+                document.getElementById(
+                    "galleryPhoneContainer"
+                );
+
+            const galleryPhone =
+                document.getElementById(
+                    "galleryPhone"
+                );
+
+            const galleryWebsite =
+                document.getElementById(
+                    "galleryWebsite"
+                );
+
+            designName.textContent =
+                sculpture.displayName ||
+                sculpture.lookupKey ||
+                "Lyman Whitaker Wind Sculpture";
+
+            artistStatement.textContent =
+                sculpture.artistStatement ||
+                "";
+
+            const formattedPrice =
+                formatPrice(
+                    sculpture.retailPrice
+                );
+
+            if (formattedPrice) {
+                retailPrice.textContent =
+                    formattedPrice;
+
+                retailPrice.hidden =
+                    false;
+            } else {
+                retailPrice.hidden =
+                    true;
+            }
+
+            if (sculpture.image) {
+                /*
+                 * Use only the filename from the JSON and anchor it
+                 * explicitly to the NFC image directory.
+                 */
+                const imageFileName =
+                    String(
+                        sculpture.image
+                    )
+                        .replace(
+                            /\\/g,
+                            "/"
+                        )
+                        .split("/")
+                        .pop();
+
+                const finalImageURL =
+                    NFC_ASSET_ROOT +
+                    "images/" +
+                    encodeURIComponent(
+                        imageFileName
+                    );
+
+                artworkImage.alt =
+                    (
+                        sculpture.displayName ||
+                        "Lyman Whitaker wind sculpture"
+                    ) +
+                    " in motion";
+
+                artworkImage.onload =
+                    function () {
+                        artworkImage.hidden =
+                            false;
+                    };
+
+                artworkImage.onerror =
+                    function () {
+                        console.error(
+                            "Sculpture image failed to load:",
+                            finalImageURL
+                        );
+
+                        artworkImage.hidden =
+                            true;
+                    };
+
+                artworkImage.src =
+                    finalImageURL;
+            } else {
+                artworkImage.hidden =
+                    true;
+            }
+
+            galleryName.textContent =
+                galleryInfo.name ||
+                "Gallery Information";
+
+            if (galleryInfo.phone) {
+                galleryPhone.textContent =
+                    galleryInfo.phone;
+
+                galleryPhone.href =
+                    "tel:" +
+                    String(
+                        galleryInfo.phone
+                    ).replace(
+                        /[^0-9+]/g,
+                        ""
+                    );
+
+                galleryPhoneContainer.hidden =
+                    false;
+            } else {
+                galleryPhoneContainer.hidden =
+                    true;
+            }
+
+            const galleryWebsiteURL =
+                normalizeWebsiteURL(
+                    galleryInfo.website
+                );
+
+            if (galleryWebsiteURL) {
+                galleryWebsite.href =
+                    galleryWebsiteURL;
+
+                galleryWebsite.hidden =
+                    false;
+            } else {
+                galleryWebsite.hidden =
+                    true;
+            }
+
+            enhancedContent.hidden =
+                false;
+
+            matchedDetails.hidden =
+                false;
+
+            document.title =
+                sculpture.displayName ||
+                "Lyman Whitaker Wind Sculpture";
+        }
+
+        async function loadEnhancedContent(
+            galleryKey,
+            sculptureKey
+        ) {
+            try {
+                const responses =
+                    await Promise.all([
+                        fetch(
+                            SCULPTURE_DATA_URL,
+                            {
+                                cache:
+                                    "no-cache"
+                            }
+                        ),
+                        fetch(
+                            GALLERY_DATA_URL,
+                            {
+                                cache:
+                                    "no-cache"
+                            }
+                        )
+                    ]);
+
+                if (!responses[0].ok) {
+                    throw new Error(
+                        "Sculpture JSON returned HTTP " +
+                        responses[0].status
+                    );
+                }
+
+                if (!responses[1].ok) {
+                    throw new Error(
+                        "Gallery JSON returned HTTP " +
+                        responses[1].status
+                    );
+                }
+
+                const data =
+                    await Promise.all([
+                        responses[0].json(),
+                        responses[1].json()
+                    ]);
+
+                if (
+                    !Array.isArray(data[0]) ||
+                    !Array.isArray(data[1])
+                ) {
+                    throw new Error(
+                        "One or more JSON files did not contain an array."
+                    );
+                }
+
+                const sculpture =
+                    findSculpture(
+                        data[0],
+                        sculptureKey
+                    );
+
+                const galleryInfo =
+                    findGallery(
+                        data[1],
+                        galleryKey
+                    );
+
+                /*
+                 * Both the sculpture and gallery must match
+                 * before enhanced mode is activated.
+                 */
+                if (
+                    !sculpture ||
+                    !galleryInfo
+                ) {
+                    console.warn(
+                        "No complete sculpture/gallery match.",
+                        {
+                            galleryKey:
+                                galleryKey,
+                            sculptureKey:
+                                sculptureKey,
+                            sculptureFound:
+                                Boolean(
+                                    sculpture
+                                ),
+                            galleryFound:
+                                Boolean(
+                                    galleryInfo
+                                )
+                        }
+                    );
+
+                    setEnhancedSmsLayout(
+                        false
+                    );
+
+                    return false;
+                }
+
+                populateEnhancedPage(
+                    sculpture,
+                    galleryInfo
+                );
+
+                /*
+                 * Leave only the manual Send Us a Text button
+                 * between the two faint lines.
+                 */
+                setEnhancedSmsLayout(
+                    true
+                );
+
+                return true;
+
+            } catch (error) {
+                console.error(
+                    "Enhanced NFC page data could not be loaded:",
+                    error
+                );
+
+                /*
+                 * Preserve the original SMS fallback format.
+                 */
+                setEnhancedSmsLayout(
+                    false
+                );
+
+                return false;
+            }
+        }
+
+        function logNFCScan(
+            gallery,
+            design,
+            osTag
+        ) {
+            /*
+             * Preserve the existing NFC logging behavior:
+             *
+             * nfc: true
+             * qr: false
+             */
+            fetch(
+                LOG_ENDPOINT,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    keepalive:
+                        true,
+
+                    body:
+                        JSON.stringify({
+                            gallery:
+                                gallery,
+
+                            design:
+                                design,
+
+                            os:
+                                osTag,
+
+                            nfc:
+                                true,
+
+                            qr:
+                                false,
+
+                            userAgent:
+                                navigator.userAgent ||
+                                ""
+                        })
+                }
+            )
+            .then(function (response) {
+                if (!response.ok) {
+                    console.error(
+                        "QR/NFC logging failed with status:",
+                        response.status
+                    );
+                }
+            })
+            .catch(function (error) {
+                console.error(
+                    "QR/NFC logging request failed:",
+                    error
+                );
+            });
+        }
+
+        async function openMessagingApp() {
+            const startedAt =
+                Date.now();
+
+            const urlParams =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const gallery =
+                cleanParameter(
+                    urlParams.get("g"),
+                    "ws",
+                    30
+                );
 
             /*
              * Preserve the complete d parameter in the outgoing
-             * text message, including:
-             * "Send this message for details."
+             * SMS message, including any existing instruction.
              */
-            const rawDesign = cleanParameter(
-                urlParams.get("d"),
-                "Artist",
-                200
-            );
+            const rawDesign =
+                cleanParameter(
+                    urlParams.get("d"),
+                    "Artist",
+                    200
+                );
 
             /*
-             * Remove the instruction only from the sculpture name
-             * displayed on this webpage.
+             * Remove the SMS instruction only from the name
+             * displayed on the webpage and sent to logging.
              */
             const cleanedDisplayDesign =
-                removeMessageInstruction(rawDesign);
+                removeMessageInstruction(
+                    rawDesign
+                );
 
-            const displayDesign = cleanedDisplayDesign
-                ? formatDesignName(cleanedDisplayDesign)
-                : "Kinetic Wind Sculpture";
+            const displayDesign =
+                cleanedDisplayDesign
+                    ? formatDesignName(
+                        cleanedDisplayDesign
+                    )
+                    : "Kinetic Wind Sculpture";
 
             const openingMessage =
-                document.getElementById("openingMessage");
+                document.getElementById(
+                    "openingMessage"
+                );
 
+            /*
+             * This heading remains visible only when enhanced
+             * content cannot be found.
+             */
             openingMessage.textContent =
                 "Opening your messaging app for automated, " +
                 "interactive information about the " +
                 displayDesign +
                 "...";
 
-            const osTag = getOSTag();
-
-/*
- * Notify the Whitaker Flask server that the NFC page
- * was opened.
- */
-fetch(
-    "https://whitakerstudio.net/api/qrnfclog",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        keepalive: true,
-        body: JSON.stringify({
-            gallery: gallery,
-            design: cleanedDisplayDesign,
-            os: osTag,
-            nfc: true,
-            qr: false,
-            userAgent: navigator.userAgent
-        })
-    }
-)
-.then(function (response) {
-    if (!response.ok) {
-        console.error(
-            "QR/NFC logging failed with status:",
-            response.status
-        );
-    }
-})
-.catch(function (error) {
-    console.error(
-        "QR/NFC logging request failed:",
-        error
-    );
-});
-
-            const messageBody =
-                "*" + gallery + "* " +
-                rawDesign + " " +
-                osTag;
-
-            const phone = "+14352362244";
-
-            const finalSmsLink =
-                "sms:" +
-                phone +
-                "?body=" +
-                encodeURIComponent(messageBody);
-
-            const smsButton =
-                document.getElementById("smsButton");
-
-            smsButton.href = finalSmsLink;
+            const osTag =
+                getOSTag();
 
             /*
-             * Give Safari a moment to display the dynamic sculpture
-             * name before showing its Messages confirmation prompt.
+             * Keep the existing NFC message format:
+             *
+             * *JS* Counterpoint Send this message for details. (I)
              */
-            window.setTimeout(function () {
-    window.location.href = finalSmsLink;
-}, 1000);
+            const messageBody =
+                "*" +
+                gallery +
+                "* " +
+                rawDesign +
+                " " +
+                osTag;
+
+            const phone =
+                "+14352362244";
+
+            const finalSmsLink =
+                createSmsLink(
+                    phone,
+                    messageBody
+                );
+
+            const smsButton =
+                document.getElementById(
+                    "smsButton"
+                );
+
+            /*
+             * Set the real SMS link before loading the JSON files.
+             */
+            smsButton.href =
+                finalSmsLink;
+
+            smsButton.removeAttribute(
+                "aria-disabled"
+            );
+
+            /*
+             * Log every NFC page opening regardless of whether
+             * enhanced content is found.
+             */
+            logNFCScan(
+                gallery,
+                cleanedDisplayDesign,
+                osTag
+            );
+
+            const galleryKey =
+                normalizeGalleryKey(
+                    gallery
+                );
+
+            const sculptureKey =
+                normalizeSculptureKey(
+                    cleanedDisplayDesign
+                );
+
+            /*
+             * Attempt to load the enhanced NFC sculpture page.
+             */
+            const enhancedLoaded =
+                await loadEnhancedContent(
+                    galleryKey,
+                    sculptureKey
+                );
+
+            /*
+             * Successful match:
+             * Do not automatically open Messages.
+             */
+            if (enhancedLoaded) {
+                return;
+            }
+
+            /*
+             * Failed match:
+             * Retain the original NFC behavior and automatically
+             * open the prepared SMS message.
+             */
+            const elapsed =
+                Date.now() -
+                startedAt;
+
+            const remainingDelay =
+                Math.max(
+                    100,
+                    AUTO_OPEN_DELAY_MS -
+                    elapsed
+                );
+
+            window.setTimeout(
+                function () {
+                    window.location.href =
+                        finalSmsLink;
+                },
+                remainingDelay
+            );
         }
 
         document.addEventListener(
