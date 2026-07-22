@@ -300,8 +300,9 @@
 
             <a
                 id="smsButton"
-                href="#"
+                href="javascript:void(0)"
                 class="button"
+                aria-disabled="true"
             >
                 Send Us a Text
             </a>
@@ -362,11 +363,13 @@
 
         const SCULPTURE_DATA_URL =
             QR_ASSET_ROOT +
-            "data/sculptures.json";
+            "data/sculptures.json" +
+            ASSET_VERSION;
 
         const GALLERY_DATA_URL =
             QR_ASSET_ROOT +
-            "data/galleries.json";
+            "data/galleries.json"+
+            ASSET_VERSION;
 
         const LOG_ENDPOINT =
             "https://whitakerstudio.net/api/qrnfclog";
@@ -1155,6 +1158,10 @@
              */
             smsButton.href =
                 finalSmsLink;
+	    
+            smsButton.removeAttribute(
+                "aria-disabled"
+            );
 
             logScan(
                 gallery,
