@@ -58,8 +58,8 @@
         }
 
         /*
-         * The GIF occupies approximately 70% of the visible
-         * screen width while remaining centered.
+         * The GIF occupies approximately 70% of the screen
+         * width while remaining centered.
          */
         .artwork-image {
             display: block;
@@ -77,13 +77,11 @@
         }
 
         /*
-         * The top and bottom borders remain visible in both modes.
-         *
          * Enhanced mode:
          * Only the Send Us a Text button appears between the lines.
          *
          * Fallback mode:
-         * The original heading, instructions, and button appear.
+         * The original SMS heading, instructions, and button appear.
          */
         .sms-section {
             margin: 35px auto;
@@ -114,9 +112,31 @@
 
         .price {
             margin-top: 35px;
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             font-size: 34px;
             font-weight: 700;
+        }
+
+        /*
+         * This appears only when checkouts.json contains a record
+         * matching both the current gallery and sculpture.
+         */
+        .purchase-button {
+            display: inline-block;
+            margin: 0 auto 35px;
+            padding: 20px 34px;
+            background-color: #2459a6;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 27px;
+            line-height: 1.2;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .purchase-button:hover,
+        .purchase-button:focus {
+            background-color: #184887;
         }
 
         .gallery-section {
@@ -211,6 +231,11 @@
                 font-size: 30px;
             }
 
+            .purchase-button {
+                padding: 18px 28px;
+                font-size: 23px;
+            }
+
             .gallery-contact,
             .gallery-website-button {
                 font-size: 21px;
@@ -248,6 +273,13 @@
             .price {
                 font-size: 27px;
             }
+
+            .purchase-button {
+                width: 100%;
+                max-width: 360px;
+                padding: 18px 16px;
+                font-size: 22px;
+            }
         }
     </style>
 </head>
@@ -256,7 +288,7 @@
     <main class="content">
 
         <!--
-            This content appears only when both the sculpture
+            Enhanced content appears only when both the sculpture
             and gallery are found.
         -->
         <section id="enhancedContent" hidden>
@@ -277,11 +309,12 @@
         </section>
 
         <!--
-            On a successful match, only the Send Us a Text button
-            remains between the two faint lines.
+            Successful match:
+            Only the manual SMS button remains between the lines.
 
-            On a failed match, the original heading and instructions
-            remain visible and Messages opens automatically.
+            Failed match:
+            The original SMS information remains visible and
+            Messages opens automatically.
         -->
         <section class="sms-section">
             <h2 id="openingMessage">
@@ -309,13 +342,25 @@
         </section>
 
         <!--
-            Price and gallery details appear only after a complete match.
+            Price, optional purchase link, and gallery details appear
+            only after a complete sculpture/gallery match.
         -->
         <section id="matchedDetails" hidden>
             <p
                 id="retailPrice"
                 class="price"
             ></p>
+
+            <a
+                id="purchaseButton"
+                class="purchase-button"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+            >
+                Purchase This Sculpture
+            </a>
 
             <div class="gallery-section">
                 <h3 id="galleryName"></h3>
@@ -358,11 +403,23 @@
     </main>
 
     <script>
+        /*
+         * QR asset structure:
+         *
+         * /qr/assets/data/sculptures.json
+         * /qr/assets/data/galleries.json
+         * /qr/assets/data/checkouts.json
+         * /qr/assets/images/*.gif
+         */
         const QR_ASSET_ROOT =
             "/qr/assets/";
-	
-const ASSET_VERSION =
-    "?v=20260722-2"
+
+        /*
+         * Increase this value after replacing JSON files when
+         * you need to discourage cached copies.
+         */
+        const ASSET_VERSION =
+            "?v=20260722-3";
 
         const SCULPTURE_DATA_URL =
             QR_ASSET_ROOT +
@@ -371,15 +428,20 @@ const ASSET_VERSION =
 
         const GALLERY_DATA_URL =
             QR_ASSET_ROOT +
-            "data/galleries.json"+
+            "data/galleries.json" +
+            ASSET_VERSION;
+
+        const CHECKOUT_DATA_URL =
+            QR_ASSET_ROOT +
+            "data/checkouts.json" +
             ASSET_VERSION;
 
         const LOG_ENDPOINT =
             "https://whitakerstudio.net/api/qrnfclog";
 
         /*
-         * This delay applies only when the enhanced content
-         * cannot be loaded or no complete match is found.
+         * This delay applies only when no complete sculpture/gallery
+         * match is found and the SMS fallback is used.
          */
         const AUTO_OPEN_DELAY_MS = 1800;
 
@@ -406,7 +468,9 @@ const ASSET_VERSION =
             }
 
             const standardIOS =
-                /iPad|iPhone|iPod/i.test(userAgent);
+                /iPad|iPhone|iPod/i.test(
+                    userAgent
+                );
 
             const modernIPad =
                 /Mac/i.test(platform) &&
@@ -441,15 +505,26 @@ const ASSET_VERSION =
             fallback,
             maxLength
         ) {
-            return (value || fallback)
-                .replace(/[\r\n\t]+/g, " ")
-                .replace(/\s+/g, " ")
+            return String(
+                value || fallback
+            )
+                .replace(
+                    /[\r\n\t]+/g,
+                    " "
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
                 .trim()
-                .substring(0, maxLength);
+                .substring(
+                    0,
+                    maxLength
+                );
         }
 
         function removeMessageInstruction(value) {
-            return value
+            return String(value || "")
                 .replace(
                     /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
                     ""
@@ -465,9 +540,11 @@ const ASSET_VERSION =
                 /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
 
             if (
-                instructionPattern.test(value)
+                instructionPattern.test(
+                    value
+                )
             ) {
-                return value
+                return String(value)
                     .replace(
                         instructionPattern,
                         " " + instruction
@@ -476,7 +553,7 @@ const ASSET_VERSION =
             }
 
             return (
-                value.trim() +
+                String(value || "").trim() +
                 " " +
                 instruction
             ).trim();
@@ -492,7 +569,7 @@ const ASSET_VERSION =
                 "ss"
             ];
 
-            return value
+            return String(value || "")
                 .toLowerCase()
                 .split(/\s+/)
                 .map(function (word) {
@@ -522,7 +599,10 @@ const ASSET_VERSION =
             return String(value || "")
                 .trim()
                 .toLowerCase()
-                .replace(/\s+/g, " ");
+                .replace(
+                    /\s+/g,
+                    " "
+                );
         }
 
         function normalizeGalleryKey(value) {
@@ -635,6 +715,29 @@ const ASSET_VERSION =
             );
         }
 
+        function normalizeWebsiteURL(value) {
+            const website =
+                String(value || "")
+                    .trim();
+
+            if (!website) {
+                return "";
+            }
+
+            if (
+                /^https?:\/\//i.test(
+                    website
+                )
+            ) {
+                return website;
+            }
+
+            return (
+                "https://" +
+                website
+            );
+        }
+
         function findSculpture(
             sculptureRecords,
             sculptureKey
@@ -667,6 +770,40 @@ const ASSET_VERSION =
             );
         }
 
+        function findCheckout(
+            checkoutRecords,
+            galleryKey,
+            sculptureKey
+        ) {
+            if (
+                !Array.isArray(
+                    checkoutRecords
+                )
+            ) {
+                return null;
+            }
+
+            return checkoutRecords.find(
+                function (item) {
+                    return (
+                        normalizeGalleryKey(
+                            item.galleryKey
+                        ) ===
+                        galleryKey &&
+                        normalizeSculptureKey(
+                            item.sculptureKey
+                        ) ===
+                        sculptureKey &&
+                        Boolean(
+                            String(
+                                item.checkoutURL || ""
+                            ).trim()
+                        )
+                    );
+                }
+            ) || null;
+        }
+
         function setEnhancedSmsLayout(
             isEnhanced
         ) {
@@ -685,13 +822,6 @@ const ASSET_VERSION =
                     "smsFallbackInstruction"
                 );
 
-            /*
-             * Successful match:
-             * Hide all SMS text and leave only the button.
-             *
-             * Failed match:
-             * Restore the original fallback text.
-             */
             openingMessage.hidden =
                 isEnhanced;
 
@@ -702,28 +832,10 @@ const ASSET_VERSION =
                 isEnhanced;
         }
 
-        function normalizeWebsiteURL(value) {
-            const website =
-                String(value || "").trim();
-
-            if (!website) {
-                return "";
-            }
-
-            if (
-                /^https?:\/\//i.test(
-                    website
-                )
-            ) {
-                return website;
-            }
-
-            return "https://" + website;
-        }
-
         function populateEnhancedPage(
             sculpture,
-            galleryInfo
+            galleryInfo,
+            checkoutInfo
         ) {
             const enhancedContent =
                 document.getElementById(
@@ -753,6 +865,11 @@ const ASSET_VERSION =
             const retailPrice =
                 document.getElementById(
                     "retailPrice"
+                );
+
+            const purchaseButton =
+                document.getElementById(
+                    "purchaseButton"
                 );
 
             const galleryName =
@@ -800,6 +917,32 @@ const ASSET_VERSION =
                     true;
             }
 
+            /*
+             * The purchase button is completely separate from
+             * the gallery's general website button.
+             */
+            const checkoutURL =
+                checkoutInfo
+                    ? normalizeWebsiteURL(
+                        checkoutInfo.checkoutURL
+                    )
+                    : "";
+
+            if (checkoutURL) {
+                purchaseButton.href =
+                    checkoutURL;
+
+                purchaseButton.hidden =
+                    false;
+            } else {
+                purchaseButton.hidden =
+                    true;
+
+                purchaseButton.removeAttribute(
+                    "href"
+                );
+            }
+
             if (sculpture.image) {
                 const imageFileName =
                     String(
@@ -845,7 +988,6 @@ const ASSET_VERSION =
 
                 artworkImage.src =
                     finalImageURL;
-
             } else {
                 artworkImage.hidden =
                     true;
@@ -861,7 +1003,9 @@ const ASSET_VERSION =
 
                 galleryPhone.href =
                     "tel:" +
-                    galleryInfo.phone.replace(
+                    String(
+                        galleryInfo.phone
+                    ).replace(
                         /[^0-9+]/g,
                         ""
                     );
@@ -887,6 +1031,10 @@ const ASSET_VERSION =
             } else {
                 galleryWebsite.hidden =
                     true;
+
+                galleryWebsite.removeAttribute(
+                    "href"
+                );
             }
 
             enhancedContent.hidden =
@@ -900,12 +1048,67 @@ const ASSET_VERSION =
                 "Lyman Whitaker Wind Sculpture";
         }
 
+        async function loadOptionalCheckoutData() {
+            try {
+                const response =
+                    await fetch(
+                        CHECKOUT_DATA_URL,
+                        {
+                            cache: "no-cache"
+                        }
+                    );
+
+                if (!response.ok) {
+                    console.warn(
+                        "Checkout JSON returned HTTP " +
+                        response.status +
+                        ". Purchase links will be unavailable."
+                    );
+
+                    return [];
+                }
+
+                const checkoutData =
+                    await response.json();
+
+                if (
+                    !Array.isArray(
+                        checkoutData
+                    )
+                ) {
+                    console.warn(
+                        "Checkout JSON did not contain an array."
+                    );
+
+                    return [];
+                }
+
+                return checkoutData;
+
+            } catch (error) {
+                /*
+                 * Checkout data is optional. Failure here must not
+                 * prevent the sculpture and gallery page from loading.
+                 */
+                console.warn(
+                    "Checkout JSON could not be loaded:",
+                    error
+                );
+
+                return [];
+            }
+        }
+
         async function loadEnhancedContent(
             galleryKey,
             sculptureKey
         ) {
             try {
-                const responses =
+                /*
+                 * Sculpture and gallery data are required.
+                 * Checkout data is optional.
+                 */
+                const requiredResponses =
                     await Promise.all([
                         fetch(
                             SCULPTURE_DATA_URL,
@@ -921,50 +1124,54 @@ const ASSET_VERSION =
                         )
                     ]);
 
-                if (!responses[0].ok) {
+                if (!requiredResponses[0].ok) {
                     throw new Error(
                         "Sculpture JSON returned HTTP " +
-                        responses[0].status
+                        requiredResponses[0].status
                     );
                 }
 
-                if (!responses[1].ok) {
+                if (!requiredResponses[1].ok) {
                     throw new Error(
                         "Gallery JSON returned HTTP " +
-                        responses[1].status
+                        requiredResponses[1].status
                     );
                 }
 
-                const data =
+                const requiredData =
                     await Promise.all([
-                        responses[0].json(),
-                        responses[1].json()
+                        requiredResponses[0].json(),
+                        requiredResponses[1].json()
                     ]);
 
                 if (
-                    !Array.isArray(data[0]) ||
-                    !Array.isArray(data[1])
+                    !Array.isArray(
+                        requiredData[0]
+                    ) ||
+                    !Array.isArray(
+                        requiredData[1]
+                    )
                 ) {
                     throw new Error(
-                        "One or more JSON files did not contain an array."
+                        "One or more required JSON files did not contain an array."
                     );
                 }
 
                 const sculpture =
                     findSculpture(
-                        data[0],
+                        requiredData[0],
                         sculptureKey
                     );
 
                 const galleryInfo =
                     findGallery(
-                        data[1],
+                        requiredData[1],
                         galleryKey
                     );
 
                 /*
-                 * Both records must match before enhanced mode
-                 * replaces the original fallback page.
+                 * A complete sculpture/gallery match is still required
+                 * before enhanced mode is shown.
                  */
                 if (
                     !sculpture ||
@@ -975,12 +1182,15 @@ const ASSET_VERSION =
                         {
                             galleryKey:
                                 galleryKey,
+
                             sculptureKey:
                                 sculptureKey,
+
                             sculptureFound:
                                 Boolean(
                                     sculpture
                                 ),
+
                             galleryFound:
                                 Boolean(
                                     galleryInfo
@@ -995,15 +1205,26 @@ const ASSET_VERSION =
                     return false;
                 }
 
+                /*
+                 * Checkout information is optional and should not delay
+                 * or prevent the standard enhanced page.
+                 */
+                const checkoutRecords =
+                    await loadOptionalCheckoutData();
+
+                const checkoutInfo =
+                    findCheckout(
+                        checkoutRecords,
+                        galleryKey,
+                        sculptureKey
+                    );
+
                 populateEnhancedPage(
                     sculpture,
-                    galleryInfo
+                    galleryInfo,
+                    checkoutInfo
                 );
 
-                /*
-                 * Leave only the manual SMS button between
-                 * the two faint lines.
-                 */
                 setEnhancedSmsLayout(
                     true
                 );
@@ -1012,13 +1233,10 @@ const ASSET_VERSION =
 
             } catch (error) {
                 console.error(
-                    "Enhanced page data could not be loaded:",
+                    "Enhanced QR page data could not be loaded:",
                     error
                 );
 
-                /*
-                 * Preserve the original SMS fallback display.
-                 */
                 setEnhancedSmsLayout(
                     false
                 );
@@ -1035,29 +1253,41 @@ const ASSET_VERSION =
             fetch(
                 LOG_ENDPOINT,
                 {
-                    method: "POST",
+                    method:
+                        "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
-                    keepalive: true,
-                    body: JSON.stringify({
-                        gallery:
-                            gallery,
-                        design:
-                            design,
-                        os:
-                            osTag,
-                        nfc:
-                            false,
-                        qr:
-                            true,
-                        userAgent:
-                            navigator.userAgent ||
-                            "",
-                        visitorID:
-                            getVisitorID()
-                    })
+
+                    keepalive:
+                        true,
+
+                    body:
+                        JSON.stringify({
+                            gallery:
+                                gallery,
+
+                            design:
+                                design,
+
+                            os:
+                                osTag,
+
+                            nfc:
+                                false,
+
+                            qr:
+                                true,
+
+                            userAgent:
+                                navigator.userAgent ||
+                                "",
+
+                            visitorID:
+                                getVisitorID()
+                        })
                 }
             )
             .then(function (response) {
@@ -1117,7 +1347,7 @@ const ASSET_VERSION =
                 );
 
             /*
-             * This remains visible only in fallback mode.
+             * This text remains visible only in fallback mode.
              */
             openingMessage.textContent =
                 "Opening your messaging app for automated, " +
@@ -1156,16 +1386,19 @@ const ASSET_VERSION =
                 );
 
             /*
-             * The manual text button works in both enhanced
-             * and fallback modes.
+             * Set the manual SMS link before loading any JSON.
              */
             smsButton.href =
                 finalSmsLink;
-	    
+
             smsButton.removeAttribute(
                 "aria-disabled"
             );
 
+            /*
+             * Log every QR opening regardless of whether enhanced
+             * content is found.
+             */
             logScan(
                 gallery,
                 cleanedDisplayDesign,
@@ -1182,9 +1415,6 @@ const ASSET_VERSION =
                     cleanedDisplayDesign
                 );
 
-            /*
-             * Attempt to display the enhanced product page.
-             */
             const enhancedLoaded =
                 await loadEnhancedContent(
                     galleryKey,
@@ -1192,17 +1422,16 @@ const ASSET_VERSION =
                 );
 
             /*
-             * When both records matched, do not automatically
-             * open Messages. The visitor can view the animated
-             * sculpture and choose the button when ready.
+             * Successful match:
+             * Do not open Messages automatically.
              */
             if (enhancedLoaded) {
                 return;
             }
 
             /*
-             * When no complete match was found, retain the
-             * original behavior and automatically open Messages.
+             * Failed match:
+             * Preserve the original SMS auto-open behavior.
              */
             const elapsed =
                 Date.now() -
