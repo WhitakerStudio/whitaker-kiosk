@@ -710,22 +710,44 @@
             } else {
                 retailPrice.hidden = true;
             }
+	    
+if (sculpture.image) {
+    const imageFileName =
+        String(sculpture.image)
+            .replace(/\\/g, "/")
+            .split("/")
+            .pop();
 
-            if (sculpture.image) {
-                artworkImage.src =
-                    sculpture.image;
+    const finalImageURL =
+        QR_ASSET_ROOT +
+        "images/" +
+        encodeURIComponent(imageFileName);
 
-                artworkImage.alt =
-                    (
-                        sculpture.displayName ||
-                        "Lyman Whitaker wind sculpture"
-                    ) +
-                    " in motion";
+    artworkImage.alt =
+        (
+            sculpture.displayName ||
+            "Lyman Whitaker wind sculpture"
+        ) +
+        " in motion";
 
-                artworkImage.hidden = false;
-            } else {
-                artworkImage.hidden = true;
-            }
+    artworkImage.onload = function () {
+        artworkImage.hidden = false;
+    };
+
+    artworkImage.onerror = function () {
+        console.error(
+            "Sculpture image failed to load:",
+            finalImageURL
+        );
+
+        artworkImage.hidden = true;
+    };
+
+    artworkImage.src =
+        finalImageURL;
+} else {
+    artworkImage.hidden = true;
+}
 
             galleryName.textContent =
                 galleryInfo.name ||
@@ -817,6 +839,28 @@
                         data[1],
                         galleryKey
                     );
+		
+const statusMessage =
+    document.getElementById(
+        "statusMessage"
+    );
+
+statusMessage.hidden = false;
+
+statusMessage.textContent =
+    "Loaded " +
+    data[0].length +
+    " sculptures and " +
+    data[1].length +
+    " galleries. Looking for sculpture [" +
+    sculptureKey +
+    "] and gallery [" +
+    galleryKey +
+    "]. Sculpture found: " +
+    Boolean(sculpture) +
+    ". Gallery found: " +
+    Boolean(galleryInfo) +
+    ".";
 
                 /*
                  * Require both records before replacing the
@@ -850,18 +894,25 @@
 
                 return true;
 
-            } catch (error) {
-                console.error(
-                    "Enhanced page data could not be loaded:",
-                    error
-                );
+           catch (error) {
+    console.error(
+        "Enhanced page data could not be loaded:",
+        error
+    );
 
-                /*
-                 * No visible error is necessary. The original,
-                 * generic landing page remains available.
-                 */
-                return false;
-            }
+    const statusMessage =
+        document.getElementById(
+            "statusMessage"
+        );
+
+    statusMessage.hidden = false;
+
+    statusMessage.textContent =
+        "Product information error: " +
+        error.message;
+
+    return false;
+}
         }
 
         function logScan(
