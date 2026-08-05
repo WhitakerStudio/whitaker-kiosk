@@ -2,53 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyman Whitaker Wind Sculpture</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             padding: 70px 30px 50px;
             font-family: Arial, Helvetica, sans-serif;
             text-align: center;
-            background-color: #ffffff;
-            color: #000000;
+            background: #fff;
+            color: #000;
         }
 
-        .content {
-            width: 100%;
-            max-width: 850px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            margin: 0 0 30px;
-            font-size: 52px;
-            line-height: 1.15;
-            font-weight: 700;
-        }
-
-        h2 {
-            margin: 0 0 35px;
-            font-size: 42px;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        h3 {
-            margin: 0 0 22px;
-            font-size: 32px;
-            line-height: 1.25;
-        }
+        .content { width: 100%; max-width: 850px; margin: 0 auto; }
+        h1 { margin: 0 0 30px; font-size: 52px; line-height: 1.15; }
+        h2 { margin: 0 0 35px; font-size: 42px; line-height: 1.2; }
+        h3 { margin: 0 0 22px; font-size: 32px; line-height: 1.25; }
 
         p {
             margin: 0 auto 30px;
@@ -57,10 +29,6 @@
             line-height: 1.45;
         }
 
-        /*
-         * The GIF occupies approximately 70% of the screen
-         * width while remaining centered.
-         */
         .artwork-image {
             display: block;
             width: 70vw;
@@ -72,17 +40,8 @@
             border-radius: 8px;
         }
 
-        .artist-statement {
-            margin-bottom: 40px;
-        }
+        .artist-statement { margin-bottom: 40px; }
 
-        /*
-         * Enhanced mode:
-         * Only the Send Us a Text button appears between the lines.
-         *
-         * Fallback mode:
-         * The original SMS heading, instructions, and button appear.
-         */
         .sms-section {
             margin: 35px auto;
             padding: 35px 25px;
@@ -90,25 +49,36 @@
             border-bottom: 1px solid #d8d8d8;
         }
 
-        .sms-section p {
-            font-size: 27px;
-        }
+        .sms-section > p { font-size: 27px; }
 
         .button {
             display: inline-block;
             padding: 25px 45px;
-            background-color: #2459a6;
-            color: #ffffff;
+            border: 0;
+            background: #2459a6;
+            color: #fff;
             text-decoration: none;
             border-radius: 8px;
+            font: inherit;
             font-size: 36px;
             line-height: 1.2;
+            cursor: pointer;
         }
 
-        .button:hover,
-        .button:focus {
-            background-color: #184887;
+        .button:hover, .button:focus { background: #184887; }
+
+        .sms-privacy-summary {
+            margin-top: 18px;
+            margin-bottom: 0;
+            max-width: 650px;
+            color: #555;
+            font-size: 16px !important;
+            line-height: 1.5;
         }
+
+        .sms-privacy-summary a,
+        .analytics-notice a,
+        .analytics-notice summary { color: #2459a6; }
 
         .price {
             margin-top: 35px;
@@ -117,16 +87,12 @@
             font-weight: 700;
         }
 
-        /*
-         * This appears only when checkouts.json contains a record
-         * matching both the current gallery and sculpture.
-         */
         .purchase-button {
             display: inline-block;
             margin: 0 auto 35px;
             padding: 20px 34px;
-            background-color: #2459a6;
-            color: #ffffff;
+            background: #2459a6;
+            color: #fff;
             border-radius: 8px;
             font-size: 27px;
             line-height: 1.2;
@@ -134,25 +100,10 @@
             text-decoration: none;
         }
 
-        .purchase-button:hover,
-        .purchase-button:focus {
-            background-color: #184887;
-        }
-
-        .gallery-section {
-            margin-top: 35px;
-            padding-top: 15px;
-        }
-
-        .gallery-contact {
-            margin-bottom: 18px;
-            font-size: 25px;
-        }
-
-        .gallery-contact a {
-            color: #2459a6;
-            text-decoration: underline;
-        }
+        .purchase-button:hover, .purchase-button:focus { background: #184887; }
+        .gallery-section { margin-top: 35px; padding-top: 15px; }
+        .gallery-contact { margin-bottom: 18px; font-size: 25px; }
+        .gallery-contact a { color: #2459a6; text-decoration: underline; }
 
         .gallery-website-button {
             display: inline-block;
@@ -166,9 +117,7 @@
         }
 
         .gallery-website-button:hover,
-        .gallery-website-button:focus {
-            background-color: #f0f5fb;
-        }
+        .gallery-website-button:focus { background: #f0f5fb; }
 
         .selection-link {
             margin-top: 45px;
@@ -177,211 +126,146 @@
             line-height: 1.5;
         }
 
-        .selection-link a {
-            color: #2459a6;
+        .selection-link a { color: #2459a6; text-decoration: underline; }
+
+        .analytics-notice {
+            max-width: 700px;
+            margin: 35px auto 0;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .analytics-notice summary {
+            cursor: pointer;
             text-decoration: underline;
         }
 
-        .selection-link a:hover,
-        .selection-link a:focus {
-            color: #184887;
+        .analytics-notice p {
+            margin: 12px auto 0;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
         }
 
-        .status-message {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #555555;
+        .status-message { margin-top: 20px; font-size: 18px; color: #555; }
+        [hidden] { display: none !important; }
+
+        dialog {
+            width: min(92vw, 620px);
+            padding: 30px;
+            border: 0;
+            border-radius: 10px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, .3);
+            text-align: left;
         }
 
-        [hidden] {
-            display: none !important;
+        dialog::backdrop { background: rgba(0, 0, 0, .55); }
+        dialog h2 { margin: 0 0 18px; font-size: 30px; }
+        dialog p { margin: 0 0 18px; font-size: 18px; line-height: 1.5; }
+        dialog a:not(.button) { color: #2459a6; }
+
+        .dialog-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .dialog-actions .button { padding: 14px 20px; font-size: 19px; }
+
+        .secondary-button {
+            padding: 14px 20px;
+            border: 1px solid #777;
+            border-radius: 8px;
+            background: #fff;
+            color: #222;
+            font-size: 19px;
+            cursor: pointer;
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 45px 20px 40px;
-            }
-
-            h1 {
-                font-size: 42px;
-            }
-
-            h2 {
-                font-size: 34px;
-            }
-
-            h3 {
-                font-size: 28px;
-            }
-
-            p {
-                font-size: 23px;
-            }
-
-            .sms-section p {
-                font-size: 22px;
-            }
-
-            .button {
-                padding: 22px 35px;
-                font-size: 29px;
-            }
-
-            .price {
-                font-size: 30px;
-            }
-
-            .purchase-button {
-                padding: 18px 28px;
-                font-size: 23px;
-            }
-
-            .gallery-contact,
-            .gallery-website-button {
-                font-size: 21px;
-            }
-
-            .selection-link {
-                font-size: 18px;
-            }
+            body { padding: 45px 20px 40px; }
+            h1 { font-size: 42px; }
+            h2 { font-size: 34px; }
+            h3 { font-size: 28px; }
+            p { font-size: 23px; }
+            .sms-section > p { font-size: 22px; }
+            .button { padding: 22px 35px; font-size: 29px; }
+            .price { font-size: 30px; }
+            .purchase-button { padding: 18px 28px; font-size: 23px; }
+            .gallery-contact, .gallery-website-button { font-size: 21px; }
+            .selection-link { font-size: 18px; }
         }
 
         @media (max-width: 420px) {
-            body {
-                padding: 35px 18px 30px;
-            }
-
-            h1 {
-                font-size: 34px;
-            }
-
-            h2 {
-                font-size: 29px;
-            }
-
-            p {
-                font-size: 20px;
-            }
-
-            .button {
-                width: 100%;
-                max-width: 360px;
-                padding: 20px 16px;
-                font-size: 26px;
-            }
-
-            .price {
-                font-size: 27px;
-            }
-
-            .purchase-button {
-                width: 100%;
-                max-width: 360px;
-                padding: 18px 16px;
-                font-size: 22px;
-            }
+            body { padding: 35px 18px 30px; }
+            h1 { font-size: 34px; }
+            h2 { font-size: 29px; }
+            p { font-size: 20px; }
+            .button { width: 100%; max-width: 360px; padding: 20px 16px; font-size: 26px; }
+            .price { font-size: 27px; }
+            .purchase-button { width: 100%; max-width: 360px; padding: 18px 16px; font-size: 22px; }
+            dialog { padding: 24px 20px; }
+            dialog h2 { font-size: 26px; }
+            dialog p { font-size: 17px; }
+            .dialog-actions { display: block; }
+            .dialog-actions .button, .secondary-button { width: 100%; margin-top: 10px; }
         }
     </style>
 </head>
 
 <body>
     <main class="content">
-
-        <!--
-            Enhanced content appears only when both the sculpture
-            and gallery are found.
-        -->
         <section id="enhancedContent" hidden>
             <h1 id="designName"></h1>
-
-            <img
-                id="artworkImage"
-                class="artwork-image"
-                src=""
-                alt=""
-                hidden
-            >
-
-            <p
-                id="artistStatement"
-                class="artist-statement"
-            ></p>
+            <img id="artworkImage" class="artwork-image" src="" alt="" hidden>
+            <p id="artistStatement" class="artist-statement"></p>
         </section>
 
-        <!--
-            Successful match:
-            Only the manual SMS button remains between the lines.
-
-            Failed match:
-            The original SMS information remains visible and
-            Messages opens automatically.
-        -->
         <section class="sms-section">
-            <h2 id="openingMessage">
-                Opening your messaging app...
-            </h2>
+            <h2 id="openingMessage">Text Us for Sculpture Information</h2>
 
             <p id="smsDescription">
-                Send the prepared message to receive automated,
-                interactive information about this kinetic wind sculpture.
+                Send the prepared message to receive automated, interactive
+                information about this kinetic wind sculpture.
             </p>
 
             <p id="smsFallbackInstruction">
-                If it does not open automatically within a few seconds,
-                tap the button below.
+                Tap the button below to open the prepared message.
             </p>
 
-            <a
-                id="smsButton"
-                href="javascript:void(0)"
-                class="button"
-                aria-disabled="true"
-            >
+            <a id="smsButton" href="#" class="button" aria-disabled="true">
                 Send Us a Text
             </a>
+
+            <p class="sms-privacy-summary">
+                When you send a text, we receive your phone number and inquiry
+                details so Whitaker Studio and the representing gallery can respond.
+                <a href="https://kiosk.whitakerstudio.com/smsprivacy/">
+                    SMS Privacy Notice
+                </a>
+            </p>
         </section>
 
-        <!--
-            Price, optional purchase link, and gallery details appear
-            only after a complete sculpture/gallery match.
-        -->
         <section id="matchedDetails" hidden>
-            <p
-                id="retailPrice"
-                class="price"
-            ></p>
+            <p id="retailPrice" class="price"></p>
 
-            <a
-                id="purchaseButton"
-                class="purchase-button"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                hidden
-            >
+            <a id="purchaseButton" class="purchase-button" href="#"
+               target="_blank" rel="noopener noreferrer" hidden>
                 Purchase This Sculpture
             </a>
 
             <div class="gallery-section">
                 <h3 id="galleryName"></h3>
 
-                <p
-                    id="galleryPhoneContainer"
-                    class="gallery-contact"
-                    hidden
-                >
-                    Call the gallery:
-                    <a id="galleryPhone" href="#"></a>
+                <p id="galleryPhoneContainer" class="gallery-contact" hidden>
+                    Call the gallery: <a id="galleryPhone" href="#"></a>
                 </p>
 
-                <a
-                    id="galleryWebsite"
-                    class="gallery-website-button"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    hidden
-                >
+                <a id="galleryWebsite" class="gallery-website-button" href="#"
+                   target="_blank" rel="noopener noreferrer" hidden>
                     View This Gallery's Lyman Whitaker Collection
                 </a>
             </div>
@@ -389,1074 +273,361 @@
 
         <p class="selection-link">
             Prefer to browse instead? Click
-            <a href="https://kiosk.whitakerstudio.com/">
-                here
-            </a>
+            <a href="https://kiosk.whitakerstudio.com/">here</a>
             to view the complete collection of Lyman Whitaker's kinetic works.
         </p>
 
-        <p
-            id="statusMessage"
-            class="status-message"
-            hidden
-        ></p>
+        <details class="analytics-notice">
+            <summary>Privacy and anonymous analytics</summary>
+            <p>
+                We record the sculpture and gallery viewed, whether QR or NFC was
+                used, the general operating-system category, and the time of the
+                visit to help measure interest. Our scan analytics do not store a
+                visitor identifier, phone number, or full device information.
+            </p>
+            <p>
+                The participating gallery may be notified that this sculpture was
+                viewed, but the notification does not identify you.
+            </p>
+        </details>
+
+        <p id="statusMessage" class="status-message" hidden></p>
     </main>
 
+    <dialog id="smsPrivacyDialog" aria-labelledby="smsPrivacyTitle">
+        <h2 id="smsPrivacyTitle">Before You Continue</h2>
+        <p>
+            Your information is not sent until you tap Send in your messaging app.
+            If sent, Whitaker Studio and the gallery representing this sculpture
+            will receive your phone number, message, and the associated sculpture
+            and gallery so they can provide information and contact you about your
+            inquiry.
+        </p>
+        <p>
+            SMS inquiry information is retained indefinitely. Read the
+            <a href="https://kiosk.whitakerstudio.com/smsprivacy/">
+                SMS Privacy Notice
+            </a>.
+        </p>
+        <div class="dialog-actions">
+            <button id="cancelSmsButton" type="button" class="secondary-button">
+                Cancel
+            </button>
+            <a id="continueSmsButton" href="#" class="button">
+                Continue to Messages
+            </a>
+        </div>
+    </dialog>
+
     <script>
-        /*
-         * QR asset structure:
-         *
-         * /qr/assets/data/sculptures.json
-         * /qr/assets/data/galleries.json
-         * /qr/assets/data/checkouts.json
-         * /qr/assets/images/*.gif
-         */
-        const QR_ASSET_ROOT =
-            "/qr/assets/";
-
-        /*
-         * Increase this value after replacing JSON files when
-         * you need to discourage cached copies.
-         */
-        const ASSET_VERSION =
-            "?v=20260722-3";
-
-        const SCULPTURE_DATA_URL =
-            QR_ASSET_ROOT +
-            "data/sculptures.json" +
-            ASSET_VERSION;
-
-        const GALLERY_DATA_URL =
-            QR_ASSET_ROOT +
-            "data/galleries.json" +
-            ASSET_VERSION;
-
-        const CHECKOUT_DATA_URL =
-            QR_ASSET_ROOT +
-            "data/checkouts.json" +
-            ASSET_VERSION;
-
-        const LOG_ENDPOINT =
-            "https://whitakerstudio.net/api/qrnfclog";
-
-        /*
-         * This delay applies only when no complete sculpture/gallery
-         * match is found and the SMS fallback is used.
-         */
-        const AUTO_OPEN_DELAY_MS = 1800;
+        const QR_ASSET_ROOT = "/qr/assets/";
+        const ASSET_VERSION = "?v=20260722-3";
+        const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
+        const GALLERY_DATA_URL = QR_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
+        const CHECKOUT_DATA_URL = QR_ASSET_ROOT + "data/checkouts.json" + ASSET_VERSION;
+        const LOG_ENDPOINT = "https://whitakerstudio.net/api/qrnfclog";
 
         function getOSTag() {
-            const userAgent =
-                navigator.userAgent || "";
-
+            const userAgent = navigator.userAgent || "";
             const platform =
-                (
-                    navigator.userAgentData &&
-                    navigator.userAgentData.platform
-                ) ||
-                navigator.platform ||
-                "";
+                (navigator.userAgentData && navigator.userAgentData.platform) ||
+                navigator.platform || "";
+            const touchPoints = navigator.maxTouchPoints || 0;
 
-            const touchPoints =
-                navigator.maxTouchPoints || 0;
+            if (/Android/i.test(userAgent) || /Android/i.test(platform)) return "(A)";
 
-            if (
-                /Android/i.test(userAgent) ||
-                /Android/i.test(platform)
-            ) {
-                return "(A)";
-            }
-
-            const standardIOS =
-                /iPad|iPhone|iPod/i.test(
-                    userAgent
-                );
-
-            const modernIPad =
-                /Mac/i.test(platform) &&
-                touchPoints > 1;
-
-            if (
-                standardIOS ||
-                modernIPad
-            ) {
-                return "(I)";
-            }
-
-            return "(O)";
+            const standardIOS = /iPad|iPhone|iPod/i.test(userAgent);
+            const modernIPad = /Mac/i.test(platform) && touchPoints > 1;
+            return standardIOS || modernIPad ? "(I)" : "(O)";
         }
 
         function isIOSDevice() {
-            return (
-                /iPad|iPhone|iPod/i.test(
-                    navigator.userAgent
-                ) ||
-                (
-                    /Mac/i.test(
-                        navigator.platform
-                    ) &&
-                    navigator.maxTouchPoints > 1
-                )
-            );
+            return /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+                (/Mac/i.test(navigator.platform) && navigator.maxTouchPoints > 1);
         }
 
-        function cleanParameter(
-            value,
-            fallback,
-            maxLength
-        ) {
-            return String(
-                value || fallback
-            )
-                .replace(
-                    /[\r\n\t]+/g,
-                    " "
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
+        function cleanParameter(value, fallback, maxLength) {
+            return String(value || fallback)
+                .replace(/[\r\n\t]+/g, " ")
+                .replace(/\s+/g, " ")
                 .trim()
-                .substring(
-                    0,
-                    maxLength
-                );
+                .substring(0, maxLength);
         }
 
         function removeMessageInstruction(value) {
             return String(value || "")
-                .replace(
-                    /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i,
-                    ""
-                )
+                .replace(/\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i, "")
                 .trim();
         }
 
         function ensureMessageInstruction(value) {
-            const instruction =
-                "Send this message for details.";
-
-            const instructionPattern =
-                /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
-
-            if (
-                instructionPattern.test(
-                    value
-                )
-            ) {
-                return String(value)
-                    .replace(
-                        instructionPattern,
-                        " " + instruction
-                    )
-                    .trim();
+            const instruction = "Send this message for details.";
+            const pattern = /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
+            if (pattern.test(value)) {
+                return String(value).replace(pattern, " " + instruction).trim();
             }
-
-            return (
-                String(value || "").trim() +
-                " " +
-                instruction
-            ).trim();
+            return (String(value || "").trim() + " " + instruction).trim();
         }
 
         function formatDesignName(value) {
-            const uppercaseWords = [
-                "sm",
-                "med",
-                "lg",
-                "xl",
-                "xxl",
-                "ss"
-            ];
-
-            return String(value || "")
-                .toLowerCase()
-                .split(/\s+/)
-                .map(function (word) {
-                    const plainWord =
-                        word.replace(
-                            /[()]/g,
-                            ""
-                        );
-
-                    if (
-                        uppercaseWords.indexOf(
-                            plainWord
-                        ) !== -1
-                    ) {
-                        return word.toUpperCase();
-                    }
-
-                    return (
-                        word.charAt(0).toUpperCase() +
-                        word.slice(1)
-                    );
-                })
-                .join(" ");
+            const uppercaseWords = ["sm", "med", "lg", "xl", "xxl", "ss"];
+            return String(value || "").toLowerCase().split(/\s+/).map(function (word) {
+                const plainWord = word.replace(/[()]/g, "");
+                if (uppercaseWords.indexOf(plainWord) !== -1) return word.toUpperCase();
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join(" ");
         }
 
         function normalizeSculptureKey(value) {
-            return String(value || "")
-                .trim()
-                .toLowerCase()
-                .replace(
-                    /\s+/g,
-                    " "
-                );
+            return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
         }
 
         function normalizeGalleryKey(value) {
-            return String(value || "")
-                .trim()
-                .toUpperCase();
-        }
-
-        function getVisitorID() {
-            const storageKey =
-                "whitakerVisitorID";
-
-            try {
-                let visitorID =
-                    localStorage.getItem(
-                        storageKey
-                    );
-
-                if (!visitorID) {
-                    if (
-                        window.crypto &&
-                        typeof crypto.randomUUID ===
-                            "function"
-                    ) {
-                        visitorID =
-                            crypto.randomUUID();
-                    } else {
-                        visitorID =
-                            "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-                                .replace(
-                                    /[xy]/g,
-                                    function (character) {
-                                        const random =
-                                            Math.random() *
-                                            16 |
-                                            0;
-
-                                        const value =
-                                            character === "x"
-                                                ? random
-                                                : (
-                                                    random &
-                                                    0x3 |
-                                                    0x8
-                                                );
-
-                                        return value.toString(
-                                            16
-                                        );
-                                    }
-                                );
-                    }
-
-                    localStorage.setItem(
-                        storageKey,
-                        visitorID
-                    );
-                }
-
-                return visitorID;
-
-            } catch (error) {
-                console.warn(
-                    "Visitor ID storage unavailable:",
-                    error
-                );
-
-                return null;
-            }
+            return String(value || "").trim().toUpperCase();
         }
 
         function formatPrice(value) {
-            const numericValue =
-                Number(value);
-
-            if (
-                !Number.isFinite(
-                    numericValue
-                )
-            ) {
-                return "";
-            }
-
-            return numericValue.toLocaleString(
-                "en-US",
-                {
-                    style: "currency",
-                    currency: "USD",
-                    maximumFractionDigits: 0
-                }
-            );
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue)) return "";
+            return numericValue.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0
+            });
         }
 
-        function createSmsLink(
-            phone,
-            messageBody
-        ) {
-            const separator =
-                isIOSDevice()
-                    ? "&body="
-                    : "?body=";
-
-            return (
-                "sms:" +
-                phone +
-                separator +
-                encodeURIComponent(
-                    messageBody
-                )
-            );
+        function createSmsLink(phone, messageBody) {
+            const separator = isIOSDevice() ? "&body=" : "?body=";
+            return "sms:" + phone + separator + encodeURIComponent(messageBody);
         }
 
         function normalizeWebsiteURL(value) {
-            const website =
-                String(value || "")
-                    .trim();
-
-            if (!website) {
-                return "";
-            }
-
-            if (
-                /^https?:\/\//i.test(
-                    website
-                )
-            ) {
-                return website;
-            }
-
-            return (
-                "https://" +
-                website
-            );
+            const website = String(value || "").trim();
+            if (!website) return "";
+            return /^https?:\/\//i.test(website) ? website : "https://" + website;
         }
 
-        function findSculpture(
-            sculptureRecords,
-            sculptureKey
-        ) {
-            return sculptureRecords.find(
-                function (item) {
-                    return (
-                        normalizeSculptureKey(
-                            item.lookupKey
-                        ) ===
-                        sculptureKey
-                    );
-                }
-            );
+        function findSculpture(records, key) {
+            return records.find(function (item) {
+                return normalizeSculptureKey(item.lookupKey) === key;
+            });
         }
 
-        function findGallery(
-            galleryRecords,
-            galleryKey
-        ) {
-            return galleryRecords.find(
-                function (item) {
-                    return (
-                        normalizeGalleryKey(
-                            item.lookupKey
-                        ) ===
-                        galleryKey
-                    );
-                }
-            );
+        function findGallery(records, key) {
+            return records.find(function (item) {
+                return normalizeGalleryKey(item.lookupKey) === key;
+            });
         }
 
-        function findCheckout(
-            checkoutRecords,
-            galleryKey,
-            sculptureKey
-        ) {
-            if (
-                !Array.isArray(
-                    checkoutRecords
-                )
-            ) {
-                return null;
-            }
-
-            return checkoutRecords.find(
-                function (item) {
-                    return (
-                        normalizeGalleryKey(
-                            item.galleryKey
-                        ) ===
-                        galleryKey &&
-                        normalizeSculptureKey(
-                            item.sculptureKey
-                        ) ===
-                        sculptureKey &&
-                        Boolean(
-                            String(
-                                item.checkoutURL || ""
-                            ).trim()
-                        )
-                    );
-                }
-            ) || null;
+        function findCheckout(records, galleryKey, sculptureKey) {
+            if (!Array.isArray(records)) return null;
+            return records.find(function (item) {
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    normalizeSculptureKey(item.sculptureKey) === sculptureKey &&
+                    Boolean(String(item.checkoutURL || "").trim());
+            }) || null;
         }
 
-        function setEnhancedSmsLayout(
-            isEnhanced
-        ) {
-            const openingMessage =
-                document.getElementById(
-                    "openingMessage"
-                );
-
-            const smsDescription =
-                document.getElementById(
-                    "smsDescription"
-                );
-
-            const smsFallbackInstruction =
-                document.getElementById(
-                    "smsFallbackInstruction"
-                );
-
-            openingMessage.hidden =
-                isEnhanced;
-
-            smsDescription.hidden =
-                isEnhanced;
-
-            smsFallbackInstruction.hidden =
-                isEnhanced;
+        function setEnhancedSmsLayout(isEnhanced) {
+            document.getElementById("openingMessage").hidden = isEnhanced;
+            document.getElementById("smsDescription").hidden = isEnhanced;
+            document.getElementById("smsFallbackInstruction").hidden = isEnhanced;
         }
 
-        function populateEnhancedPage(
-            sculpture,
-            galleryInfo,
-            checkoutInfo
-        ) {
-            const enhancedContent =
-                document.getElementById(
-                    "enhancedContent"
-                );
+        function populateEnhancedPage(sculpture, galleryInfo, checkoutInfo) {
+            const enhancedContent = document.getElementById("enhancedContent");
+            const matchedDetails = document.getElementById("matchedDetails");
+            const designName = document.getElementById("designName");
+            const artworkImage = document.getElementById("artworkImage");
+            const artistStatement = document.getElementById("artistStatement");
+            const retailPrice = document.getElementById("retailPrice");
+            const purchaseButton = document.getElementById("purchaseButton");
+            const galleryName = document.getElementById("galleryName");
+            const galleryPhoneContainer = document.getElementById("galleryPhoneContainer");
+            const galleryPhone = document.getElementById("galleryPhone");
+            const galleryWebsite = document.getElementById("galleryWebsite");
 
-            const matchedDetails =
-                document.getElementById(
-                    "matchedDetails"
-                );
-
-            const designName =
-                document.getElementById(
-                    "designName"
-                );
-
-            const artworkImage =
-                document.getElementById(
-                    "artworkImage"
-                );
-
-            const artistStatement =
-                document.getElementById(
-                    "artistStatement"
-                );
-
-            const retailPrice =
-                document.getElementById(
-                    "retailPrice"
-                );
-
-            const purchaseButton =
-                document.getElementById(
-                    "purchaseButton"
-                );
-
-            const galleryName =
-                document.getElementById(
-                    "galleryName"
-                );
-
-            const galleryPhoneContainer =
-                document.getElementById(
-                    "galleryPhoneContainer"
-                );
-
-            const galleryPhone =
-                document.getElementById(
-                    "galleryPhone"
-                );
-
-            const galleryWebsite =
-                document.getElementById(
-                    "galleryWebsite"
-                );
-
-            designName.textContent =
-                sculpture.displayName ||
-                sculpture.lookupKey ||
+            designName.textContent = sculpture.displayName || sculpture.lookupKey ||
                 "Lyman Whitaker Wind Sculpture";
+            artistStatement.textContent = sculpture.artistStatement || "";
 
-            artistStatement.textContent =
-                sculpture.artistStatement ||
-                "";
+            const formattedPrice = formatPrice(sculpture.retailPrice);
+            retailPrice.hidden = !formattedPrice;
+            if (formattedPrice) retailPrice.textContent = formattedPrice;
 
-            const formattedPrice =
-                formatPrice(
-                    sculpture.retailPrice
-                );
-
-            if (formattedPrice) {
-                retailPrice.textContent =
-                    formattedPrice;
-
-                retailPrice.hidden =
-                    false;
-            } else {
-                retailPrice.hidden =
-                    true;
-            }
-
-            /*
-             * The purchase button is completely separate from
-             * the gallery's general website button.
-             */
-            const checkoutURL =
-                checkoutInfo
-                    ? normalizeWebsiteURL(
-                        checkoutInfo.checkoutURL
-                    )
-                    : "";
-
-            if (checkoutURL) {
-                purchaseButton.href =
-                    checkoutURL;
-
-                purchaseButton.hidden =
-                    false;
-            } else {
-                purchaseButton.hidden =
-                    true;
-
-                purchaseButton.removeAttribute(
-                    "href"
-                );
-            }
+            const checkoutURL = checkoutInfo
+                ? normalizeWebsiteURL(checkoutInfo.checkoutURL)
+                : "";
+            purchaseButton.hidden = !checkoutURL;
+            if (checkoutURL) purchaseButton.href = checkoutURL;
+            else purchaseButton.removeAttribute("href");
 
             if (sculpture.image) {
-                const imageFileName =
-                    String(
-                        sculpture.image
-                    )
-                        .replace(
-                            /\\/g,
-                            "/"
-                        )
-                        .split("/")
-                        .pop();
-
-                const finalImageURL =
-                    QR_ASSET_ROOT +
-                    "images/" +
-                    encodeURIComponent(
-                        imageFileName
-                    );
-
-                artworkImage.alt =
-                    (
-                        sculpture.displayName ||
-                        "Lyman Whitaker wind sculpture"
-                    ) +
-                    " in motion";
-
-                artworkImage.onload =
-                    function () {
-                        artworkImage.hidden =
-                            false;
-                    };
-
-                artworkImage.onerror =
-                    function () {
-                        console.error(
-                            "Sculpture image failed to load:",
-                            finalImageURL
-                        );
-
-                        artworkImage.hidden =
-                            true;
-                    };
-
-                artworkImage.src =
-                    finalImageURL;
+                const imageFileName = String(sculpture.image)
+                    .replace(/\\/g, "/").split("/").pop();
+                const finalImageURL = QR_ASSET_ROOT + "images/" +
+                    encodeURIComponent(imageFileName);
+                artworkImage.alt = (sculpture.displayName ||
+                    "Lyman Whitaker wind sculpture") + " in motion";
+                artworkImage.onload = function () { artworkImage.hidden = false; };
+                artworkImage.onerror = function () {
+                    console.error("Sculpture image failed to load:", finalImageURL);
+                    artworkImage.hidden = true;
+                };
+                artworkImage.src = finalImageURL;
             } else {
-                artworkImage.hidden =
-                    true;
+                artworkImage.hidden = true;
             }
 
-            galleryName.textContent =
-                galleryInfo.name ||
-                "Gallery Information";
+            galleryName.textContent = galleryInfo.name || "Gallery Information";
 
             if (galleryInfo.phone) {
-                galleryPhone.textContent =
-                    galleryInfo.phone;
-
-                galleryPhone.href =
-                    "tel:" +
-                    String(
-                        galleryInfo.phone
-                    ).replace(
-                        /[^0-9+]/g,
-                        ""
-                    );
-
-                galleryPhoneContainer.hidden =
-                    false;
+                galleryPhone.textContent = galleryInfo.phone;
+                galleryPhone.href = "tel:" + String(galleryInfo.phone).replace(/[^0-9+]/g, "");
+                galleryPhoneContainer.hidden = false;
             } else {
-                galleryPhoneContainer.hidden =
-                    true;
+                galleryPhoneContainer.hidden = true;
             }
 
-            const galleryWebsiteURL =
-                normalizeWebsiteURL(
-                    galleryInfo.website
-                );
+            const galleryWebsiteURL = normalizeWebsiteURL(galleryInfo.website);
+            galleryWebsite.hidden = !galleryWebsiteURL;
+            if (galleryWebsiteURL) galleryWebsite.href = galleryWebsiteURL;
+            else galleryWebsite.removeAttribute("href");
 
-            if (galleryWebsiteURL) {
-                galleryWebsite.href =
-                    galleryWebsiteURL;
-
-                galleryWebsite.hidden =
-                    false;
-            } else {
-                galleryWebsite.hidden =
-                    true;
-
-                galleryWebsite.removeAttribute(
-                    "href"
-                );
-            }
-
-            enhancedContent.hidden =
-                false;
-
-            matchedDetails.hidden =
-                false;
-
-            document.title =
-                sculpture.displayName ||
-                "Lyman Whitaker Wind Sculpture";
+            enhancedContent.hidden = false;
+            matchedDetails.hidden = false;
+            document.title = sculpture.displayName || "Lyman Whitaker Wind Sculpture";
         }
 
         async function loadOptionalCheckoutData() {
             try {
-                const response =
-                    await fetch(
-                        CHECKOUT_DATA_URL,
-                        {
-                            cache: "no-cache"
-                        }
-                    );
-
-                if (!response.ok) {
-                    console.warn(
-                        "Checkout JSON returned HTTP " +
-                        response.status +
-                        ". Purchase links will be unavailable."
-                    );
-
-                    return [];
-                }
-
-                const checkoutData =
-                    await response.json();
-
-                if (
-                    !Array.isArray(
-                        checkoutData
-                    )
-                ) {
-                    console.warn(
-                        "Checkout JSON did not contain an array."
-                    );
-
-                    return [];
-                }
-
-                return checkoutData;
-
+                const response = await fetch(CHECKOUT_DATA_URL, { cache: "no-cache" });
+                if (!response.ok) return [];
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
             } catch (error) {
-                /*
-                 * Checkout data is optional. Failure here must not
-                 * prevent the sculpture and gallery page from loading.
-                 */
-                console.warn(
-                    "Checkout JSON could not be loaded:",
-                    error
-                );
-
+                console.warn("Checkout JSON could not be loaded:", error);
                 return [];
             }
         }
 
-        async function loadEnhancedContent(
-            galleryKey,
-            sculptureKey
-        ) {
+        async function loadEnhancedContent(galleryKey, sculptureKey) {
             try {
-                /*
-                 * Sculpture and gallery data are required.
-                 * Checkout data is optional.
-                 */
-                const requiredResponses =
-                    await Promise.all([
-                        fetch(
-                            SCULPTURE_DATA_URL,
-                            {
-                                cache: "no-cache"
-                            }
-                        ),
-                        fetch(
-                            GALLERY_DATA_URL,
-                            {
-                                cache: "no-cache"
-                            }
-                        )
-                    ]);
-
-                if (!requiredResponses[0].ok) {
-                    throw new Error(
-                        "Sculpture JSON returned HTTP " +
-                        requiredResponses[0].status
-                    );
+                const responses = await Promise.all([
+                    fetch(SCULPTURE_DATA_URL, { cache: "no-cache" }),
+                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
+                ]);
+                if (!responses[0].ok || !responses[1].ok) {
+                    throw new Error("Required sculpture or gallery data could not be loaded.");
                 }
 
-                if (!requiredResponses[1].ok) {
-                    throw new Error(
-                        "Gallery JSON returned HTTP " +
-                        requiredResponses[1].status
-                    );
+                const data = await Promise.all([responses[0].json(), responses[1].json()]);
+                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
+                    throw new Error("Required JSON data was not an array.");
                 }
 
-                const requiredData =
-                    await Promise.all([
-                        requiredResponses[0].json(),
-                        requiredResponses[1].json()
-                    ]);
-
-                if (
-                    !Array.isArray(
-                        requiredData[0]
-                    ) ||
-                    !Array.isArray(
-                        requiredData[1]
-                    )
-                ) {
-                    throw new Error(
-                        "One or more required JSON files did not contain an array."
-                    );
-                }
-
-                const sculpture =
-                    findSculpture(
-                        requiredData[0],
-                        sculptureKey
-                    );
-
-                const galleryInfo =
-                    findGallery(
-                        requiredData[1],
-                        galleryKey
-                    );
-
-                /*
-                 * A complete sculpture/gallery match is still required
-                 * before enhanced mode is shown.
-                 */
-                if (
-                    !sculpture ||
-                    !galleryInfo
-                ) {
-                    console.warn(
-                        "No complete sculpture/gallery match.",
-                        {
-                            galleryKey:
-                                galleryKey,
-
-                            sculptureKey:
-                                sculptureKey,
-
-                            sculptureFound:
-                                Boolean(
-                                    sculpture
-                                ),
-
-                            galleryFound:
-                                Boolean(
-                                    galleryInfo
-                                )
-                        }
-                    );
-
-                    setEnhancedSmsLayout(
-                        false
-                    );
-
+                const sculpture = findSculpture(data[0], sculptureKey);
+                const galleryInfo = findGallery(data[1], galleryKey);
+                if (!sculpture || !galleryInfo) {
+                    setEnhancedSmsLayout(false);
                     return false;
                 }
 
-                /*
-                 * Checkout information is optional and should not delay
-                 * or prevent the standard enhanced page.
-                 */
-                const checkoutRecords =
-                    await loadOptionalCheckoutData();
-
-                const checkoutInfo =
-                    findCheckout(
-                        checkoutRecords,
-                        galleryKey,
-                        sculptureKey
-                    );
-
-                populateEnhancedPage(
-                    sculpture,
-                    galleryInfo,
-                    checkoutInfo
+                const checkoutInfo = findCheckout(
+                    await loadOptionalCheckoutData(), galleryKey, sculptureKey
                 );
-
-                setEnhancedSmsLayout(
-                    true
-                );
-
+                populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
+                setEnhancedSmsLayout(true);
                 return true;
-
             } catch (error) {
-                console.error(
-                    "Enhanced QR page data could not be loaded:",
-                    error
-                );
-
-                setEnhancedSmsLayout(
-                    false
-                );
-
+                console.error("Enhanced QR page data could not be loaded:", error);
+                setEnhancedSmsLayout(false);
                 return false;
             }
         }
 
-        function logScan(
-            gallery,
-            design,
-            osTag
-        ) {
-            fetch(
-                LOG_ENDPOINT,
-                {
-                    method:
-                        "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    keepalive:
-                        true,
-
-                    body:
-                        JSON.stringify({
-                            gallery:
-                                gallery,
-
-                            design:
-                                design,
-
-                            os:
-                                osTag,
-
-                            nfc:
-                                false,
-
-                            qr:
-                                true,
-
-                            userAgent:
-                                navigator.userAgent ||
-                                "",
-
-                            visitorID:
-                                getVisitorID()
-                        })
-                }
-            )
-            .then(function (response) {
+        function logAnonymousScan(gallery, design, osTag) {
+            /*
+             * No VisitorID, localStorage value, full user-agent, phone number,
+             * or customer identifier is created or transmitted here.
+             */
+            fetch(LOG_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    gallery: gallery,
+                    design: design,
+                    os: osTag,
+                    nfc: false,
+                    qr: true
+                })
+            }).then(function (response) {
                 if (!response.ok) {
-                    console.error(
-                        "QR/NFC logging failed with status:",
-                        response.status
-                    );
+                    console.error("Anonymous scan logging failed:", response.status);
                 }
-            })
-            .catch(function (error) {
-                console.error(
-                    "QR/NFC logging request failed:",
-                    error
-                );
+            }).catch(function (error) {
+                console.error("Anonymous scan logging request failed:", error);
             });
         }
 
-        async function openMessagingApp() {
-            const startedAt =
-                Date.now();
+        function configureSmsConfirmation(finalSmsLink) {
+            const smsButton = document.getElementById("smsButton");
+            const dialog = document.getElementById("smsPrivacyDialog");
+            const continueButton = document.getElementById("continueSmsButton");
+            const cancelButton = document.getElementById("cancelSmsButton");
 
-            const urlParams =
-                new URLSearchParams(
-                    window.location.search
-                );
+            smsButton.href = finalSmsLink;
+            smsButton.removeAttribute("aria-disabled");
+            continueButton.href = finalSmsLink;
 
-            const gallery =
-                cleanParameter(
-                    urlParams.get("g"),
-                    "ws",
-                    30
-                );
+            smsButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                if (typeof dialog.showModal === "function") {
+                    dialog.showModal();
+                } else {
+                    const proceed = window.confirm(
+                        "If you send the prepared text, Whitaker Studio and the " +
+                        "representing gallery will receive your phone number and " +
+                        "inquiry details and may contact you. Continue to Messages?"
+                    );
+                    if (proceed) window.location.href = finalSmsLink;
+                }
+            });
 
-            const rawDesign =
-                cleanParameter(
-                    urlParams.get("d"),
-                    "Artist",
-                    200
-                );
-
-            const cleanedDisplayDesign =
-                removeMessageInstruction(
-                    rawDesign
-                );
-
-            const displayDesign =
-                cleanedDisplayDesign
-                    ? formatDesignName(
-                        cleanedDisplayDesign
-                    )
-                    : "Kinetic Wind Sculpture";
-
-            const openingMessage =
-                document.getElementById(
-                    "openingMessage"
-                );
-
-            /*
-             * This text remains visible only in fallback mode.
-             */
-            openingMessage.textContent =
-                "Opening your messaging app for automated, " +
-                "interactive information about the " +
-                displayDesign +
-                "...";
-
-            const smsDesign =
-                ensureMessageInstruction(
-                    rawDesign
-                );
-
-            const osTag =
-                getOSTag();
-
-            const messageBody =
-                "-" +
-                gallery +
-                "- " +
-                smsDesign +
-                " " +
-                osTag;
-
-            const phone =
-                "+14352362244";
-
-            const finalSmsLink =
-                createSmsLink(
-                    phone,
-                    messageBody
-                );
-
-            const smsButton =
-                document.getElementById(
-                    "smsButton"
-                );
-
-            /*
-             * Set the manual SMS link before loading any JSON.
-             */
-            smsButton.href =
-                finalSmsLink;
-
-            smsButton.removeAttribute(
-                "aria-disabled"
-            );
-
-            /*
-             * Log every QR opening regardless of whether enhanced
-             * content is found.
-             */
-            logScan(
-                gallery,
-                cleanedDisplayDesign,
-                osTag
-            );
-
-            const galleryKey =
-                normalizeGalleryKey(
-                    gallery
-                );
-
-            const sculptureKey =
-                normalizeSculptureKey(
-                    cleanedDisplayDesign
-                );
-
-            const enhancedLoaded =
-                await loadEnhancedContent(
-                    galleryKey,
-                    sculptureKey
-                );
-
-            /*
-             * Successful match:
-             * Do not open Messages automatically.
-             */
-            if (enhancedLoaded) {
-                return;
-            }
-
-            /*
-             * Failed match:
-             * Preserve the original SMS auto-open behavior.
-             */
-            const elapsed =
-                Date.now() -
-                startedAt;
-
-            const remainingDelay =
-                Math.max(
-                    100,
-                    AUTO_OPEN_DELAY_MS -
-                    elapsed
-                );
-
-            window.setTimeout(
-                function () {
-                    window.location.href =
-                        finalSmsLink;
-                },
-                remainingDelay
-            );
+            cancelButton.addEventListener("click", function () { dialog.close(); });
         }
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            openMessagingApp
-        );
+        async function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
+            const rawDesign = cleanParameter(urlParams.get("d"), "Artist", 200);
+            const cleanedDisplayDesign = removeMessageInstruction(rawDesign);
+            const displayDesign = cleanedDisplayDesign
+                ? formatDesignName(cleanedDisplayDesign)
+                : "Kinetic Wind Sculpture";
+
+            document.getElementById("openingMessage").textContent =
+                "Text us for automated, interactive information about the " +
+                displayDesign + ".";
+
+            const osTag = getOSTag();
+            const smsDesign = ensureMessageInstruction(rawDesign);
+            const messageBody = "-" + gallery + "- " + smsDesign + " " + osTag;
+            const finalSmsLink = createSmsLink("+14352362244", messageBody);
+
+            configureSmsConfirmation(finalSmsLink);
+            logAnonymousScan(gallery, cleanedDisplayDesign, osTag);
+
+            await loadEnhancedContent(
+                normalizeGalleryKey(gallery),
+                normalizeSculptureKey(cleanedDisplayDesign)
+            );
+
+            /* Messages is never opened automatically. */
+        }
+
+        document.addEventListener("DOMContentLoaded", initializePage);
     </script>
 </body>
 </html>
