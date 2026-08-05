@@ -52,6 +52,27 @@
             font-size: 20px;
         }
 
+        .analytics-notice {
+            max-width: 620px;
+            margin: 32px auto 0;
+            color: #666666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .analytics-notice summary {
+            color: #2459a6;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .analytics-notice p {
+            margin: 12px auto 0;
+            color: #666666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 30px 20px;
@@ -80,6 +101,21 @@
             The page did not open automatically.
             <a id="fallbackLink" href="#">Continue here</a>.
         </p>
+
+        <details class="analytics-notice">
+            <summary>Privacy and anonymous analytics</summary>
+            <p>
+                We record the sculpture and gallery associated with this sign,
+                whether QR or NFC was used, the general operating-system category,
+                the destination page without its query string, and the time of the
+                visit to help measure interest. Our scan analytics do not store a
+                visitor identifier, phone number, or full device information.
+            </p>
+            <p>
+                The participating gallery may be notified that this sign was used,
+                but the notification does not identify you.
+            </p>
+        </details>
     </main>
 
     <script>
@@ -141,56 +177,6 @@
             return "(O)";
         }
 
-        function getVisitorID() {
-            const storageKey = "whitakerVisitorID";
-
-            try {
-                let visitorID =
-                    localStorage.getItem(storageKey);
-
-                if (!visitorID) {
-                    if (
-                        window.crypto &&
-                        typeof window.crypto.randomUUID ===
-                            "function"
-                    ) {
-                        visitorID =
-                            window.crypto.randomUUID();
-                    } else {
-                        visitorID =
-                            "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-                                .replace(
-                                    /[xy]/g,
-                                    function (character) {
-                                        const randomValue =
-                                            Math.random() * 16 | 0;
-
-                                        const value =
-                                            character === "x"
-                                                ? randomValue
-                                                : (
-                                                    randomValue &
-                                                    0x3
-                                                ) | 0x8;
-
-                                        return value.toString(16);
-                                    }
-                                );
-                    }
-
-                    localStorage.setItem(
-                        storageKey,
-                        visitorID
-                    );
-                }
-
-                return visitorID;
-
-            } catch (error) {
-                return "";
-            }
-        }
-
         function getSafeRedirectURL(rawURL) {
             if (!rawURL) {
                 return null;
@@ -219,6 +205,16 @@
             } catch (error) {
                 return null;
             }
+        }
+
+        function getAnonymousRedirectReference(redirectURL) {
+            const parsedURL = new URL(redirectURL);
+
+            /*
+             * Do not log query parameters or fragments because they may
+             * contain tokens or other visitor-specific information.
+             */
+            return parsedURL.origin + parsedURL.pathname;
         }
 
         function sendScanLog(scanData) {
@@ -326,13 +322,10 @@
                 qr: false,
 
                 url_scan: true,
-                redirect_link: redirectURL,
-
-                userAgent:
-                    navigator.userAgent || "",
-
-                visitorID:
-                    getVisitorID()
+                redirect_link:
+                    getAnonymousRedirectReference(
+                        redirectURL
+                    )
             };
 
             sendScanLog(scanData);
@@ -364,3 +357,4 @@
     </script>
 </body>
 </html>
+
