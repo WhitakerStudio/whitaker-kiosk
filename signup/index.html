@@ -2,521 +2,250 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Opening Messaging App...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery Scan Alert Signup | Whitaker Studio</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            padding: 125px 30px 50px;
+            padding: 90px 30px 50px;
             font-family: Arial, Helvetica, sans-serif;
             text-align: center;
-            background-color: #ffffff;
-            color: #000000;
+            background: #fff;
+            color: #111;
         }
 
-        .content {
-            width: 100%;
-            max-width: 850px;
-            margin: 0 auto;
+        .content { width: 100%; max-width: 850px; margin: 0 auto; }
+
+        h1 {
+            margin: 0 0 30px;
+            font-size: 52px;
+            line-height: 1.15;
         }
 
-        h2 {
-            margin: 0 0 50px;
-            font-size: 48px;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        p {
-            margin: 0 auto 35px;
-            max-width: 760px;
-            font-size: 32px;
-            line-height: 1.4;
+        .introduction {
+            margin: 0 auto 32px;
+            max-width: 740px;
+            font-size: 28px;
+            line-height: 1.45;
         }
 
         .button {
             display: inline-block;
-            padding: 30px 50px;
-            background-color: #2459a6;
-            color: #ffffff;
-            text-decoration: none;
+            padding: 25px 42px;
             border-radius: 8px;
-            font-size: 42px;
+            background: #2459a6;
+            color: #fff;
+            font-size: 34px;
             line-height: 1.2;
+            text-decoration: none;
         }
 
-        .button:hover,
-        .button:focus {
-            background-color: #184887;
+        .button:hover, .button:focus { background: #184887; }
+
+        .consent-disclosure {
+            max-width: 730px;
+            margin: 24px auto 0;
+            padding: 20px;
+            border: 1px solid #d7dce3;
+            border-radius: 8px;
+            background: #f7f9fc;
+            color: #333;
+            font-size: 17px;
+            line-height: 1.55;
+            text-align: left;
         }
+
+        .consent-disclosure a,
+        .selection-link a,
+        .analytics-notice summary { color: #2459a6; }
 
         .selection-link {
-            margin-top: 40px;
-            margin-bottom: 0;
-            font-size: 24px;
+            margin: 38px auto 0;
+            max-width: 720px;
+            font-size: 20px;
             line-height: 1.5;
         }
 
-        .selection-link a {
-            color: #2459a6;
+        .analytics-notice {
+            max-width: 700px;
+            margin: 32px auto 0;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .analytics-notice summary {
+            cursor: pointer;
             text-decoration: underline;
         }
 
-        .selection-link a:hover,
-        .selection-link a:focus {
-            color: #184887;
+        .analytics-notice p {
+            margin: 12px auto 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        [aria-disabled="true"] {
+            pointer-events: none;
+            opacity: .65;
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 100px 20px 40px;
-            }
-
-            h2 {
-                margin-bottom: 40px;
-                font-size: 42px;
-            }
-
-            p {
-                margin-bottom: 30px;
-                font-size: 24px;
-            }
-
-            .button {
-                padding: 22px 35px;
-                font-size: 28px;
-            }
-
-            .selection-link {
-                margin-top: 35px;
-                font-size: 18px;
-            }
+            body { padding: 65px 20px 40px; }
+            h1 { font-size: 42px; }
+            .introduction { font-size: 24px; }
+            .button { padding: 22px 32px; font-size: 28px; }
         }
 
         @media (max-width: 420px) {
-            body {
-                padding: 90px 20px 35px;
-            }
-
-            h2 {
-                font-size: 34px;
-            }
-
-            p {
-                font-size: 21px;
-            }
-
-            .button {
-                width: 100%;
-                max-width: 360px;
-                padding: 22px 20px;
-                font-size: 27px;
-            }
+            body { padding: 45px 18px 30px; }
+            h1 { font-size: 34px; }
+            .introduction { font-size: 21px; }
+            .button { width: 100%; padding: 20px 14px; font-size: 26px; }
+            .consent-disclosure { padding: 17px; font-size: 16px; }
+            .selection-link { font-size: 18px; }
         }
     </style>
 </head>
 
 <body>
     <main class="content">
-        <h2 id="openingMessage">
-            Opening your messaging app...
-        </h2>
+        <h1>Sign Up for Gallery Scan Alerts</h1>
 
-        <p>
-            Send the prepared message to begin the gallery signup process.
+        <p class="introduction">
+            Send the prepared message to receive automated SMS alerts from
+            Whitaker Studio when visitors scan participating sculpture displays
+            associated with your gallery.
         </p>
 
-        <p>
-            If it does not open automatically within a few seconds,
-            tap the button below.
-        </p>
-
-        <a
-            id="smsButton"
-            href="#"
-            class="button"
-        >
-            Send Us a Text
+        <a id="smsButton" href="#" class="button" aria-disabled="true">
+            Start SMS Signup
         </a>
+
+        <p class="consent-disclosure">
+            By sending the prepared text, you request enrollment and agree to
+            receive recurring automated gallery scan alerts and related program
+            messages from Whitaker Studio at the number used to send the text.
+            Message frequency varies. Message and data rates may apply. Reply
+            <strong>HELP</strong> for help or <strong>STOP</strong> to cancel.
+            Consent is not a condition of purchase. Review the
+            <a href="https://kiosk.whitakerstudio.com/signupprivacy/#terms">
+                SMS Terms
+            </a>
+            and
+            <a href="https://kiosk.whitakerstudio.com/signupprivacy/#privacy">
+                Privacy Notice
+            </a>.
+        </p>
 
         <p class="selection-link">
             Prefer to browse instead? Click
-            <a href="https://kiosk.whitakerstudio.com/">
-                here
-            </a>
+            <a href="https://kiosk.whitakerstudio.com/">here</a>
             to view the complete collection of Lyman Whitaker's kinetic works.
         </p>
+
+        <details class="analytics-notice">
+            <summary>Privacy and anonymous analytics</summary>
+            <p>
+                We record the gallery and signup page viewed, that QR was used,
+                the general operating-system category, and the time of the visit
+                to help measure use. Our scan analytics do not store a visitor
+                identifier, phone number, or full device information.
+            </p>
+            <p>
+                Your phone number is received only if you choose to send the
+                prepared text. See the SMS Terms and Privacy Notice above.
+            </p>
+        </details>
     </main>
 
     <script>
+        const LOG_ENDPOINT = "https://whitakerstudio.net/api/qrnfclog";
+
         function getOSTag() {
-            const userAgent =
-                navigator.userAgent || "";
-
+            const userAgent = navigator.userAgent || "";
             const platform =
-                (
-                    navigator.userAgentData &&
-                    navigator.userAgentData.platform
-                ) ||
-                navigator.platform ||
-                "";
+                (navigator.userAgentData && navigator.userAgentData.platform) ||
+                navigator.platform || "";
+            const touchPoints = navigator.maxTouchPoints || 0;
 
-            const touchPoints =
-                navigator.maxTouchPoints || 0;
+            if (/Android/i.test(userAgent) || /Android/i.test(platform)) return "(A)";
 
-            if (
-                /Android/i.test(userAgent) ||
-                /Android/i.test(platform)
-            ) {
-                return "(A)";
-            }
-
-            const standardIOS =
-                /iPad|iPhone|iPod/i.test(
-                    userAgent
-                );
-
-            const modernIPad =
-                /Mac/i.test(platform) &&
-                touchPoints > 1;
-
-            if (
-                standardIOS ||
-                modernIPad
-            ) {
-                return "(I)";
-            }
-
-            return "(O)";
+            const standardIOS = /iPad|iPhone|iPod/i.test(userAgent);
+            const modernIPad = /Mac/i.test(platform) && touchPoints > 1;
+            return standardIOS || modernIPad ? "(I)" : "(O)";
         }
 
         function isIOSDevice() {
-            return (
-                /iPad|iPhone|iPod/i.test(
-                    navigator.userAgent
-                ) ||
-                (
-                    /Mac/i.test(
-                        navigator.platform
-                    ) &&
-                    navigator.maxTouchPoints > 1
-                )
-            );
+            return /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+                (/Mac/i.test(navigator.platform) && navigator.maxTouchPoints > 1);
         }
 
-        function cleanParameter(
-            value,
-            fallback,
-            maxLength
-        ) {
-            return String(
-                value || fallback
-            )
-                .replace(
-                    /[\r\n\t]+/g,
-                    " "
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
+        function cleanParameter(value, fallback, maxLength) {
+            return String(value || fallback)
+                .replace(/[\r\n\t]+/g, " ")
+                .replace(/\s+/g, " ")
                 .trim()
-                .substring(
-                    0,
-                    maxLength
-                );
+                .substring(0, maxLength);
         }
 
-        /*
-         * Return a persistent anonymous visitor identifier.
-         *
-         * Because the same storage key is used by the other
-         * kiosk pages, the same browser can be recognized across
-         * QR, NFC, and SMS sign-up visits.
-         */
-        function getVisitorID() {
-            const storageKey =
-                "whitakerVisitorID";
-
-            try {
-                let visitorID =
-                    localStorage.getItem(
-                        storageKey
-                    );
-
-                if (!visitorID) {
-                    if (
-                        window.crypto &&
-                        typeof window.crypto.randomUUID ===
-                            "function"
-                    ) {
-                        visitorID =
-                            window.crypto.randomUUID();
-                    } else {
-                        visitorID =
-                            "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-                                .replace(
-                                    /[xy]/g,
-                                    function (character) {
-                                        const random =
-                                            Math.random() *
-                                            16 |
-                                            0;
-
-                                        const value =
-                                            character === "x"
-                                                ? random
-                                                : (
-                                                    random &
-                                                    0x3
-                                                ) |
-                                                0x8;
-
-                                        return value.toString(
-                                            16
-                                        );
-                                    }
-                                );
-                    }
-
-                    localStorage.setItem(
-                        storageKey,
-                        visitorID
-                    );
-                }
-
-                return visitorID;
-
-            } catch (error) {
-                console.warn(
-                    "Visitor ID storage is unavailable:",
-                    error
-                );
-
-                return null;
-            }
+        function createSmsLink(phone, messageBody) {
+            const separator = isIOSDevice() ? "&body=" : "?body=";
+            return "sms:" + phone + separator + encodeURIComponent(messageBody);
         }
 
-        function formatDesignName(value) {
-            const uppercaseWords = [
-                "sm",
-                "med",
-                "lg",
-                "xl",
-                "xxl"
-            ];
-
-            return String(value || "")
-                .toLowerCase()
-                .split(/\s+/)
-                .map(function (word) {
-                    if (
-                        uppercaseWords.indexOf(
-                            word
-                        ) !== -1
-                    ) {
-                        return word.toUpperCase();
-                    }
-
-                    return (
-                        word.charAt(0).toUpperCase() +
-                        word.slice(1)
-                    );
+        function logAnonymousSignupVisit(gallery, design, osTag) {
+            /*
+             * No persistent visitor ID, localStorage value, full user-agent,
+             * phone number, or customer identifier is transmitted here.
+             */
+            fetch(LOG_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    gallery: gallery,
+                    design: design,
+                    os: osTag,
+                    nfc: false,
+                    qr: true
                 })
-                .join(" ");
-        }
-
-        function createSmsLink(
-            phone,
-            messageBody
-        ) {
-            const separator =
-                isIOSDevice()
-                    ? "&body="
-                    : "?body=";
-
-            return (
-                "sms:" +
-                phone +
-                separator +
-                encodeURIComponent(
-                    messageBody
-                )
-            );
-        }
-
-        function logSignupScan(
-            gallery,
-            design,
-            osTag,
-            visitorID
-        ) {
-            fetch(
-                "https://whitakerstudio.net/api/qrnfclog",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    keepalive: true,
-
-                    body: JSON.stringify({
-                        gallery: gallery,
-                        design: design,
-                        os: osTag,
-                        nfc: false,
-                        qr: true,
-                        userAgent:
-                            navigator.userAgent ||
-                            "",
-                        visitorID:
-                            visitorID
-                    })
-                }
-            )
-            .then(function (response) {
+            }).then(function (response) {
                 if (!response.ok) {
-                    console.error(
-                        "QR/NFC logging failed with status:",
-                        response.status
-                    );
+                    console.error("Signup-page logging failed:", response.status);
                 }
-            })
-            .catch(function (error) {
-                /*
-                 * A logging failure should not prevent the
-                 * visitor's messaging application from opening.
-                 */
-                console.error(
-                    "QR/NFC logging request failed:",
-                    error
-                );
+            }).catch(function (error) {
+                console.error("Signup-page logging request failed:", error);
             });
         }
 
-        function openMessagingApp() {
-            const urlParams =
-                new URLSearchParams(
-                    window.location.search
-                );
-
-            const gallery =
-                cleanParameter(
-                    urlParams.get("g"),
-                    "ws",
-                    30
-                );
-
-            const rawDesign =
-                cleanParameter(
-                    urlParams.get("d"),
-                    "Gallery Signup",
-                    200
-                );
-
-            const cleanedDisplayDesign =
-                rawDesign;
-
-            const displayDesign =
-                cleanedDisplayDesign
-                    ? formatDesignName(
-                        cleanedDisplayDesign
-                    )
-                    : "Gallery Signup";
-
-            const openingMessage =
-                document.getElementById(
-                    "openingMessage"
-                );
-
-            openingMessage.textContent =
-                "Opening your messaging app " +
-                "to begin the SMS signup process...";
-
-            const osTag =
-                getOSTag();
-
-            const visitorID =
-                getVisitorID();
-
-            /*
-             * Record the sign-up page opening.
-             *
-             * This remains a QR record:
-             * qr = true
-             * nfc = false
-             *
-             * The persistent visitor ID is now included.
-             */
-            logSignupScan(
-                gallery,
-                cleanedDisplayDesign,
-                osTag,
-                visitorID
+        function initializeSignupPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
+            const rawDesign = cleanParameter(
+                urlParams.get("d"),
+                "Gallery Signup",
+                200
             );
+            const osTag = getOSTag();
 
-            /*
-             * Preserve the gallery sign-up message format:
-             *
-             * !OG! Gallery Signup
-             */
-            const messageBody =
-                "!" +
-                gallery +
-                "! " +
-                rawDesign;
+            logAnonymousSignupVisit(gallery, rawDesign, osTag);
 
-            const phone =
-                "+14352362244";
+            /* Preserve the existing signup command: !OG! Gallery Signup */
+            const messageBody = "!" + gallery + "! " + rawDesign;
+            const finalSmsLink = createSmsLink("+14352362244", messageBody);
+            const smsButton = document.getElementById("smsButton");
 
-            const finalSmsLink =
-                createSmsLink(
-                    phone,
-                    messageBody
-                );
+            smsButton.href = finalSmsLink;
+            smsButton.removeAttribute("aria-disabled");
 
-            const smsButton =
-                document.getElementById(
-                    "smsButton"
-                );
-
-            /*
-             * Set the fallback button before attempting
-             * automatic navigation.
-             */
-            smsButton.href =
-                finalSmsLink;
-
-            /*
-             * Give the browser a brief opportunity to render
-             * the page and queue the logging request.
-             */
-            window.setTimeout(
-                function () {
-                    window.location.href =
-                        finalSmsLink;
-                },
-                500
-            );
+            /* Messages opens only after the visitor deliberately taps the button. */
         }
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            openMessagingApp
-        );
+        document.addEventListener("DOMContentLoaded", initializeSignupPage);
     </script>
 </body>
 </html>
