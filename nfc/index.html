@@ -41,6 +41,7 @@
         }
 
         .artist-statement { margin-bottom: 40px; }
+        .artist-statement a { color: #2459a6; text-decoration: underline; }
 
         .sms-section {
             margin: 35px auto;
@@ -102,6 +103,15 @@
 
         .purchase-button:hover, .purchase-button:focus { background: #184887; }
         .gallery-section { margin-top: 35px; padding-top: 15px; }
+        .gallery-logo {
+            display: block;
+            width: 100%;
+            max-width: 850px;
+            max-height: 180px;
+            height: auto;
+            margin: 0 auto 22px;
+            object-fit: contain;
+        }
         .gallery-contact { margin-bottom: 18px; font-size: 25px; }
         .gallery-contact a { color: #2459a6; text-decoration: underline; }
 
@@ -224,7 +234,7 @@
             <p id="artistStatement" class="artist-statement"></p>
         </section>
 
-        <section class="sms-section">
+        <section id="smsSection" class="sms-section">
             <h2 id="openingMessage">Text Us for Sculpture Information</h2>
 
             <p id="smsDescription">
@@ -258,6 +268,7 @@
             </a>
 
             <div class="gallery-section">
+                <img id="galleryLogo" class="gallery-logo" src="" alt="" hidden>
                 <h3 id="galleryName"></h3>
 
                 <p id="galleryPhoneContainer" class="gallery-contact" hidden>
@@ -321,7 +332,7 @@
 
     <script>
         const NFC_ASSET_ROOT = "/nfc/assets/";
-        const ASSET_VERSION = "?v=20260722-3";
+        const ASSET_VERSION = "?v=20260810-1";
         const SCULPTURE_DATA_URL = NFC_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const GALLERY_DATA_URL = NFC_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
         const CHECKOUT_DATA_URL = NFC_ASSET_ROOT + "data/checkouts.json" + ASSET_VERSION;
@@ -398,6 +409,20 @@
             return /^https?:\/\//i.test(website) ? website : "https://" + website;
         }
 
+        function isTruthyFlag(value) {
+            return value === true || value === 1 ||
+                String(value || "").trim().toLowerCase() === "true" ||
+                String(value || "").trim() === "1";
+        }
+
+        function getAssetImageURL(value) {
+            const fileName = String(value || "")
+                .replace(/\\/g, "/").split("/").pop();
+            return fileName
+                ? NFC_ASSET_ROOT + "images/" + encodeURIComponent(fileName)
+                : "";
+        }
+
         function findSculpture(records, key) {
             return records.find(function (item) {
                 return normalizeSculptureKey(item.lookupKey) === key;
@@ -431,8 +456,10 @@
             const designName = document.getElementById("designName");
             const artworkImage = document.getElementById("artworkImage");
             const artistStatement = document.getElementById("artistStatement");
+            const smsSection = document.getElementById("smsSection");
             const retailPrice = document.getElementById("retailPrice");
             const purchaseButton = document.getElementById("purchaseButton");
+            const galleryLogo = document.getElementById("galleryLogo");
             const galleryName = document.getElementById("galleryName");
             const galleryPhoneContainer = document.getElementById("galleryPhoneContainer");
             const galleryPhone = document.getElementById("galleryPhone");
@@ -441,6 +468,23 @@
             designName.textContent = sculpture.displayName || sculpture.lookupKey ||
                 "Lyman Whitaker Wind Sculpture";
             artistStatement.textContent = sculpture.artistStatement || "";
+
+            const promoVideoURL = normalizeWebsiteURL(sculpture.promoVideoURL);
+            if (promoVideoURL) {
+                if (artistStatement.textContent) {
+                    artistStatement.appendChild(document.createTextNode(" "));
+                }
+                artistStatement.appendChild(
+                    document.createTextNode("A short video of the piece is available ")
+                );
+                const promoLink = document.createElement("a");
+                promoLink.href = promoVideoURL;
+                promoLink.textContent = "here";
+                artistStatement.appendChild(promoLink);
+                artistStatement.appendChild(document.createTextNode("."));
+            }
+
+            smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
 
             const formattedPrice = formatPrice(sculpture.retailPrice);
             retailPrice.hidden = !formattedPrice;
@@ -454,10 +498,7 @@
             else purchaseButton.removeAttribute("href");
 
             if (sculpture.image) {
-                const imageFileName = String(sculpture.image)
-                    .replace(/\\/g, "/").split("/").pop();
-                const finalImageURL = NFC_ASSET_ROOT + "images/" +
-                    encodeURIComponent(imageFileName);
+                const finalImageURL = getAssetImageURL(sculpture.image);
                 artworkImage.alt = (sculpture.displayName ||
                     "Lyman Whitaker wind sculpture") + " in motion";
                 artworkImage.onload = function () { artworkImage.hidden = false; };
@@ -470,7 +511,27 @@
                 artworkImage.hidden = true;
             }
 
-            galleryName.textContent = galleryInfo.name || "Gallery Information";
+            const galleryDisplayName = galleryInfo.name || "Gallery Information";
+            galleryName.textContent = galleryDisplayName;
+            galleryName.hidden = false;
+
+            const galleryLogoURL = getAssetImageURL(galleryInfo.logoImage);
+            if (galleryLogoURL) {
+                galleryLogo.alt = galleryDisplayName;
+                galleryLogo.onload = function () {
+                    galleryLogo.hidden = false;
+                    galleryName.hidden = true;
+                };
+                galleryLogo.onerror = function () {
+                    console.error("Gallery logo failed to load:", galleryLogoURL);
+                    galleryLogo.hidden = true;
+                    galleryName.hidden = false;
+                };
+                galleryLogo.src = galleryLogoURL;
+            } else {
+                galleryLogo.hidden = true;
+                galleryLogo.removeAttribute("src");
+            }
 
             if (galleryInfo.phone) {
                 galleryPhone.textContent = galleryInfo.phone;
@@ -519,6 +580,12 @@
 
                 const sculpture = findSculpture(data[0], sculptureKey);
                 const galleryInfo = findGallery(data[1], galleryKey);
+
+                if (galleryInfo) {
+                    document.getElementById("smsSection").hidden =
+                        isTruthyFlag(galleryInfo.hideCustomerSMS);
+                }
+
                 if (!sculpture || !galleryInfo) {
                     setEnhancedSmsLayout(false);
                     return false;
@@ -621,4 +688,3 @@
     </script>
 </body>
 </html>
-
