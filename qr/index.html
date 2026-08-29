@@ -43,6 +43,14 @@
         .artist-statement { margin-bottom: 40px; }
         .artist-statement a { color: #2459a6; text-decoration: underline; }
 
+        .finish-name {
+            margin-top: -15px;
+            margin-bottom: 30px;
+            color: #555;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
         .sms-section {
             margin: 35px auto;
             padding: 35px 25px;
@@ -257,6 +265,7 @@
     <main class="content">
         <section id="enhancedContent" hidden>
             <h1 id="designName"></h1>
+            <p id="finishName" class="finish-name" hidden></p>
             <img id="artworkImage" class="artwork-image" src="" alt="" hidden>
             <p id="artistStatement" class="artist-statement"></p>
         </section>
@@ -372,7 +381,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260829-1";
+        const ASSET_VERSION = "?v=20260829-2";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const GALLERY_DATA_URL = QR_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
@@ -479,15 +488,17 @@
             });
         }
 
-        function findProductGroup(records, productGroupID) {
+        function findProductGroup(records, productGroupID, finishGroupID) {
             const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
 
             return records.find(function (item) {
                 return String(
                     item.productGroupID !== undefined
                         ? item.productGroupID
                         : item.lookupKey
-                ).trim() === requestedID;
+                ).trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID;
             });
         }
 
@@ -506,14 +517,21 @@
             }) || null;
         }
 
-        function findProductGroupCheckout(records, galleryKey, productGroupID) {
+        function findProductGroupCheckout(
+            records,
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
             if (!Array.isArray(records)) return null;
 
             const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
 
             return records.find(function (item) {
                 return normalizeGalleryKey(item.galleryKey) === galleryKey &&
                     String(item.productGroupID || "").trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID &&
                     Boolean(String(item.checkoutURL || "").trim());
             }) || null;
         }
@@ -528,6 +546,7 @@
             const enhancedContent = document.getElementById("enhancedContent");
             const matchedDetails = document.getElementById("matchedDetails");
             const designName = document.getElementById("designName");
+            const finishName = document.getElementById("finishName");
             const artworkImage = document.getElementById("artworkImage");
             const artistStatement = document.getElementById("artistStatement");
             const smsSection = document.getElementById("smsSection");
@@ -542,6 +561,12 @@
 
             designName.textContent = sculpture.displayName || sculpture.lookupKey ||
                 "Lyman Whitaker Wind Sculpture";
+
+            const isProductGroup = Array.isArray(sculpture.sizes);
+            const finishDisplayName = String(sculpture.finishName || "").trim();
+            finishName.textContent = finishDisplayName;
+            finishName.hidden = !isProductGroup || !finishDisplayName;
+
             artistStatement.textContent = sculpture.artistStatement || "";
 
             const promoVideoURL = normalizeWebsiteURL(sculpture.promoVideoURL);
@@ -560,8 +585,6 @@
             }
 
             smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
-
-            const isProductGroup = Array.isArray(sculpture.sizes);
 
             sizePriceList.replaceChildren();
             sizePriceList.hidden = true;
@@ -737,7 +760,11 @@
             }
         }
 
-        async function loadProductGroupContent(galleryKey, productGroupID) {
+        async function loadProductGroupContent(
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
             try {
                 const responses = await Promise.all([
                     fetch(PRODUCT_GROUP_DATA_URL, { cache: "no-cache" }),
@@ -759,7 +786,11 @@
                     throw new Error("Required JSON data was not an array.");
                 }
 
-                const productGroup = findProductGroup(data[0], productGroupID);
+                const productGroup = findProductGroup(
+                    data[0],
+                    productGroupID,
+                    finishGroupID
+                );
                 const galleryInfo = findGallery(data[1], galleryKey);
 
                 if (galleryInfo) {
@@ -775,7 +806,8 @@
                 const checkoutInfo = findProductGroupCheckout(
                     await loadOptionalCheckoutData(),
                     galleryKey,
-                    productGroupID
+                    productGroupID,
+                    finishGroupID
                 );
 
                 populateEnhancedPage(
@@ -1053,8 +1085,26 @@ function logAnonymousScanOnce(
                 "",
                 20
             );
-            const hasProductGroup = /^\d+$/.test(productGroupID);
+            const finishGroupID = cleanParameter(
+                urlParams.get("f"),
+                "",
+                20
+            );
+            const hasGroupParameter =
+                productGroupID !== "" || finishGroupID !== "";
+            const hasProductGroup =
+                /^\d+$/.test(productGroupID) &&
+                /^\d+$/.test(finishGroupID);
             const osTag = getOSTag();
+
+            if (hasGroupParameter && !hasProductGroup) {
+                const statusMessage = document.getElementById("statusMessage");
+                statusMessage.textContent =
+                    "This price-list link is missing a valid design or finish. " +
+                    "Please use the gallery link below or try scanning again.";
+                statusMessage.hidden = false;
+                return;
+            }
 
             /*
              * Product-group mode is used by price-list QR codes.
@@ -1066,7 +1116,8 @@ function logAnonymousScanOnce(
 
                 const productGroup = await loadProductGroupContent(
                     galleryKey,
-                    productGroupID
+                    productGroupID,
+                    finishGroupID
                 );
 
                 if (!productGroup) {
@@ -1081,8 +1132,13 @@ function logAnonymousScanOnce(
                 const groupDisplayName =
                     String(productGroup.displayName || "").trim() ||
                     "Product Group " + productGroupID;
+                const finishDisplayName =
+                    String(productGroup.finishName || "").trim();
+                const groupAndFinishName = finishDisplayName
+                    ? groupDisplayName + " " + finishDisplayName
+                    : groupDisplayName;
 
-                const smsDesign = ensureMessageInstruction(groupDisplayName);
+                const smsDesign = ensureMessageInstruction(groupAndFinishName);
                 const messageBody =
                     "-" + gallery + "- " + smsDesign + " " + osTag;
 
@@ -1093,7 +1149,7 @@ function logAnonymousScanOnce(
                 if (scanAlertEnabled) {
                     logAnonymousScanOnce(
                         gallery,
-                        groupDisplayName,
+                        groupAndFinishName,
                         osTag,
                         "qr"
                     );
