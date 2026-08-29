@@ -1111,14 +1111,22 @@ function logAnonymousScanOnce(
              * Existing d= links continue through the standard branch below.
              */
             if (hasProductGroup) {
-                document.getElementById("openingMessage").textContent =
-                    "Text us for information about this sculpture design.";
+                /*
+                 * Product-group pages represent multiple sizes, so the SMS
+                 * automation cannot unambiguously identify one sculpture.
+                 * Keep SMS available only on standard d= pages.
+                 */
+                document.getElementById("smsSection").hidden = true;
 
                 const productGroup = await loadProductGroupContent(
                     galleryKey,
                     productGroupID,
                     finishGroupID
                 );
+
+                /* populateEnhancedPage applies the gallery's normal SMS rule;
+                   product-group mode always overrides it. */
+                document.getElementById("smsSection").hidden = true;
 
                 if (!productGroup) {
                     const statusMessage = document.getElementById("statusMessage");
@@ -1137,14 +1145,6 @@ function logAnonymousScanOnce(
                 const groupAndFinishName = finishDisplayName
                     ? groupDisplayName + " " + finishDisplayName
                     : groupDisplayName;
-
-                const smsDesign = ensureMessageInstruction(groupAndFinishName);
-                const messageBody =
-                    "-" + gallery + "- " + smsDesign + " " + osTag;
-
-                configureSmsConfirmation(
-                    createSmsLink("+14352362244", messageBody)
-                );
 
                 if (scanAlertEnabled) {
                     logAnonymousScanOnce(
