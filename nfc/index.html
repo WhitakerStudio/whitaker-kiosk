@@ -43,14 +43,6 @@
         .artist-statement { margin-bottom: 40px; }
         .artist-statement a { color: #2459a6; text-decoration: underline; }
 
-        .finish-name {
-            margin-top: -15px;
-            margin-bottom: 30px;
-            color: #555;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
         .sms-section {
             margin: 35px auto;
             padding: 35px 25px;
@@ -94,31 +86,6 @@
             margin-bottom: 25px;
             font-size: 34px;
             font-weight: 700;
-        }
-
-        .size-price-list {
-            width: 100%;
-            max-width: 650px;
-            margin: 35px auto 25px;
-            border-top: 1px solid #d8d8d8;
-        }
-
-        .size-price-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 24px;
-            align-items: baseline;
-            padding: 15px 0;
-            border-bottom: 1px solid #d8d8d8;
-            font-size: 30px;
-            line-height: 1.3;
-            text-align: left;
-        }
-
-        .size-price-amount {
-            font-weight: 700;
-            white-space: nowrap;
-            text-align: right;
         }
 
         .purchase-button {
@@ -237,7 +204,6 @@
             .sms-section > p { font-size: 22px; }
             .button { padding: 22px 35px; font-size: 29px; }
             .price { font-size: 30px; }
-            .size-price-row { font-size: 25px; }
             .purchase-button { padding: 18px 28px; font-size: 23px; }
             .gallery-contact, .gallery-website-button { font-size: 21px; }
             .selection-link { font-size: 18px; }
@@ -250,7 +216,6 @@
             p { font-size: 20px; }
             .button { width: 100%; max-width: 360px; padding: 20px 16px; font-size: 26px; }
             .price { font-size: 27px; }
-            .size-price-row { gap: 16px; padding: 13px 0; font-size: 22px; }
             .purchase-button { width: 100%; max-width: 360px; padding: 18px 16px; font-size: 22px; }
             dialog { padding: 24px 20px; }
             dialog h2 { font-size: 26px; }
@@ -265,7 +230,6 @@
     <main class="content">
         <section id="enhancedContent" hidden>
             <h1 id="designName"></h1>
-            <p id="finishName" class="finish-name" hidden></p>
             <img id="artworkImage" class="artwork-image" src="" alt="" hidden>
             <p id="artistStatement" class="artist-statement"></p>
         </section>
@@ -298,9 +262,6 @@
         <section id="matchedDetails" hidden>
             <p id="retailPrice" class="price"></p>
 
-            <div id="sizePriceList" class="size-price-list"
-                 aria-label="Available sizes and prices" hidden></div>
-
             <a id="purchaseButton" class="purchase-button" href="#"
                target="_blank" rel="noopener noreferrer" hidden>
                 Purchase This Sculpture
@@ -327,10 +288,7 @@
             to view the complete collection of Lyman Whitaker's kinetic works.
         </p>
 
-        <details 
-	    id="analyticsNotice"	
-	    class="analytics-notice"
-	>
+        <details class="analytics-notice">
             <summary>Privacy and anonymous analytics</summary>
             <p>
                 We record the sculpture and gallery viewed, whether QR or NFC was
@@ -342,13 +300,6 @@
                 The participating gallery may be notified that this sculpture was
                 viewed, but the notification does not identify you.
             </p>
-	    <p>
-    		To prevent repeated scan notifications when you revisit or restore
-    		the same sculpture page, this site stores a scan-specific timestamp
-    		in your browser. It is used for 30 days, remains on your device,
-    		and is not transmitted to Whitaker Studio or used to identify you.
-    		Expired entries are removed the next time a kiosk page is opened.
-	    </p>
         </details>
 
         <p id="statusMessage" class="status-message" hidden></p>
@@ -380,16 +331,11 @@
     </dialog>
 
     <script>
-        const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260831-1";
-        const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
-        const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
-        const PRODUCT_SALES_GROUP_DATA_URL =
-            QR_ASSET_ROOT + "data/product-sales-groups.json" + ASSET_VERSION;
-        const PRODUCT_SALES_GROUP_CHECKOUT_DATA_URL =
-            QR_ASSET_ROOT + "data/product-sales-group-checkouts.json" + ASSET_VERSION;
-        const GALLERY_DATA_URL = QR_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
-        const CHECKOUT_DATA_URL = QR_ASSET_ROOT + "data/checkouts.json" + ASSET_VERSION;
+        const NFC_ASSET_ROOT = "/nfc/assets/";
+        const ASSET_VERSION = "?v=20260810-1";
+        const SCULPTURE_DATA_URL = NFC_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
+        const GALLERY_DATA_URL = NFC_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
+        const CHECKOUT_DATA_URL = NFC_ASSET_ROOT + "data/checkouts.json" + ASSET_VERSION;
         const LOG_ENDPOINT = "https://whitakerstudio.net/api/qrnfclog";
 
         function getOSTag() {
@@ -423,15 +369,6 @@
             return String(value || "")
                 .replace(/\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i, "")
                 .trim();
-        }
-
-        function ensureMessageInstruction(value) {
-            const instruction = "Send this message for details.";
-            const pattern = /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
-            if (pattern.test(value)) {
-                return String(value).replace(pattern, " " + instruction).trim();
-            }
-            return (String(value || "").trim() + " " + instruction).trim();
         }
 
         function formatDesignName(value) {
@@ -482,39 +419,13 @@
             const fileName = String(value || "")
                 .replace(/\\/g, "/").split("/").pop();
             return fileName
-                ? QR_ASSET_ROOT + "images/" + encodeURIComponent(fileName)
+                ? NFC_ASSET_ROOT + "images/" + encodeURIComponent(fileName)
                 : "";
         }
 
         function findSculpture(records, key) {
             return records.find(function (item) {
                 return normalizeSculptureKey(item.lookupKey) === key;
-            });
-        }
-
-        function findProductGroup(records, productGroupID, finishGroupID) {
-            const requestedID = String(productGroupID || "").trim();
-            const requestedFinishID = String(finishGroupID || "").trim();
-
-            return records.find(function (item) {
-                return String(
-                    item.productGroupID !== undefined
-                        ? item.productGroupID
-                        : item.lookupKey
-                ).trim() === requestedID &&
-                    String(item.finishGroupID || "").trim() === requestedFinishID;
-            });
-        }
-
-        function findProductSalesGroup(records, productSalesGroupID) {
-            const requestedID = String(productSalesGroupID || "").trim();
-
-            return records.find(function (item) {
-                return String(
-                    item.productSalesGroupID !== undefined
-                        ? item.productSalesGroupID
-                        : item.lookupKey
-                ).trim() === requestedID;
             });
         }
 
@@ -533,40 +444,6 @@
             }) || null;
         }
 
-        function findProductGroupCheckout(
-            records,
-            galleryKey,
-            productGroupID,
-            finishGroupID
-        ) {
-            if (!Array.isArray(records)) return null;
-
-            const requestedID = String(productGroupID || "").trim();
-            const requestedFinishID = String(finishGroupID || "").trim();
-
-            return records.find(function (item) {
-                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
-                    String(item.productGroupID || "").trim() === requestedID &&
-                    String(item.finishGroupID || "").trim() === requestedFinishID &&
-                    Boolean(String(item.checkoutURL || "").trim());
-            }) || null;
-        }
-
-        function findProductSalesGroupCheckout(
-            records,
-            galleryKey,
-            productSalesGroupID
-        ) {
-            if (!Array.isArray(records)) return null;
-
-            const requestedID = String(productSalesGroupID || "").trim();
-
-            return records.find(function (item) {
-                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
-                    String(item.productSalesGroupID || "").trim() === requestedID;
-            }) || null;
-        }
-
         function setEnhancedSmsLayout(isEnhanced) {
             document.getElementById("openingMessage").hidden = isEnhanced;
             document.getElementById("smsDescription").hidden = isEnhanced;
@@ -577,12 +454,10 @@
             const enhancedContent = document.getElementById("enhancedContent");
             const matchedDetails = document.getElementById("matchedDetails");
             const designName = document.getElementById("designName");
-            const finishName = document.getElementById("finishName");
             const artworkImage = document.getElementById("artworkImage");
             const artistStatement = document.getElementById("artistStatement");
             const smsSection = document.getElementById("smsSection");
             const retailPrice = document.getElementById("retailPrice");
-            const sizePriceList = document.getElementById("sizePriceList");
             const purchaseButton = document.getElementById("purchaseButton");
             const galleryLogo = document.getElementById("galleryLogo");
             const galleryName = document.getElementById("galleryName");
@@ -592,12 +467,6 @@
 
             designName.textContent = sculpture.displayName || sculpture.lookupKey ||
                 "Lyman Whitaker Wind Sculpture";
-
-            const isProductGroup = Array.isArray(sculpture.sizes);
-            const finishDisplayName = String(sculpture.finishName || "").trim();
-            finishName.textContent = finishDisplayName;
-            finishName.hidden = !isProductGroup || !finishDisplayName;
-
             artistStatement.textContent = sculpture.artistStatement || "";
 
             const promoVideoURL = normalizeWebsiteURL(sculpture.promoVideoURL);
@@ -617,72 +486,16 @@
 
             smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
 
-            sizePriceList.replaceChildren();
-            sizePriceList.hidden = true;
-
-            if (isProductGroup) {
-                retailPrice.hidden = true;
-                retailPrice.textContent = "";
-
-                const orderedSizes = sculpture.sizes.slice().sort(function (left, right) {
-                    const leftOrder = Number(left.displayOrder);
-                    const rightOrder = Number(right.displayOrder);
-
-                    if (Number.isFinite(leftOrder) && Number.isFinite(rightOrder)) {
-                        if (leftOrder !== rightOrder) return leftOrder - rightOrder;
-                    } else if (Number.isFinite(leftOrder)) {
-                        return -1;
-                    } else if (Number.isFinite(rightOrder)) {
-                        return 1;
-                    }
-
-                    return String(left.sizeDescription || "").localeCompare(
-                        String(right.sizeDescription || "")
-                    );
-                });
-
-                orderedSizes.forEach(function (size) {
-                    const sizeDescription = String(size.sizeDescription || "").trim();
-                    const formattedSizePrice = formatPrice(size.retailPrice);
-
-                    if (!sizeDescription || !formattedSizePrice) return;
-
-                    const row = document.createElement("div");
-                    row.className = "size-price-row";
-
-                    const description = document.createElement("span");
-                    description.className = "size-price-description";
-                    description.textContent = sizeDescription;
-
-                    const amount = document.createElement("span");
-                    amount.className = "size-price-amount";
-                    amount.textContent = formattedSizePrice;
-
-                    row.appendChild(description);
-                    row.appendChild(amount);
-                    sizePriceList.appendChild(row);
-                });
-
-                sizePriceList.hidden = !sizePriceList.children.length;
-            } else {
-                const formattedPrice = formatPrice(sculpture.retailPrice);
-                retailPrice.hidden = !formattedPrice;
-                retailPrice.textContent = formattedPrice;
-            }
+            const formattedPrice = formatPrice(sculpture.retailPrice);
+            retailPrice.hidden = !formattedPrice;
+            if (formattedPrice) retailPrice.textContent = formattedPrice;
 
             const checkoutURL = checkoutInfo
                 ? normalizeWebsiteURL(checkoutInfo.checkoutURL)
                 : "";
             purchaseButton.hidden = !checkoutURL;
-            purchaseButton.textContent = isProductGroup
-                ? "Purchase This Design"
-                : "Purchase This Sculpture";
-
-            if (checkoutURL) {
-                purchaseButton.href = checkoutURL;
-            } else {
-                purchaseButton.removeAttribute("href");
-            }
+            if (checkoutURL) purchaseButton.href = checkoutURL;
+            else purchaseButton.removeAttribute("href");
 
             if (sculpture.image) {
                 const finalImageURL = getAssetImageURL(sculpture.image);
@@ -775,7 +588,7 @@
 
                 if (!sculpture || !galleryInfo) {
                     setEnhancedSmsLayout(false);
-                    return false;
+                    return null;
                 }
 
                 const checkoutInfo = findCheckout(
@@ -783,383 +596,38 @@
                 );
                 populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
                 setEnhancedSmsLayout(true);
-                return true;
+                return sculpture;
             } catch (error) {
-                console.error("Enhanced QR page data could not be loaded:", error);
-                setEnhancedSmsLayout(false);
-                return false;
-            }
-        }
-
-        async function loadOptionalProductSalesGroupCheckoutData() {
-            try {
-                const response = await fetch(
-                    PRODUCT_SALES_GROUP_CHECKOUT_DATA_URL,
-                    { cache: "no-cache" }
-                );
-                if (!response.ok) return [];
-                const data = await response.json();
-                return Array.isArray(data) ? data : [];
-            } catch (error) {
-                console.warn(
-                    "Product-sales-group checkout JSON could not be loaded:",
-                    error
-                );
-                return [];
-            }
-        }
-
-        async function loadProductGroupContent(
-            galleryKey,
-            productGroupID,
-            finishGroupID
-        ) {
-            try {
-                const responses = await Promise.all([
-                    fetch(PRODUCT_GROUP_DATA_URL, { cache: "no-cache" }),
-                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
-                ]);
-
-                if (!responses[0].ok || !responses[1].ok) {
-                    throw new Error(
-                        "Required product-group or gallery data could not be loaded."
-                    );
-                }
-
-                const data = await Promise.all([
-                    responses[0].json(),
-                    responses[1].json()
-                ]);
-
-                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
-                    throw new Error("Required JSON data was not an array.");
-                }
-
-                const productGroup = findProductGroup(
-                    data[0],
-                    productGroupID,
-                    finishGroupID
-                );
-                const galleryInfo = findGallery(data[1], galleryKey);
-
-                if (galleryInfo) {
-                    document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
-                }
-
-                if (!productGroup || !galleryInfo) {
-                    setEnhancedSmsLayout(false);
-                    return null;
-                }
-
-                const checkoutInfo = findProductGroupCheckout(
-                    await loadOptionalCheckoutData(),
-                    galleryKey,
-                    productGroupID,
-                    finishGroupID
-                );
-
-                populateEnhancedPage(
-                    productGroup,
-                    galleryInfo,
-                    checkoutInfo
-                );
-
-                setEnhancedSmsLayout(true);
-                return productGroup;
-            } catch (error) {
-                console.error("Product-group QR data could not be loaded:", error);
+                console.error("Enhanced NFC page data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
                 return null;
             }
         }
 
-        async function loadProductSalesGroupContent(
-            galleryKey,
-            productSalesGroupID
-        ) {
-            try {
-                const responses = await Promise.all([
-                    fetch(PRODUCT_SALES_GROUP_DATA_URL, { cache: "no-cache" }),
-                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
-                ]);
-
-                if (!responses[0].ok || !responses[1].ok) {
-                    throw new Error(
-                        "Required product-sales-group or gallery data could not be loaded."
-                    );
-                }
-
-                const data = await Promise.all([
-                    responses[0].json(),
-                    responses[1].json()
-                ]);
-
-                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
-                    throw new Error("Required JSON data was not an array.");
-                }
-
-                const productSalesGroup = findProductSalesGroup(
-                    data[0],
-                    productSalesGroupID
-                );
-                const galleryInfo = findGallery(data[1], galleryKey);
-
-                if (galleryInfo) {
-                    document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
-                }
-
-                if (!productSalesGroup || !galleryInfo) {
-                    setEnhancedSmsLayout(false);
-                    return null;
-                }
-
-                const checkoutInfo = findProductSalesGroupCheckout(
-                    await loadOptionalProductSalesGroupCheckoutData(),
-                    galleryKey,
-                    productSalesGroupID
-                );
-
-                populateEnhancedPage(
-                    productSalesGroup,
-                    galleryInfo,
-                    checkoutInfo
-                );
-
-                setEnhancedSmsLayout(true);
-
-                return {
-                    productSalesGroup: productSalesGroup,
-                    checkoutInfo: checkoutInfo
-                };
-            } catch (error) {
-                console.error(
-                    "Product-sales-group QR data could not be loaded:",
-                    error
-                );
-                setEnhancedSmsLayout(false);
-                return null;
-            }
-        }
-
-       const SCAN_ALERT_STORAGE_PREFIX =
-    "whitaker-scan-alert:";
-
-const SCAN_ALERT_SUPPRESSION_MS =
-    30 * 24 * 60 * 60 * 1000;
-
-function createScanAlertStorageKey(
-    gallery,
-    design,
-    scanMethod
-) {
-    /*
-     * This is not a visitor identifier.
-     *
-     * It identifies only this gallery, sculpture, and scan method
-     * within this browser.
-     */
-    const keyValue = [
-        scanMethod,
-        String(gallery || "")
-            .trim()
-            .toLowerCase(),
-        String(design || "")
-            .trim()
-            .toLowerCase()
-    ].join("|");
-
-    return (
-        SCAN_ALERT_STORAGE_PREFIX +
-        encodeURIComponent(keyValue)
-    );
-}
-
-function removeExpiredScanAlertMarkers() {
-    const now = Date.now();
-
-    try {
-        /*
-         * Work backward because entries may be removed
-         * while iterating.
-         */
-        for (
-            let index = localStorage.length - 1;
-            index >= 0;
-            index--
-        ) {
-            const key =
-                localStorage.key(index);
-
-            if (
-                !key ||
-                key.indexOf(
-                    SCAN_ALERT_STORAGE_PREFIX
-                ) !== 0
-            ) {
-                continue;
-            }
-
-            const timestamp =
-                Number(
-                    localStorage.getItem(key)
-                );
-
-            const isInvalid =
-                !Number.isFinite(timestamp);
-
-            const isExpired =
-                Number.isFinite(timestamp) &&
-                now - timestamp >=
-                    SCAN_ALERT_SUPPRESSION_MS;
-
+        function logAnonymousScan(gallery, design, osTag) {
             /*
-             * Also remove implausible future timestamps in case
-             * the device clock was changed.
+             * No VisitorID, localStorage value, full user-agent, phone number,
+             * or customer identifier is created or transmitted here.
              */
-            const isFuture =
-                Number.isFinite(timestamp) &&
-                timestamp > now + 300000;
-
-            if (
-                isInvalid ||
-                isExpired ||
-                isFuture
-            ) {
-                localStorage.removeItem(key);
-            }
-        }
-    } catch (error) {
-        /*
-         * Some privacy modes disable localStorage.
-         * The page and scan logging will still work.
-         */
-    }
-}
-
-function logAnonymousScanOnce(
-    gallery,
-    design,
-    osTag,
-    scanMethod
-) {
-    const now = Date.now();
-
-    const storageKey =
-        createScanAlertStorageKey(
-            gallery,
-            design,
-            scanMethod
-        );
-
-    let markerWasCreated = false;
-
-    removeExpiredScanAlertMarkers();
-
-    try {
-        const previousTimestamp =
-            Number(
-                localStorage.getItem(
-                    storageKey
-                )
-            );
-
-        if (
-            Number.isFinite(
-                previousTimestamp
-            ) &&
-            previousTimestamp <= now &&
-            now - previousTimestamp <
-                SCAN_ALERT_SUPPRESSION_MS
-        ) {
-            /*
-             * This gallery/sculpture/method already generated
-             * an alert in this browser during the last 30 days.
-             *
-             * The page still loads normally.
-             */
-            return;
-        }
-
-        /*
-         * Set the marker before sending so two nearly simultaneous
-         * page loads are less likely to create duplicate alerts.
-         */
-        localStorage.setItem(
-            storageKey,
-            String(now)
-        );
-
-        markerWasCreated = true;
-
-    } catch (error) {
-        /*
-         * If browser storage is unavailable, continue with normal
-         * anonymous logging. No page functionality is interrupted.
-         */
-    }
-
-    fetch(
-        LOG_ENDPOINT,
-        {
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                    "application/json"
-            },
-
-            keepalive: true,
-
-            body: JSON.stringify({
-                gallery: gallery,
-                design: design,
-                os: osTag,
-
-                nfc:
-                    scanMethod === "nfc",
-
-                qr:
-                    scanMethod === "qr"
-            })
-        }
-    )
-    .then(function (response) {
-        if (!response.ok) {
-            throw new Error(
-                "Scan logging returned HTTP " +
-                response.status
-            );
-        }
-    })
-    .catch(function (error) {
-        /*
-         * If the request was unsuccessful, remove the new marker.
-         * The next visit can then try sending the alert again.
-         */
-        if (markerWasCreated) {
-            try {
-                if (
-                    localStorage.getItem(
-                        storageKey
-                    ) === String(now)
-                ) {
-                    localStorage.removeItem(
-                        storageKey
-                    );
+            fetch(LOG_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    gallery: gallery,
+                    design: design,
+                    os: osTag,
+                    nfc: true,
+                    qr: false
+                })
+            }).then(function (response) {
+                if (!response.ok) {
+                    console.error("Anonymous scan logging failed:", response.status);
                 }
-            } catch (storageError) {
-                // Storage may be unavailable.
-            }
+            }).catch(function (error) {
+                console.error("Anonymous scan logging request failed:", error);
+            });
         }
-
-        console.error(
-            "Anonymous scan logging failed:",
-            error
-        );
-    });
-}
 
         function configureSmsConfirmation(finalSmsLink) {
             const smsButton = document.getElementById("smsButton");
@@ -1190,181 +658,8 @@ function logAnonymousScanOnce(
 
         async function initializePage() {
             const urlParams = new URLSearchParams(window.location.search);
-            const scanAlertEnabled = urlParams.get("a") !== "0";
-
-            if (!scanAlertEnabled) {
-                document.getElementById("analyticsNotice").hidden = true;
-            }
-
             const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
-            const galleryKey = normalizeGalleryKey(gallery);
-            const productSalesGroupID = cleanParameter(
-                urlParams.get("psg"),
-                "",
-                20
-            );
-            const productGroupID = cleanParameter(
-                urlParams.get("pg"),
-                "",
-                20
-            );
-            const finishGroupID = cleanParameter(
-                urlParams.get("f"),
-                "",
-                20
-            );
-            const hasGroupParameter =
-                productGroupID !== "" || finishGroupID !== "";
-            const hasProductGroup =
-                /^\d+$/.test(productGroupID) &&
-                /^\d+$/.test(finishGroupID);
-            const hasProductSalesGroupParameter =
-                productSalesGroupID !== "";
-            const hasProductSalesGroup =
-                /^\d+$/.test(productSalesGroupID);
-            const osTag = getOSTag();
-
-            if (hasProductSalesGroupParameter && hasGroupParameter) {
-                const statusMessage = document.getElementById("statusMessage");
-                statusMessage.textContent =
-                    "This link contains conflicting sculpture-group options. " +
-                    "Please use the gallery link below or try scanning again.";
-                statusMessage.hidden = false;
-                return;
-            }
-
-            if (hasProductSalesGroupParameter && !hasProductSalesGroup) {
-                const statusMessage = document.getElementById("statusMessage");
-                statusMessage.textContent =
-                    "This product grouping could not be identified. Please use " +
-                    "the gallery link below or try scanning again.";
-                statusMessage.hidden = false;
-                return;
-            }
-
-            if (hasGroupParameter && !hasProductGroup) {
-                const statusMessage = document.getElementById("statusMessage");
-                statusMessage.textContent =
-                    "This price-list link is missing a valid design or finish. " +
-                    "Please use the gallery link below or try scanning again.";
-                statusMessage.hidden = false;
-                return;
-            }
-
-            /*
-             * Product-sales-group mode represents one complete, saleable
-             * arrangement, so it behaves like a standard d= sculpture while
-             * retaining its separate ID namespace.
-             */
-            if (hasProductSalesGroup) {
-                const salesGroupResult = await loadProductSalesGroupContent(
-                    galleryKey,
-                    productSalesGroupID
-                );
-
-                if (!salesGroupResult) {
-                    const statusMessage = document.getElementById("statusMessage");
-                    statusMessage.textContent =
-                        "This product grouping could not be found. Please use " +
-                        "the gallery link below or try again later.";
-                    statusMessage.hidden = false;
-                    return;
-                }
-
-                const productSalesGroup =
-                    salesGroupResult.productSalesGroup;
-                const checkoutInfo = salesGroupResult.checkoutInfo;
-                const salesGroupDisplayName =
-                    String(productSalesGroup.displayName || "").trim() ||
-                    "Product Sales Group " + productSalesGroupID;
-                const smsLookupValue =
-                    String(
-                        checkoutInfo && checkoutInfo.smsMessage
-                            ? checkoutInfo.smsMessage
-                            : productSalesGroup.abbreviation ||
-                              salesGroupDisplayName
-                    ).trim();
-                const smsDesign = ensureMessageInstruction(smsLookupValue);
-                const messageBody =
-                    "-" + gallery + "- " + smsDesign + " " + osTag;
-
-                configureSmsConfirmation(
-                    createSmsLink("+14352362244", messageBody)
-                );
-
-                if (scanAlertEnabled) {
-                    logAnonymousScanOnce(
-                        gallery,
-                        salesGroupDisplayName,
-                        osTag,
-                        "nfc"
-                    );
-                }
-
-                return;
-            }
-
-            /*
-             * Product-group mode is used by price-list QR codes.
-             * Existing d= links continue through the standard branch below.
-             */
-            if (hasProductGroup) {
-                /*
-                 * Product-group pages represent multiple sizes, so the SMS
-                 * automation cannot unambiguously identify one sculpture.
-                 * Keep SMS available only on standard d= pages.
-                 */
-                document.getElementById("smsSection").hidden = true;
-
-                const productGroup = await loadProductGroupContent(
-                    galleryKey,
-                    productGroupID,
-                    finishGroupID
-                );
-
-                /* populateEnhancedPage applies the gallery's normal SMS rule;
-                   product-group mode always overrides it. */
-                document.getElementById("smsSection").hidden = true;
-
-                if (!productGroup) {
-                    const statusMessage = document.getElementById("statusMessage");
-                    statusMessage.textContent =
-                        "This sculpture group could not be found. Please use the " +
-                        "gallery link below or try again later.";
-                    statusMessage.hidden = false;
-                    return;
-                }
-
-                const groupDisplayName =
-                    String(productGroup.displayName || "").trim() ||
-                    "Product Group " + productGroupID;
-                const finishDisplayName =
-                    String(productGroup.finishName || "").trim();
-                const groupAndFinishName = finishDisplayName
-                    ? groupDisplayName + " " + finishDisplayName
-                    : groupDisplayName;
-
-                if (scanAlertEnabled) {
-                    logAnonymousScanOnce(
-                        gallery,
-                        groupAndFinishName,
-                        osTag,
-                        "nfc"
-                    );
-                }
-
-                return;
-            }
-
-            /*
-             * Standard sculpture mode. This preserves the behavior of all
-             * existing QR codes that use d= with a design or order-record ID.
-             */
-            const rawDesign = cleanParameter(
-                urlParams.get("d"),
-                "Artist",
-                200
-            );
+            const rawDesign = cleanParameter(urlParams.get("d"), "Artist", 200);
             const cleanedDisplayDesign = removeMessageInstruction(rawDesign);
             const displayDesign = cleanedDisplayDesign
                 ? formatDesignName(cleanedDisplayDesign)
@@ -1374,26 +669,23 @@ function logAnonymousScanOnce(
                 "Text us for automated, interactive information about the " +
                 displayDesign + ".";
 
-            const smsDesign = ensureMessageInstruction(rawDesign);
-            const messageBody =
-    		"*" + gallery + "* " + smsDesign + " " + osTag;
+            const osTag = getOSTag();
+            const messageBody = "*" + gallery + "* " + rawDesign + " " + osTag;
             const finalSmsLink = createSmsLink("+14352362244", messageBody);
 
             configureSmsConfirmation(finalSmsLink);
 
-            if (scanAlertEnabled) {
-                logAnonymousScanOnce(
-                    gallery,
-                    cleanedDisplayDesign,
-                    osTag,
-                    "nfc"
-                );
-            }
-
-            await loadEnhancedContent(
-                galleryKey,
+            const matchedSculpture = await loadEnhancedContent(
+                normalizeGalleryKey(gallery),
                 normalizeSculptureKey(cleanedDisplayDesign)
             );
+
+            const loggedDesignName =
+                matchedSculpture && matchedSculpture.displayName
+                    ? String(matchedSculpture.displayName).trim()
+                    : cleanedDisplayDesign;
+
+            logAnonymousScan(gallery, loggedDesignName, osTag);
 
             /* Messages is never opened automatically. */
         }

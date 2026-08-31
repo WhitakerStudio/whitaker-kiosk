@@ -775,7 +775,7 @@
 
                 if (!sculpture || !galleryInfo) {
                     setEnhancedSmsLayout(false);
-                    return false;
+                    return null;
                 }
 
                 const checkoutInfo = findCheckout(
@@ -783,11 +783,11 @@
                 );
                 populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
                 setEnhancedSmsLayout(true);
-                return true;
+                return sculpture;
             } catch (error) {
                 console.error("Enhanced QR page data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
-                return false;
+                return null;
             }
         }
 
@@ -1380,19 +1380,24 @@ function logAnonymousScanOnce(
 
             configureSmsConfirmation(finalSmsLink);
 
+            const matchedSculpture = await loadEnhancedContent(
+                galleryKey,
+                normalizeSculptureKey(cleanedDisplayDesign)
+            );
+
+            const loggedDesignName =
+                matchedSculpture && matchedSculpture.displayName
+                    ? String(matchedSculpture.displayName).trim()
+                    : cleanedDisplayDesign;
+
             if (scanAlertEnabled) {
                 logAnonymousScanOnce(
                     gallery,
-                    cleanedDisplayDesign,
+                    loggedDesignName,
                     osTag,
                     "qr"
                 );
             }
-
-            await loadEnhancedContent(
-                galleryKey,
-                normalizeSculptureKey(cleanedDisplayDesign)
-            );
 
             /* Messages is never opened automatically. */
         }
