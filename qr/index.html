@@ -121,6 +121,59 @@
             text-align: right;
         }
 
+        button.size-price-row {
+            width: 100%;
+            border-top: 0;
+            border-right: 0;
+            border-left: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .iteration-price-entry {
+            border-bottom: 1px solid #d8d8d8;
+        }
+
+        .iteration-price-entry > .size-price-row {
+            border-bottom: 0;
+        }
+
+        .iteration-size-trigger:hover,
+        .iteration-size-trigger:focus-visible {
+            background: #f0f5fb;
+            outline: 2px solid #2459a6;
+            outline-offset: -2px;
+        }
+
+        .iteration-hint {
+            display: block;
+            margin-top: 5px;
+            color: #2459a6;
+            font-size: 15px;
+            line-height: 1.25;
+        }
+
+        .iteration-detail {
+            padding: 12px 18px 28px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .iteration-detail .artwork-image {
+            width: 100%;
+            max-width: 520px;
+            max-height: 480px;
+            margin-bottom: 22px;
+        }
+
+        .iteration-detail .artist-statement {
+            margin-bottom: 0;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
         .purchase-button {
             display: inline-block;
             margin: 0 auto 35px;
@@ -381,7 +434,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260831-2";
+        const ASSET_VERSION = "?v=20260901-1";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -484,6 +537,54 @@
             return fileName
                 ? QR_ASSET_ROOT + "images/" + encodeURIComponent(fileName)
                 : "";
+        }
+
+        function renderArtistStatement(container, statement, videoURL) {
+            container.replaceChildren();
+
+            const statementText = String(statement || "").trim();
+            if (statementText) {
+                container.appendChild(document.createTextNode(statementText));
+            }
+
+            const normalizedVideoURL = normalizeWebsiteURL(videoURL);
+            if (normalizedVideoURL) {
+                if (statementText) {
+                    container.appendChild(document.createTextNode(" "));
+                }
+
+                container.appendChild(
+                    document.createTextNode("A short video of the piece is available ")
+                );
+
+                const promoLink = document.createElement("a");
+                promoLink.href = normalizedVideoURL;
+                promoLink.textContent = "here";
+                promoLink.target = "_blank";
+                promoLink.rel = "noopener noreferrer";
+                container.appendChild(promoLink);
+                container.appendChild(document.createTextNode("."));
+            }
+        }
+
+        function renderArtworkImage(imageElement, imageValue, altText) {
+            const finalImageURL = getAssetImageURL(imageValue);
+            imageElement.hidden = true;
+
+            if (!finalImageURL) {
+                imageElement.removeAttribute("src");
+                return;
+            }
+
+            imageElement.alt = altText;
+            imageElement.onload = function () {
+                imageElement.hidden = false;
+            };
+            imageElement.onerror = function () {
+                console.error("Sculpture image failed to load:", finalImageURL);
+                imageElement.hidden = true;
+            };
+            imageElement.src = finalImageURL;
         }
 
         function findSculpture(records, key) {
@@ -598,22 +699,11 @@
             finishName.textContent = finishDisplayName;
             finishName.hidden = !isProductGroup || !finishDisplayName;
 
-            artistStatement.textContent = sculpture.artistStatement || "";
-
-            const promoVideoURL = normalizeWebsiteURL(sculpture.promoVideoURL);
-            if (promoVideoURL) {
-                if (artistStatement.textContent) {
-                    artistStatement.appendChild(document.createTextNode(" "));
-                }
-                artistStatement.appendChild(
-                    document.createTextNode("A short video of the piece is available ")
-                );
-                const promoLink = document.createElement("a");
-                promoLink.href = promoVideoURL;
-                promoLink.textContent = "here";
-                artistStatement.appendChild(promoLink);
-                artistStatement.appendChild(document.createTextNode("."));
-            }
+            renderArtistStatement(
+                artistStatement,
+                sculpture.artistStatement,
+                sculpture.promoVideoURL
+            );
 
             smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
 
@@ -625,6 +715,36 @@
                 retailPrice.textContent = "";
 
                 const orderedSizes = sculpture.sizes.slice().sort(function (left, right) {
+                    const leftIterationID = String(
+                        left.iterationGroupID || ""
+                    ).trim();
+                    const rightIterationID = String(
+                        right.iterationGroupID || ""
+                    ).trim();
+
+                    if (Boolean(leftIterationID) !== Boolean(rightIterationID)) {
+                        return leftIterationID ? 1 : -1;
+                    }
+
+                    if (leftIterationID && rightIterationID) {
+                        const leftNumericID = Number(leftIterationID);
+                        const rightNumericID = Number(rightIterationID);
+
+                        if (
+                            Number.isFinite(leftNumericID) &&
+                            Number.isFinite(rightNumericID) &&
+                            leftNumericID !== rightNumericID
+                        ) {
+                            return leftNumericID - rightNumericID;
+                        }
+
+                        const iterationComparison = String(
+                            left.iterationName || ""
+                        ).localeCompare(String(right.iterationName || ""));
+
+                        if (iterationComparison !== 0) return iterationComparison;
+                    }
+
                     const leftOrder = Number(left.displayOrder);
                     const rightOrder = Number(right.displayOrder);
 
@@ -651,12 +771,33 @@
 
                     if (!sizeDescription || !formattedSizePrice) return;
 
-                    const row = document.createElement("div");
+                    const isIteration = Boolean(
+                        String(size.iterationGroupID || "").trim() ||
+                        String(size.iterationName || "").trim()
+                    );
+
+                    const row = document.createElement(
+                        isIteration ? "button" : "div"
+                    );
                     row.className = "size-price-row";
+
+                    if (isIteration) {
+                        row.type = "button";
+                        row.classList.add("iteration-size-trigger");
+                        row.setAttribute("aria-expanded", "false");
+                    }
 
                     const description = document.createElement("span");
                     description.className = "size-price-description";
                     description.textContent = sizeDescription;
+
+                    let iterationHint = null;
+                    if (isIteration) {
+                        iterationHint = document.createElement("span");
+                        iterationHint.className = "iteration-hint";
+                        iterationHint.textContent = "View image and details";
+                        description.appendChild(iterationHint);
+                    }
 
                     const amount = document.createElement("span");
                     amount.className = "size-price-amount";
@@ -664,7 +805,73 @@
 
                     row.appendChild(description);
                     row.appendChild(amount);
-                    sizePriceList.appendChild(row);
+
+                    if (!isIteration) {
+                        sizePriceList.appendChild(row);
+                        return;
+                    }
+
+                    const entry = document.createElement("div");
+                    entry.className = "iteration-price-entry";
+
+                    const iterationDetail = document.createElement("div");
+                    iterationDetail.className = "iteration-detail";
+                    iterationDetail.hidden = true;
+
+                    const iterationImage = document.createElement("img");
+                    iterationImage.className = "artwork-image";
+                    iterationImage.hidden = true;
+
+                    const iterationStatement = document.createElement("p");
+                    iterationStatement.className = "artist-statement";
+
+                    renderArtworkImage(
+                        iterationImage,
+                        size.image,
+                        sizeDescription + " in motion"
+                    );
+                    renderArtistStatement(
+                        iterationStatement,
+                        size.artistStatement,
+                        size.promoVideoURL
+                    );
+
+                    iterationDetail.appendChild(iterationImage);
+                    iterationDetail.appendChild(iterationStatement);
+                    entry.appendChild(row);
+                    entry.appendChild(iterationDetail);
+                    sizePriceList.appendChild(entry);
+
+                    row.addEventListener("click", function () {
+                        const shouldOpen = iterationDetail.hidden;
+
+                        sizePriceList.querySelectorAll(".iteration-detail").forEach(
+                            function (openDetail) {
+                                if (openDetail === iterationDetail) return;
+                                openDetail.hidden = true;
+
+                                const otherTrigger = openDetail.previousElementSibling;
+                                if (otherTrigger) {
+                                    otherTrigger.setAttribute("aria-expanded", "false");
+                                    const otherHint = otherTrigger.querySelector(
+                                        ".iteration-hint"
+                                    );
+                                    if (otherHint) {
+                                        otherHint.textContent = "View image and details";
+                                    }
+                                }
+                            }
+                        );
+
+                        iterationDetail.hidden = !shouldOpen;
+                        row.setAttribute(
+                            "aria-expanded",
+                            shouldOpen ? "true" : "false"
+                        );
+                        iterationHint.textContent = shouldOpen
+                            ? "Hide image and details"
+                            : "View image and details";
+                    });
                 });
 
                 sizePriceList.hidden = !sizePriceList.children.length;
@@ -688,19 +895,12 @@
                 purchaseButton.removeAttribute("href");
             }
 
-            if (sculpture.image) {
-                const finalImageURL = getAssetImageURL(sculpture.image);
-                artworkImage.alt = (sculpture.displayName ||
-                    "Lyman Whitaker wind sculpture") + " in motion";
-                artworkImage.onload = function () { artworkImage.hidden = false; };
-                artworkImage.onerror = function () {
-                    console.error("Sculpture image failed to load:", finalImageURL);
-                    artworkImage.hidden = true;
-                };
-                artworkImage.src = finalImageURL;
-            } else {
-                artworkImage.hidden = true;
-            }
+            renderArtworkImage(
+                artworkImage,
+                sculpture.image,
+                (sculpture.displayName || "Lyman Whitaker wind sculpture") +
+                    " in motion"
+            );
 
             const galleryDisplayName = galleryInfo.name || "Gallery Information";
             galleryName.textContent = galleryDisplayName;
