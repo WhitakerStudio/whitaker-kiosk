@@ -381,7 +381,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260831-1";
+        const ASSET_VERSION = "?v=20260831-2";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -642,7 +642,11 @@
                 });
 
                 orderedSizes.forEach(function (size) {
-                    const sizeDescription = String(size.sizeDescription || "").trim();
+                    const sizeDescription = String(
+                        size.displayLabel ||
+                        size.sizeDescription ||
+                        ""
+                    ).trim();
                     const formattedSizePrice = formatPrice(size.retailPrice);
 
                     if (!sizeDescription || !formattedSizePrice) return;
