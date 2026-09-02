@@ -664,6 +664,11 @@
                 String(value || "").trim() === "1";
         }
 
+        function shouldHideSms(galleryInfo) {
+            return document.documentElement.dataset.suppressSms === "true" ||
+                isTruthyFlag(galleryInfo && galleryInfo.hideCustomerSMS);
+        }
+
         function getAssetImageURL(value) {
             const fileName = String(value || "")
                 .replace(/\\/g, "/").split("/").pop();
@@ -893,7 +898,7 @@
                 sculpture.promoVideoURL
             );
 
-            smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
+            smsSection.hidden = shouldHideSms(galleryInfo);
 
             sizePriceList.replaceChildren();
             sizePriceList.hidden = true;
@@ -1162,7 +1167,7 @@
 
                 if (galleryInfo) {
                     document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
+                        shouldHideSms(galleryInfo);
                 }
 
                 if (!sculpture || !galleryInfo) {
@@ -1236,7 +1241,7 @@
 
                 if (galleryInfo) {
                     document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
+                        shouldHideSms(galleryInfo);
                 }
 
                 if (!productGroup || !galleryInfo) {
@@ -1299,7 +1304,7 @@
 
                 if (galleryInfo) {
                     document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
+                        shouldHideSms(galleryInfo);
                 }
 
                 if (!productSalesGroup || !galleryInfo) {
@@ -1584,8 +1589,17 @@ function logAnonymousScanOnce(
             const urlParams = new URLSearchParams(window.location.search);
             const scanAlertEnabled = urlParams.get("a") !== "0";
 
+            /*
+             * a=0 identifies a non-tracked presentation. Sending an SMS
+             * necessarily identifies the sender's phone number, so suppress
+             * the complete SMS option for these links as well.
+             */
+            document.documentElement.dataset.suppressSms =
+                scanAlertEnabled ? "false" : "true";
+
             if (!scanAlertEnabled) {
                 document.getElementById("analyticsNotice").hidden = true;
+                document.getElementById("smsSection").hidden = true;
             }
 
             const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
@@ -1680,9 +1694,11 @@ function logAnonymousScanOnce(
                 const messageBody =
                     "-" + gallery + "- " + smsDesign + " " + osTag;
 
-                configureSmsConfirmation(
-                    createSmsLink("+14352362244", messageBody)
-                );
+                if (scanAlertEnabled) {
+                    configureSmsConfirmation(
+                        createSmsLink("+14352362244", messageBody)
+                    );
+                }
 
                 if (scanAlertEnabled) {
                     logAnonymousScanOnce(
@@ -1770,7 +1786,9 @@ function logAnonymousScanOnce(
             const messageBody = "-" + gallery + "- " + smsDesign + " " + osTag;
             const finalSmsLink = createSmsLink("+14352362244", messageBody);
 
-            configureSmsConfirmation(finalSmsLink);
+            if (scanAlertEnabled) {
+                configureSmsConfirmation(finalSmsLink);
+            }
 
             const matchedSculpture = await loadEnhancedContent(
                 galleryKey,
