@@ -291,12 +291,10 @@
             Desktop and laptop presentation.
 
             Fine-pointer/hover detection avoids changing the established
-            phone and touch-tablet presentation. Images retain their natural
-            width so low-bandwidth GIFs are reduced when necessary but are
-            not enlarged beyond their native dimensions. Viewport-relative
-            height limits keep the primary artwork within the initial screen.
-            JavaScript limits this content column to 2.5 times the rendered
-            width of the primary artwork for visual balance.
+            phone and touch-tablet presentation. A consistent desktop content
+            width prevents narrow source GIFs from compressing the text and
+            gallery contact information. The primary artwork remains limited
+            to 480 pixels and is never wider than the content column.
         */
         @media (min-width: 769px) and (hover: hover) and (pointer: fine) {
             body {
@@ -304,7 +302,7 @@
             }
 
             .content {
-                max-width: var(--desktop-balanced-width, 760px);
+                max-width: 520px;
             }
 
             h1 {
@@ -336,7 +334,7 @@
 
             .artwork-image {
                 width: auto;
-                max-width: min(100%, 620px);
+                max-width: min(100%, 480px);
                 max-height: 48vh;
                 max-height: min(48dvh, 480px);
                 margin-bottom: clamp(14px, 2.5vh, 24px);
@@ -717,74 +715,19 @@
 
             if (!finalImageURL) {
                 imageElement.removeAttribute("src");
-                if (imageElement.id === "artworkImage") {
-                    updateDesktopContentWidth(imageElement);
-                }
                 return;
             }
 
             imageElement.alt = altText;
             imageElement.onload = function () {
                 imageElement.hidden = false;
-                if (imageElement.id === "artworkImage") {
-                    updateDesktopContentWidth(imageElement);
-                }
             };
             imageElement.onerror = function () {
                 console.error("Sculpture image failed to load:", finalImageURL);
                 imageElement.hidden = true;
-                if (imageElement.id === "artworkImage") {
-                    updateDesktopContentWidth(imageElement);
-                }
             };
             imageElement.src = finalImageURL;
         }
-
-        const desktopArtworkLayout = window.matchMedia(
-            "(min-width: 769px) and (hover: hover) and (pointer: fine)"
-        );
-
-        function updateDesktopContentWidth(imageElement) {
-            const content = document.querySelector(".content");
-            if (!content) return;
-
-            if (
-                !desktopArtworkLayout.matches ||
-                !imageElement ||
-                imageElement.hidden
-            ) {
-                content.style.removeProperty("--desktop-balanced-width");
-                return;
-            }
-
-            const renderedImageWidth = imageElement.getBoundingClientRect().width;
-            if (!Number.isFinite(renderedImageWidth) || renderedImageWidth <= 0) {
-                content.style.removeProperty("--desktop-balanced-width");
-                return;
-            }
-
-            const availableViewportWidth = Math.max(0, window.innerWidth - 56);
-            const balancedWidth = Math.min(
-                renderedImageWidth * 2.5,
-                760,
-                availableViewportWidth
-            );
-
-            content.style.setProperty(
-                "--desktop-balanced-width",
-                Math.round(balancedWidth) + "px"
-            );
-        }
-
-        let desktopBalanceResizeFrame = 0;
-        window.addEventListener("resize", function () {
-            window.cancelAnimationFrame(desktopBalanceResizeFrame);
-            desktopBalanceResizeFrame = window.requestAnimationFrame(function () {
-                updateDesktopContentWidth(
-                    document.getElementById("artworkImage")
-                );
-            });
-        });
 
         function findSculpture(records, key) {
             return records.find(function (item) {
