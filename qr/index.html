@@ -174,6 +174,12 @@
             line-height: 1.5;
         }
 
+        .iteration-purchase-button {
+            margin-top: 22px;
+            margin-bottom: 0;
+            font-size: 22px;
+        }
+
         .purchase-button {
             display: inline-block;
             margin: 0 auto 35px;
@@ -567,7 +573,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260901-1";
+        const ASSET_VERSION = "?v=20260902-1";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -842,8 +848,29 @@
                 return normalizeGalleryKey(item.galleryKey) === galleryKey &&
                     String(item.productGroupID || "").trim() === requestedID &&
                     String(item.finishGroupID || "").trim() === requestedFinishID &&
+                    !String(item.iterationGroupID || "").trim() &&
                     Boolean(String(item.checkoutURL || "").trim());
             }) || null;
+        }
+
+        function findProductGroupIterationCheckouts(
+            records,
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
+            if (!Array.isArray(records)) return [];
+
+            const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
+
+            return records.filter(function (item) {
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    String(item.productGroupID || "").trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID &&
+                    Boolean(String(item.iterationGroupID || "").trim()) &&
+                    Boolean(String(item.checkoutURL || "").trim());
+            });
         }
 
         function findProductSalesGroupCheckout(
@@ -867,7 +894,12 @@
             document.getElementById("smsFallbackInstruction").hidden = isEnhanced;
         }
 
-        function populateEnhancedPage(sculpture, galleryInfo, checkoutInfo) {
+        function populateEnhancedPage(
+            sculpture,
+            galleryInfo,
+            checkoutInfo,
+            iterationCheckouts
+        ) {
             const enhancedContent = document.getElementById("enhancedContent");
             const matchedDetails = document.getElementById("matchedDetails");
             const designName = document.getElementById("designName");
@@ -888,6 +920,21 @@
                 "Lyman Whitaker Wind Sculpture";
 
             const isProductGroup = Array.isArray(sculpture.sizes);
+            const iterationCheckoutMap = new Map();
+
+            (Array.isArray(iterationCheckouts) ? iterationCheckouts : []).forEach(
+                function (item) {
+                    const iterationID = String(
+                        item.iterationGroupID || ""
+                    ).trim();
+                    const iterationURL = normalizeWebsiteURL(item.checkoutURL);
+
+                    if (iterationID && iterationURL && !iterationCheckoutMap.has(iterationID)) {
+                        iterationCheckoutMap.set(iterationID, iterationURL);
+                    }
+                }
+            );
+
             const finishDisplayName = String(sculpture.finishName || "").trim();
             finishName.textContent = finishDisplayName;
             finishName.hidden = !isProductGroup || !finishDisplayName;
@@ -1031,6 +1078,30 @@
 
                     iterationDetail.appendChild(iterationImage);
                     iterationDetail.appendChild(iterationStatement);
+
+                    const iterationCheckoutURL = iterationCheckoutMap.get(
+                        String(size.iterationGroupID || "").trim()
+                    );
+
+                    if (iterationCheckoutURL) {
+                        const iterationPurchaseButton = document.createElement("a");
+                        const iterationDisplayName = [
+                            String(sculpture.displayName || "").trim(),
+                            String(size.iterationName || "").trim()
+                        ].filter(Boolean).join(" ");
+
+                        iterationPurchaseButton.className =
+                            "purchase-button iteration-purchase-button";
+                        iterationPurchaseButton.href = iterationCheckoutURL;
+                        iterationPurchaseButton.target = "_blank";
+                        iterationPurchaseButton.rel = "noopener noreferrer";
+                        iterationPurchaseButton.textContent = iterationDisplayName
+                            ? "Purchase " + iterationDisplayName
+                            : "Purchase This Iteration";
+
+                        iterationDetail.appendChild(iterationPurchaseButton);
+                    }
+
                     entry.appendChild(row);
                     entry.appendChild(iterationDetail);
                     sizePriceList.appendChild(entry);
@@ -1249,8 +1320,16 @@
                     return null;
                 }
 
+                const checkoutRecords = await loadOptionalCheckoutData();
                 const checkoutInfo = findProductGroupCheckout(
-                    await loadOptionalCheckoutData(),
+                    checkoutRecords,
+                    galleryKey,
+                    productGroupID,
+                    finishGroupID
+                );
+
+                const iterationCheckouts = findProductGroupIterationCheckouts(
+                    checkoutRecords,
                     galleryKey,
                     productGroupID,
                     finishGroupID
@@ -1259,7 +1338,8 @@
                 populateEnhancedPage(
                     productGroup,
                     galleryInfo,
-                    checkoutInfo
+                    checkoutInfo,
+                    iterationCheckouts
                 );
 
                 setEnhancedSmsLayout(true);
