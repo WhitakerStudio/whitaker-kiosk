@@ -289,6 +289,8 @@
             width so low-bandwidth GIFs are reduced when necessary but are
             not enlarged beyond their native dimensions. Viewport-relative
             height limits keep the primary artwork within the initial screen.
+            JavaScript limits this content column to 2.5 times the rendered
+            width of the primary artwork for visual balance.
         */
         @media (min-width: 769px) and (hover: hover) and (pointer: fine) {
             body {
@@ -296,7 +298,7 @@
             }
 
             .content {
-                max-width: 760px;
+                max-width: var(--desktop-balanced-width, 760px);
             }
 
             h1 {
@@ -704,19 +706,74 @@
 
             if (!finalImageURL) {
                 imageElement.removeAttribute("src");
+                if (imageElement.id === "artworkImage") {
+                    updateDesktopContentWidth(imageElement);
+                }
                 return;
             }
 
             imageElement.alt = altText;
             imageElement.onload = function () {
                 imageElement.hidden = false;
+                if (imageElement.id === "artworkImage") {
+                    updateDesktopContentWidth(imageElement);
+                }
             };
             imageElement.onerror = function () {
                 console.error("Sculpture image failed to load:", finalImageURL);
                 imageElement.hidden = true;
+                if (imageElement.id === "artworkImage") {
+                    updateDesktopContentWidth(imageElement);
+                }
             };
             imageElement.src = finalImageURL;
         }
+
+        const desktopArtworkLayout = window.matchMedia(
+            "(min-width: 769px) and (hover: hover) and (pointer: fine)"
+        );
+
+        function updateDesktopContentWidth(imageElement) {
+            const content = document.querySelector(".content");
+            if (!content) return;
+
+            if (
+                !desktopArtworkLayout.matches ||
+                !imageElement ||
+                imageElement.hidden
+            ) {
+                content.style.removeProperty("--desktop-balanced-width");
+                return;
+            }
+
+            const renderedImageWidth = imageElement.getBoundingClientRect().width;
+            if (!Number.isFinite(renderedImageWidth) || renderedImageWidth <= 0) {
+                content.style.removeProperty("--desktop-balanced-width");
+                return;
+            }
+
+            const availableViewportWidth = Math.max(0, window.innerWidth - 56);
+            const balancedWidth = Math.min(
+                renderedImageWidth * 2.5,
+                760,
+                availableViewportWidth
+            );
+
+            content.style.setProperty(
+                "--desktop-balanced-width",
+                Math.round(balancedWidth) + "px"
+            );
+        }
+
+        let desktopBalanceResizeFrame = 0;
+        window.addEventListener("resize", function () {
+            window.cancelAnimationFrame(desktopBalanceResizeFrame);
+            desktopBalanceResizeFrame = window.requestAnimationFrame(function () {
+                updateDesktopContentWidth(
+                    document.getElementById("artworkImage")
+                );
+            });
+        });
 
         function findSculpture(records, key) {
             return records.find(function (item) {
