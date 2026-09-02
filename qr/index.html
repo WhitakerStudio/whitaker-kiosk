@@ -281,6 +281,137 @@
             cursor: pointer;
         }
 
+        /*
+            Desktop and laptop presentation.
+
+            Fine-pointer/hover detection avoids changing the established
+            phone and touch-tablet presentation. Images retain their natural
+            width so low-bandwidth GIFs are reduced when necessary but are
+            not enlarged beyond their native dimensions. Viewport-relative
+            height limits keep the primary artwork within the initial screen.
+        */
+        @media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+            body {
+                padding: clamp(18px, 3vh, 34px) 28px 36px;
+            }
+
+            .content {
+                max-width: 760px;
+            }
+
+            h1 {
+                margin-bottom: clamp(12px, 2vh, 22px);
+                font-size: clamp(32px, 4.5vh, 43px);
+            }
+
+            h2 {
+                margin-bottom: 22px;
+                font-size: clamp(28px, 3.8vh, 36px);
+            }
+
+            h3 {
+                margin-bottom: 16px;
+                font-size: 27px;
+            }
+
+            p {
+                margin-bottom: clamp(14px, 2vh, 22px);
+                font-size: clamp(17px, 2.35vh, 21px);
+                line-height: 1.4;
+            }
+
+            .finish-name {
+                margin-top: -8px;
+                margin-bottom: clamp(12px, 2vh, 20px);
+                font-size: 21px;
+            }
+
+            .artwork-image {
+                width: auto;
+                max-width: min(100%, 620px);
+                max-height: 48vh;
+                max-height: min(48dvh, 480px);
+                margin-bottom: clamp(14px, 2.5vh, 24px);
+            }
+
+            .artist-statement {
+                margin-bottom: clamp(18px, 3vh, 30px);
+            }
+
+            .sms-section {
+                margin: 25px auto;
+                padding: 24px 22px;
+            }
+
+            .sms-section > p {
+                font-size: 19px;
+            }
+
+            .button {
+                padding: 16px 28px;
+                font-size: 24px;
+            }
+
+            .price {
+                margin-top: 24px;
+                margin-bottom: 18px;
+                font-size: 28px;
+            }
+
+            .size-price-list {
+                margin: 24px auto 20px;
+            }
+
+            .size-price-row {
+                padding: 11px 0;
+                font-size: 21px;
+            }
+
+            .iteration-detail .artwork-image {
+                width: auto;
+                max-width: 100%;
+                max-height: 40vh;
+                max-height: min(40dvh, 420px);
+            }
+
+            .purchase-button {
+                margin-bottom: 24px;
+                padding: 15px 26px;
+                font-size: 22px;
+            }
+
+            .gallery-section {
+                margin-top: 24px;
+                padding-top: 10px;
+            }
+
+            .gallery-logo {
+                max-height: 16vh;
+                max-height: min(16dvh, 125px);
+                margin-bottom: 16px;
+            }
+
+            .gallery-contact {
+                margin-bottom: 14px;
+                font-size: 20px;
+            }
+
+            .gallery-website-button {
+                margin: 6px auto 18px;
+                padding: 13px 22px;
+                font-size: 19px;
+            }
+
+            .selection-link {
+                margin-top: 28px;
+                font-size: 17px;
+            }
+
+            .analytics-notice {
+                margin-top: 24px;
+            }
+        }
+
         @media (max-width: 768px) {
             body { padding: 45px 20px 40px; }
             h1 { font-size: 42px; }
