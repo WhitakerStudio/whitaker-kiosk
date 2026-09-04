@@ -571,7 +571,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260902-1";
+        const ASSET_VERSION = "?v=20260904-1";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -1194,7 +1194,10 @@
                 );
                 populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
                 setEnhancedSmsLayout(true);
-                return sculpture;
+                return {
+                    sculpture: sculpture,
+                    galleryInfo: galleryInfo
+                };
             } catch (error) {
                 console.error("Enhanced QR page data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
@@ -1286,7 +1289,10 @@
                 );
 
                 setEnhancedSmsLayout(true);
-                return productGroup;
+                return {
+                    productGroup: productGroup,
+                    galleryInfo: galleryInfo
+                };
             } catch (error) {
                 console.error("Product-group QR data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
@@ -1351,7 +1357,8 @@
 
                 return {
                     productSalesGroup: productSalesGroup,
-                    checkoutInfo: checkoutInfo
+                    checkoutInfo: checkoutInfo,
+                    galleryInfo: galleryInfo
                 };
             } catch (error) {
                 console.error(
@@ -1703,6 +1710,12 @@ function logAnonymousScanOnce(
                 const productSalesGroup =
                     salesGroupResult.productSalesGroup;
                 const checkoutInfo = salesGroupResult.checkoutInfo;
+                const canonicalGallery = cleanParameter(
+                    salesGroupResult.galleryInfo &&
+                        salesGroupResult.galleryInfo.galleryID,
+                    gallery,
+                    30
+                );
                 const salesGroupDisplayName =
                     String(productSalesGroup.displayName || "").trim() ||
                     "Product Sales Group " + productSalesGroupID;
@@ -1715,7 +1728,7 @@ function logAnonymousScanOnce(
                     ).trim();
                 const smsDesign = ensureMessageInstruction(smsLookupValue);
                 const messageBody =
-                    "-" + gallery + "- " + smsDesign + " " + osTag;
+                    "-" + canonicalGallery + "- " + smsDesign + " " + osTag;
 
                 if (scanAlertEnabled) {
                     configureSmsConfirmation(
@@ -1725,7 +1738,7 @@ function logAnonymousScanOnce(
 
                 if (scanAlertEnabled) {
                     logAnonymousScanOnce(
-                        gallery,
+                        canonicalGallery,
                         salesGroupDisplayName,
                         osTag,
                         "qr"
@@ -1747,7 +1760,7 @@ function logAnonymousScanOnce(
                  */
                 document.getElementById("smsSection").hidden = true;
 
-                const productGroup = await loadProductGroupContent(
+                const productGroupResult = await loadProductGroupContent(
                     galleryKey,
                     productGroupID,
                     finishGroupID
@@ -1757,7 +1770,7 @@ function logAnonymousScanOnce(
                    product-group mode always overrides it. */
                 document.getElementById("smsSection").hidden = true;
 
-                if (!productGroup) {
+                if (!productGroupResult) {
                     const statusMessage = document.getElementById("statusMessage");
                     statusMessage.textContent =
                         "This sculpture group could not be found. Please use the " +
@@ -1765,6 +1778,14 @@ function logAnonymousScanOnce(
                     statusMessage.hidden = false;
                     return;
                 }
+
+                const productGroup = productGroupResult.productGroup;
+                const canonicalGallery = cleanParameter(
+                    productGroupResult.galleryInfo &&
+                        productGroupResult.galleryInfo.galleryID,
+                    gallery,
+                    30
+                );
 
                 const groupDisplayName =
                     String(productGroup.displayName || "").trim() ||
@@ -1777,7 +1798,7 @@ function logAnonymousScanOnce(
 
                 if (scanAlertEnabled) {
                     logAnonymousScanOnce(
-                        gallery,
+                        canonicalGallery,
                         groupAndFinishName,
                         osTag,
                         "qr"
@@ -1805,18 +1826,29 @@ function logAnonymousScanOnce(
                 "Text us for automated, interactive information about the " +
                 displayDesign + ".";
 
+            const enhancedResult = await loadEnhancedContent(
+                galleryKey,
+                normalizeSculptureKey(cleanedDisplayDesign)
+            );
+
+            const matchedSculpture = enhancedResult
+                ? enhancedResult.sculpture
+                : null;
+            const canonicalGallery = cleanParameter(
+                enhancedResult && enhancedResult.galleryInfo
+                    ? enhancedResult.galleryInfo.galleryID
+                    : "",
+                gallery,
+                30
+            );
             const smsDesign = ensureMessageInstruction(rawDesign);
-            const messageBody = "-" + gallery + "- " + smsDesign + " " + osTag;
+            const messageBody =
+                "-" + canonicalGallery + "- " + smsDesign + " " + osTag;
             const finalSmsLink = createSmsLink("+14352362244", messageBody);
 
             if (scanAlertEnabled) {
                 configureSmsConfirmation(finalSmsLink);
             }
-
-            const matchedSculpture = await loadEnhancedContent(
-                galleryKey,
-                normalizeSculptureKey(cleanedDisplayDesign)
-            );
 
             const loggedDesignName =
                 matchedSculpture && matchedSculpture.displayName
@@ -1825,7 +1857,7 @@ function logAnonymousScanOnce(
 
             if (scanAlertEnabled) {
                 logAnonymousScanOnce(
-                    gallery,
+                    canonicalGallery,
                     loggedDesignName,
                     osTag,
                     "qr"
