@@ -40,6 +40,13 @@
             border-radius: 8px;
         }
 
+        video.artwork-video {
+            width: auto;
+            max-width: min(100%, 720px);
+            max-height: 720px;
+            background: #fff;
+        }
+
         .artist-statement { margin-bottom: 40px; }
         .artist-statement a { color: #2459a6; text-decoration: underline; }
 
@@ -305,6 +312,18 @@
                 max-width: 520px;
             }
 
+            .content.webm-playing {
+                max-width: 760px;
+            }
+
+            .artwork-video,
+            .iteration-detail .artwork-video {
+                width: auto;
+                max-width: min(100%, 720px);
+                max-height: 720px;
+                background: #fff;
+            }
+
             h1 {
                 margin-bottom: clamp(12px, 2vh, 22px);
                 font-size: clamp(32px, 4.5vh, 43px);
@@ -448,6 +467,14 @@
             .dialog-actions { display: block; }
             .dialog-actions .button, .secondary-button { width: 100%; margin-top: 10px; }
         }
+        /* Apply after the image rules so video can use its 720px export. */
+        video.artwork-video,
+        .iteration-detail video.artwork-video {
+            width: auto;
+            max-width: min(100%, 720px);
+            max-height: 720px;
+            background: #fff;
+        }
     </style>
 </head>
 
@@ -571,7 +598,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260904-1";
+        const ASSET_VERSION = "?v=20260905-1";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -709,24 +736,103 @@
             }
         }
 
-        function renderArtworkImage(imageElement, imageValue, altText) {
-            const finalImageURL = getAssetImageURL(imageValue);
-            imageElement.hidden = true;
+        function supportsWebM() {
+            return document.createElement("video")
+                .canPlayType('video/webm; codecs="vp9"') !== "";
+        }
 
-            if (!finalImageURL) {
-                imageElement.removeAttribute("src");
-                return;
+        function updateMediaLayout() {
+            document.querySelector(".content").classList.toggle(
+                "webm-playing",
+                Array.from(document.querySelectorAll("video.artwork-video")).some(
+                    video => !video.hidden && !video.paused &&
+                        !video.closest("[hidden]")
+                )
+            );
+        }
+
+        // Called only for the main artwork or after a detail row is expanded.
+        // No GIF request is made unless video is unavailable or fails.
+        function renderArtworkImage(imageElement, imageValue, altText, webmValue) {
+            const imageURL = getAssetImageURL(imageValue);
+            const videoURL = getAssetImageURL(webmValue);
+            let video = null;
+            let failed = false;
+            let active = true;
+            let observer = null;
+            imageElement.hidden = true;
+            imageElement.alt = altText;
+            imageElement.removeAttribute("src");
+
+            function showImage() {
+                if (failed) return;
+                failed = true;
+                if (observer) observer.disconnect();
+                if (video) {
+                    video.pause();
+                    video.hidden = true;
+                    video.removeAttribute("src");
+                    video.load();
+                }
+                updateMediaLayout();
+                if (!imageURL) return;
+                imageElement.onload = () => { imageElement.hidden = false; };
+                imageElement.onerror = () => { imageElement.hidden = true; };
+                imageElement.src = imageURL;
             }
 
-            imageElement.alt = altText;
-            imageElement.onload = function () {
-                imageElement.hidden = false;
+            function play() {
+                if (!video || failed || !active || document.hidden ||
+                    video.closest("[hidden]")) return;
+                const attempt = video.play();
+                if (attempt) attempt.catch(error => {
+                    // Collapsing a row can interrupt a pending play request.
+                    if (active && error.name !== "AbortError") showImage();
+                });
+            }
+
+            if (videoURL && supportsWebM()) {
+                video = document.createElement("video");
+                video.className = "artwork-image artwork-video";
+                video.setAttribute("aria-label", altText);
+                video.muted = true;
+                video.defaultMuted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.setAttribute("playsinline", "");
+                video.preload = "none";
+                imageElement.before(video);
+                video.addEventListener("error", showImage);
+                video.addEventListener("playing", updateMediaLayout);
+                video.addEventListener("pause", updateMediaLayout);
+                video.src = videoURL;
+                if ("IntersectionObserver" in window) {
+                    observer = new IntersectionObserver(entries => {
+                        if (entries[0].isIntersecting) play();
+                        else video.pause();
+                    });
+                    observer.observe(video);
+                } else {
+                    play();
+                }
+            } else {
+                showImage();
+            }
+
+            const controller = {
+                resume() { active = true; play(); },
+                pause() {
+                    active = false;
+                    if (video) video.pause();
+                    updateMediaLayout();
+                }
             };
-            imageElement.onerror = function () {
-                console.error("Sculpture image failed to load:", finalImageURL);
-                imageElement.hidden = true;
-            };
-            imageElement.src = finalImageURL;
+            document.addEventListener("visibilitychange", () => {
+                if (video && document.hidden) video.pause();
+                else if (video && video.getBoundingClientRect().bottom > 0 &&
+                    video.getBoundingClientRect().top < window.innerHeight) play();
+            });
+            return controller;
         }
 
         function findSculpture(records, key) {
@@ -959,12 +1065,15 @@
                         String(size.iterationName || "").trim()
                     );
 
+                    const isExpandable = isIteration ||
+                        Boolean(getAssetImageURL(size.webmVideo) && supportsWebM());
+
                     const row = document.createElement(
-                        isIteration ? "button" : "div"
+                        isExpandable ? "button" : "div"
                     );
                     row.className = "size-price-row";
 
-                    if (isIteration) {
+                    if (isExpandable) {
                         row.type = "button";
                         row.classList.add("iteration-size-trigger");
                         row.setAttribute("aria-expanded", "false");
@@ -975,7 +1084,7 @@
                     description.textContent = sizeDescription;
 
                     let iterationHint = null;
-                    if (isIteration) {
+                    if (isExpandable) {
                         iterationHint = document.createElement("span");
                         iterationHint.className = "iteration-hint";
                         iterationHint.textContent = "View image and details";
@@ -989,7 +1098,7 @@
                     row.appendChild(description);
                     row.appendChild(amount);
 
-                    if (!isIteration) {
+                    if (!isExpandable) {
                         sizePriceList.appendChild(row);
                         return;
                     }
@@ -1008,11 +1117,7 @@
                     const iterationStatement = document.createElement("p");
                     iterationStatement.className = "artist-statement";
 
-                    renderArtworkImage(
-                        iterationImage,
-                        size.image,
-                        sizeDescription + " in motion"
-                    );
+                    let detailMedia = null;
                     renderArtistStatement(
                         iterationStatement,
                         size.artistStatement,
@@ -1055,6 +1160,9 @@
                         sizePriceList.querySelectorAll(".iteration-detail").forEach(
                             function (openDetail) {
                                 if (openDetail === iterationDetail) return;
+                                if (openDetail.mediaController) {
+                                    openDetail.mediaController.pause();
+                                }
                                 openDetail.hidden = true;
 
                                 const otherTrigger = openDetail.previousElementSibling;
@@ -1071,6 +1179,15 @@
                         );
 
                         iterationDetail.hidden = !shouldOpen;
+                        if (shouldOpen) {
+                            if (!detailMedia) {
+                                detailMedia = renderArtworkImage(
+                                    iterationImage, size.image,
+                                    sizeDescription + " in motion", size.webmVideo
+                                );
+                                iterationDetail.mediaController = detailMedia;
+                            } else detailMedia.resume();
+                        } else if (detailMedia) detailMedia.pause();
                         row.setAttribute(
                             "aria-expanded",
                             shouldOpen ? "true" : "false"
@@ -1106,7 +1223,8 @@
                 artworkImage,
                 sculpture.image,
                 (sculpture.displayName || "Lyman Whitaker wind sculpture") +
-                    " in motion"
+                    " in motion",
+                sculpture.webmVideo
             );
 
             const galleryDisplayName = galleryInfo.name || "Gallery Information";
