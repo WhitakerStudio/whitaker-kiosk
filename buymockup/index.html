@@ -182,7 +182,7 @@
       $('total-label').textContent = quoted ? 'Sculpture price only' : 'Subtotal before tax';
       $('total').textContent = validPrice ? money(retail + (quoted ? 0 : shipping)) : 'To be confirmed';
       $('shipping-note').textContent = quoted
-        ? 'We’ll confirm shipping with you before payment. The amount above excludes shipping and tax.'
+        ? 'We’ll will contact you for shipping payment once calculated. The amount above excludes shipping and tax.'
         : 'Shipping shown is for this size within the contiguous U.S. Final shipping and tax are confirmed before payment.';
       $('continue').textContent = quoted ? 'Request a shipping quote' : 'Continue to payment';
       document.querySelector('.payment-note').textContent = quoted ? 'No payment until shipping is confirmed.' : 'Shipping address and payment details come next.';
