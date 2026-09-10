@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sculpture purchase · Design preview</title>
+  <style>
+    :root { --ink:#222c31; --muted:#606a6f; --accent:#79502e; --accent-hover:#5f3c21; --line:#dce1e3; --surface:#f4f6f7; --radius:12px; }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; color:var(--ink); background:white; font:16px/1.55 Arial,Helvetica,sans-serif; }
+    button,select { font:inherit; }
+    a { color:inherit; text-underline-offset:4px; }
+    button,a,select { -webkit-tap-highlight-color:transparent; }
+    :focus-visible { outline:3px solid #3474ad; outline-offset:4px; }
+    .preview-strip { text-align:center; padding:9px 20px; background:var(--ink); color:white; font-size:13px; letter-spacing:.035em; }
+    header { margin:auto; max-width:1120px; padding:30px 24px 25px; border-bottom:1px solid var(--line); text-align:center; }
+    .brand-logo { display:block; max-width:min(100%,460px); max-height:100px; width:auto; height:auto; margin:auto; object-fit:contain; }
+    .brand-name { font:32px/1.2 Georgia,serif; margin:0; }
+    .brand-context { color:var(--muted); margin:13px 0 0; font-size:14px; }
+    main { max-width:1120px; margin:auto; padding:38px 24px 48px; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(340px,1fr); gap:58px; align-items:start; }
+    .eyebrow { text-transform:uppercase; letter-spacing:.13em; font-size:12px; font-weight:700; color:var(--accent); margin:0 0 9px; }
+    h1 { font:normal clamp(36px,4vw,54px)/1.12 Georgia,serif; letter-spacing:-.025em; margin:0 0 12px; overflow-wrap:anywhere; }
+    .variant { margin:0; color:var(--muted); font-size:17px; }
+    .media-stage { margin-top:22px; min-height:300px; height:385px; display:flex; align-items:center; justify-content:center; }
+    .media-stage img,.media-stage video { width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; }
+    .media-caption { text-align:center; color:var(--muted); font-size:14px; margin:12px auto 0; }
+    .motion { display:block; margin:8px auto 0; background:white; color:var(--muted); border:0; text-decoration:underline; cursor:pointer; font-size:14px; padding:8px; }
+    .art-footer { border-top:1px solid var(--line); margin-top:26px; padding-top:18px; display:flex; gap:20px; justify-content:space-between; font-size:14px; color:var(--muted); }
+    .art-footer p { margin:0; }
+    .summary { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
+    h2 { font-size:23px; line-height:1.3; margin:0 0 24px; font-weight:500; }
+    .choice { display:block; margin:0 0 22px; }
+    .choice span { display:block; font-size:14px; font-weight:700; margin-bottom:7px; }
+    select { width:100%; min-height:48px; padding:10px 32px 10px 12px; background:white; color:var(--ink); border:1px solid #aeb8be; border-radius:6px; }
+    dl { margin:0; }
+    .line { display:flex; gap:20px; justify-content:space-between; margin:12px 0; }
+    dt { color:var(--muted); }
+    dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+    .total { border-top:1px solid #cbd2d6; margin-top:20px; padding-top:19px; font-size:21px; font-weight:700; }
+    .total dt { color:var(--ink); }
+    .small { font-size:14px; color:var(--muted); }
+    .shipping-note { margin:14px 0 0; }
+    .lead { border-left:3px solid var(--accent); padding:2px 0 2px 17px; margin:26px 0; }
+    .lead h3 { font-size:16px; margin:0 0 6px; }
+    .lead p { font-size:15px; margin:0; color:var(--muted); }
+    .primary { display:block; width:100%; border:0; border-radius:7px; background:var(--accent); color:white; padding:15px 18px; cursor:pointer; font-weight:700; }
+    .primary:hover { background:var(--accent-hover); }
+    .primary:disabled { opacity:.55; cursor:not-allowed; }
+    .payment-note { text-align:center; margin:12px 0 0; }
+    .assistance { text-align:center; padding:19px 12px 0; font-size:14px; color:var(--muted); }
+    .assistance a { white-space:nowrap; }
+    footer { max-width:1072px; margin:auto; padding:22px 24px; border-top:1px solid var(--line); text-align:center; font-size:13px; color:var(--muted); }
+    .status { max-width:700px; margin:50px auto; text-align:center; }
+    dialog { width:min(500px,calc(100% - 32px)); border:1px solid var(--line); border-radius:14px; padding:30px; color:var(--ink); box-shadow:0 24px 90px #0003; }
+    dialog::backdrop { background:#15242cb3; }
+    dialog p { margin:0 0 22px; }
+    @media(max-width:760px) { header { padding:24px 22px 20px; } .brand-logo { max-width:min(100%,340px); max-height:80px; } main { padding:28px 20px 32px; } .layout { grid-template-columns:1fr; gap:28px; } .media-stage { height:320px; min-height:0; } .summary { padding:24px; } h1 { font-size:40px; } .art-footer { margin-top:18px; } }
+    @media(max-width:380px) { .summary { padding:18px; } .line { gap:10px; } }
+  </style>
+</head>
+<body>
+  <div class="preview-strip">DESIGN PREVIEW · No orders or payments are submitted</div>
+  <header>
+    <img id="logo" class="brand-logo" alt="" hidden>
+    <p id="brand" class="brand-name">Your gallery</p>
+    <p class="brand-context">Lyman Whitaker · Kinetic sculpture</p>
+  </header>
+  <main>
+    <p id="status" class="status" role="status">Loading your sculpture…</p>
+    <div id="layout" class="layout" hidden>
+      <section aria-labelledby="title">
+        <p class="eyebrow">Your sculpture</p>
+        <h1 id="title"></h1>
+        <p id="variant" class="variant"></p>
+        <div id="media" class="media-stage"></div>
+        <button id="motion" type="button" class="motion" hidden>Pause motion</button>
+        <p id="dimensions" class="media-caption" hidden></p>
+        <div class="art-footer"><p>Designed by<br><strong>Lyman Whitaker</strong></p><p>Crafted by<br><strong>Whitaker Studio</strong></p></div>
+      </section>
+      <section aria-labelledby="summary-title">
+        <div class="summary">
+          <h2 id="summary-title">Purchase details</h2>
+          <label id="size-field" class="choice" hidden><span>Size / variation</span><select id="size"></select></label>
+          <label class="choice"><span>Shipping destination</span><select id="destination"><option value="contiguous">Contiguous United States</option><option value="alaska">Alaska</option><option value="hawaii">Hawaii</option><option value="other">U.S. territories / international</option></select></label>
+          <dl aria-live="polite">
+            <div class="line"><dt>Sculpture</dt><dd id="price">—</dd></div>
+            <div class="line"><dt>Shipping</dt><dd id="shipping">—</dd></div>
+            <div class="line"><dt>Sales tax</dt><dd>Calculated at checkout</dd></div>
+            <div class="line total"><dt id="total-label">Subtotal before tax</dt><dd id="total">—</dd></div>
+          </dl>
+          <p id="shipping-note" class="small shipping-note"></p>
+          <div class="lead"><h3>Handcrafted for you</h3><p>Your sculpture is handcrafted and will ship in about 4–6 weeks. We’ll email you an estimated shipment date after your order is confirmed. Transit time is additional.</p></div>
+          <button id="continue" class="primary" type="button">Continue to payment</button>
+          <p class="small payment-note">Shipping address and payment details come next.</p>
+        </div>
+        <p id="assistance" class="assistance" hidden>Questions about your sculpture? <a id="phone"></a></p>
+      </section>
+    </div>
+  </main>
+  <footer>This is a purchase-page concept. Prices and delivery estimates are for review; nothing can be purchased here.</footer>
+  <dialog id="handoff" aria-labelledby="handoff-title"><h2 id="handoff-title">Payment preview</h2><p id="handoff-copy"></p><form method="dialog"><button class="primary">Back to sculpture</button></form></dialog>
+  <script>
+    'use strict';
+    // Shared media only; no copied assets, analytics, cookies, or browser storage.
+    // Absolute URL also permits previewing this file outside the kiosk hostname.
+    const ASSET_ROOT = 'https://kiosk.whitakerstudio.com/qr/assets/';
+    const $ = id => document.getElementById(id);
+    const key = value => String(value ?? '').trim().toLowerCase();
+    const money = value => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(value);
+    const number = value => value == null || value === '' ? NaN : Number(value);
+    let product, gallery, group, selected, currentVideo, mediaGeneration = 0;
+    let quoted = true;
+    const params = new URLSearchParams(location.search);
+    // No parameters opens a real-asset example. Explicit unknown keys show an error.
+    const demo = !params.has('d') && !params.has('pg') && !params.has('psg');
+    const galleryKey = params.get('g') || 'WI';
+    async function data(file) {
+      const response = await fetch(ASSET_ROOT + 'data/' + file, {credentials:'omit'});
+      if (!response.ok) throw new Error('Could not load ' + file);
+      const records = JSON.parse((await response.text()).replace(/^\uFEFF/,''));
+      if (!Array.isArray(records)) throw new Error('Unexpected data format');
+      return records;
+    }
+    function asset(value) {
+      // Legacy exports sometimes include a Windows path. Match the QR page's leaf-name handling.
+      const leaf = String(value || '').replace(/\\/g,'/').split('/').pop();
+      return leaf ? ASSET_ROOT + 'images/' + encodeURIComponent(leaf) : '';
+    }
+    function renderMedia(record) {
+      const generation = ++mediaGeneration;
+      if (currentVideo) { currentVideo.pause(); currentVideo.removeAttribute('src'); currentVideo.load(); }
+      currentVideo = null;
+      $('media').replaceChildren(); $('motion').hidden = true;
+      const imageURL = asset(record.image || product.image);
+      const fallback = () => {
+        if (generation !== mediaGeneration) return;
+        if (currentVideo) { currentVideo.pause(); currentVideo.removeAttribute('src'); currentVideo.load(); currentVideo = null; }
+        $('media').replaceChildren(); $('motion').hidden = true;
+        if (!imageURL) { $('media').textContent = 'Sculpture preview unavailable'; return; }
+        const image = new Image(); image.alt = $('title').textContent;
+        image.onerror = () => { if (generation === mediaGeneration) $('media').textContent = 'Sculpture preview unavailable'; };
+        image.src = imageURL; $('media').append(image);
+      };
+      const video = document.createElement('video');
+      const webm = asset(record.webmVideo);
+      if (!webm || !video.canPlayType('video/webm; codecs="vp9"')) { fallback(); return; }
+      currentVideo = video;
+      video.muted = true; video.defaultMuted = true; video.loop = true; video.playsInline = true; video.preload = 'metadata';
+      video.setAttribute('aria-label', $('title').textContent + ' in motion');
+      video.addEventListener('error',fallback,{once:true});
+      video.src = webm; $('media').append(video);
+      $('motion').hidden = false;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      $('motion').textContent = reduced ? 'Play motion' : 'Pause motion';
+      if (!reduced) video.play().catch(() => { if (generation === mediaGeneration) $('motion').textContent = 'Play motion'; });
+    }
+    $('motion').onclick = () => {
+      if (!currentVideo) return;
+      if (currentVideo.paused) currentVideo.play().then(() => {$('motion').textContent='Pause motion';}).catch(() => {$('motion').textContent='Playback unavailable';});
+      else {currentVideo.pause(); $('motion').textContent='Play motion';}
+    };
+    document.addEventListener('visibilitychange', () => { if (document.hidden && currentVideo) {currentVideo.pause(); $('motion').textContent='Play motion';} });
+    function shippingEstimate(record, destination) {
+      // PREVIEW ONLY. Virgo must supply server-authoritative sale price, retail shipping basis,
+      // eligibility, tax and shipping. Unknown sizes and sales groupings require a quote here.
+      const size = key(record.sizeDescription).replace(/[-_]/g,' ').replace(/\s+/g,' ');
+      const eligible = ['mini','miniature','small','sm','medium','med','large','lg','extra large','xl','sub huge'].includes(size);
+      const retail = number(record.retailPrice);
+      return destination === 'contiguous' && eligible && Number.isFinite(retail) && retail > 0
+        ? Math.round(retail * 10) / 100 : null;
+    }
+    function updateSummary() {
+      const retail = number(selected.retailPrice);
+      const validPrice = Number.isFinite(retail) && retail > 0;
+      const shipping = shippingEstimate(selected,$('destination').value);
+      quoted = shipping === null || !validPrice;
+      $('price').textContent = validPrice ? money(retail) : 'Confirm with gallery';
+      $('shipping').textContent = quoted ? 'Quote required' : money(shipping);
+      $('total-label').textContent = quoted ? 'Sculpture price only' : 'Subtotal before tax';
+      $('total').textContent = validPrice ? money(retail + (quoted ? 0 : shipping)) : 'To be confirmed';
+      $('shipping-note').textContent = quoted
+        ? 'We’ll confirm shipping with you before payment. The amount above excludes shipping and tax.'
+        : 'Shipping shown is for this size within the contiguous U.S. Final shipping and tax are confirmed before payment.';
+      $('continue').textContent = quoted ? 'Request a shipping quote' : 'Continue to payment';
+      document.querySelector('.payment-note').textContent = quoted ? 'No payment until shipping is confirmed.' : 'Shipping address and payment details come next.';
+    }
+    function renderSelection() {
+      selected = group ? group.sizes[Number($('size').value)] : product;
+      // For a specific product link, attach size metadata without replacing its sale/list price.
+      if (!group && product.sizeMetadata) selected = {...product.sizeMetadata,...product};
+      $('title').textContent = group ? group.displayName : product.displayName;
+      $('variant').textContent = [selected.displayLabel || selected.sizeDescription, (group || product).finishName].filter(Boolean).join(' · ');
+      const dimensions = [[selected.overallHeightInches,'tall'],[selected.widthInches,'wide']].filter(([n])=>number(n)>0);
+      $('dimensions').hidden = !dimensions.length;
+      $('dimensions').textContent = dimensions.map(([n,label])=>n+' inches '+label).join(' × ');
+      renderMedia(selected); updateSummary();
+    }
+    $('destination').onchange = updateSummary;
+    $('size').onchange = renderSelection;
+    $('continue').onclick = () => {
+      $('handoff-title').textContent = quoted ? 'Shipping quote · Preview only' : 'Payment · Preview only';
+      $('handoff-copy').textContent = quoted
+        ? 'On the finished page, you would provide contact and delivery details to request a shipping quote. This mock-up does not collect or send anything.'
+        : 'On the finished page, Virgo will open Stripe Checkout to collect your shipping address, contact details and payment. Your final total will be confirmed before you pay. No checkout session is created in this mock-up.';
+      $('handoff').showModal();
+    };
+    async function init() {
+      try {
+        const galleries = await data('galleries.json');
+        gallery = galleries.find(g => key(g.lookupKey) === key(galleryKey));
+        if (!gallery) throw new Error('This gallery was not found. Check the g value in the link.');
+        $('brand').textContent = gallery.name;
+        const logo = asset(gallery.logoImage);
+        if (logo) { $('logo').alt = gallery.name; $('logo').onload=()=>{$('logo').hidden=false;$('brand').hidden=true;}; $('logo').onerror=()=>{$('logo').hidden=true;$('brand').hidden=false;}; $('logo').src=logo; }
+        if (gallery.phone) { $('phone').textContent=gallery.phone; $('phone').href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,''); $('assistance').hidden=false; }
+        if (params.has('psg')) {
+          product = (await data('product-sales-groups.json')).find(p=>String(p.productSalesGroupID ?? p.lookupKey)===params.get('psg'));
+        } else if (params.has('pg') || demo) {
+          const pg = demo ? '3' : params.get('pg'); const finish = params.get('f') || (demo ? '72' : '');
+          group = (await data('product-groups.json')).find(p=>String(p.productGroupID)===pg && String(p.finishGroupID)===finish);
+          if (!group || !Array.isArray(group.sizes) || !group.sizes.length) throw new Error('This design / finish was not found. Check pg and f in the link.');
+          product = group;
+          group.sizes.forEach((s,i)=>{const option=document.createElement('option');option.value=i;option.textContent=s.displayLabel||s.sizeDescription;$('size').append(option);});
+          const requested = group.sizes.findIndex(s=>String(s.productID)===params.get('pid'));
+          $('size').value = String(requested >= 0 ? requested : 0); $('size-field').hidden=false;
+        } else {
+          product=(await data('sculptures.json')).find(p=>key(p.lookupKey)===key(params.get('d')));
+          if (product) {
+            // Optional enrichment: existing sculpture exports may not carry size or finish.
+            try { for (const pg of await data('product-groups.json')) {const size=pg.sizes?.find(s=>key(s.productLookupKey)===key(product.lookupKey));if(size){ product={...product,finishName:pg.finishName,sizeMetadata:size};break;}} } catch { /* Safe quote-only fallback */ }
+          }
+        }
+        if (!product) throw new Error('This sculpture was not found. Check the selection in the link.');
+        renderSelection(); $('status').hidden=true; $('layout').hidden=false;
+        document.title=product.displayName+' · '+gallery.name+' · Purchase preview';
+      } catch(error) { $('status').textContent=error.message+' This preview needs access to the published QR assets.'; }
+    }
+    init();
+  </script>
+</body>
+</html>
