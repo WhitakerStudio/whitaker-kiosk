@@ -481,6 +481,48 @@
             max-height: 720px;
             background: #fff;
         }
+
+        /* Immersive promo is a modal browser-viewport player, not a navigation. */
+        .promo-viewer {
+            position: fixed; inset: 0; margin: 0; padding: 0; border: 0;
+            width: 100%; max-width: none; height: 100vh; height: 100dvh;
+            max-height: none; background: #000; color: #fff; overflow: auto;
+            text-align: left; box-sizing: border-box;
+        }
+        .promo-viewer::backdrop { background: #000; }
+        .promo-viewer:fullscreen { width: 100%; height: 100%; }
+        .promo-stage { position: absolute; inset: 0; }
+        .promo-stage video { width: 100%; height: 100%; object-fit: contain; }
+        .promo-top, .promo-bottom {
+            position: absolute; z-index: 2; left: 0; right: 0;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 16px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+        }
+        .promo-top { top: 0; padding-top: max(16px, env(safe-area-inset-top)); background: linear-gradient(#000c, transparent); }
+        .promo-bottom { bottom: 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, #000e); }
+        .promo-viewer .promo-action {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-height: 44px; padding: 10px 14px; margin: 0; border-radius: 8px;
+            background: #141414e8; border: 1px solid #aaa; color: #fff;
+            font: 500 15px/1.3 Arial, sans-serif; text-decoration: none; cursor: pointer;
+        }
+        .promo-viewer .promo-action:hover { background: #383838; }
+        .promo-viewer :focus-visible { outline: 3px solid #8acbff; outline-offset: 3px; }
+        .promo-viewer [hidden] { display: none !important; }
+        .promo-viewer .promo-purchase { background: #fff; color: #111; }
+        .promo-title { flex: 1 1 180px; font: 500 16px/1.3 Arial, sans-serif; margin: 0; }
+        .promo-seek { flex: 1 1 160px; min-width: 100px; height: 40px; accent-color: #fff; }
+        .promo-time { font: 14px Arial, sans-serif; font-variant-numeric: tabular-nums; }
+        .promo-message {
+            position: absolute; top: 40%; left: 8%; right: 8%; z-index: 1;
+            text-align: center; background: #111e; padding: 18px; border-radius: 10px;
+        }
+        .promo-message p { font-size: 17px; line-height: 1.4; margin: 0 0 12px; }
+        @media (max-width: 600px) {
+            .promo-title { flex-basis: 100%; order: 2; }
+            .promo-top, .promo-bottom { gap: 8px; }
+            .promo-viewer .promo-action { font-size: 14px; padding: 10px 12px; }
+        }
     </style>
 </head>
 
@@ -604,7 +646,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260907-1";
+        const ASSET_VERSION = "?v=20260921-1";
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -735,7 +777,202 @@
                 : "";
         }
 
-        function renderArtistStatement(container, statement, videoURL) {
+
+        // Direct media URLs stay external. Never run them through getAssetImageURL.
+        function safePromoURL(value) {
+            try {
+                const url = new URL(String(value || "").trim());
+                return /^https?:$/.test(url.protocol) && !url.username && !url.password
+                    ? url.href : "";
+            } catch (_) { return ""; }
+        }
+
+        function getPromoOptions(record, checkoutURL, title) {
+            return {
+                vertical: safePromoURL(record.promoWebmVertical),
+                wide: safePromoURL(record.promoWebmWide),
+                fallback: safePromoURL(record.promoVideoURL),
+                purchase: safePromoURL(checkoutURL),
+                title: title || record.displayName || record.displayLabel || "Sculpture video"
+            };
+        }
+
+        let immersivePromo = null;
+        function openImmersivePromo(options) {
+            if (!immersivePromo) immersivePromo = createImmersivePromo();
+            immersivePromo.open(options);
+        }
+
+        function createImmersivePromo() {
+            const dialog = document.createElement("dialog");
+            if (typeof dialog.showModal !== "function") {
+                return { open(options) {
+                    window.location.assign(options.fallback || options.vertical || options.wide);
+                } };
+            }
+            dialog.className = "promo-viewer";
+            dialog.setAttribute("aria-labelledby", "promo-title");
+            // Fixed markup only. All data is assigned with textContent / validated URLs.
+            dialog.innerHTML = `
+                <div class="promo-stage"></div>
+                <div class="promo-top">
+                    <button type="button" class="promo-action" data-action="back">Back to product</button>
+                    <h2 id="promo-title" class="promo-title"></h2>
+                    <button type="button" class="promo-action" data-action="format"></button>
+                    <a class="promo-action promo-purchase" data-action="purchase" hidden>Purchase</a>
+                </div>
+                <div class="promo-message" hidden role="status">
+                    <p></p><a class="promo-action" data-action="fallback" hidden>Open original promo</a>
+                </div>
+                <div class="promo-bottom">
+                    <button type="button" class="promo-action" data-action="play">Play</button>
+                    <button type="button" class="promo-action" data-action="sound">Turn sound on</button>
+                    <input class="promo-seek" type="range" min="0" max="1000" value="0" aria-label="Video position" disabled>
+                    <span class="promo-time">0:00 / 0:00</span>
+                    <button type="button" class="promo-action" data-action="fullscreen">Full screen</button>
+                </div>`;
+            document.body.appendChild(dialog);
+            const action = name => dialog.querySelector('[data-action="' + name + '"]');
+            const stage = dialog.querySelector(".promo-stage");
+            const message = dialog.querySelector(".promo-message");
+            const seek = dialog.querySelector(".promo-seek");
+            const time = dialog.querySelector(".promo-time");
+            let options, video, format, muted = true, trigger, previousOverflow, resumeVideos = [];
+            let historyOwned = false;
+            const stamp = seconds => {
+                const n = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+                return Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
+            };
+            function say(text) {
+                message.querySelector("p").textContent = text;
+                message.hidden = !text;
+            }
+            function release() {
+                if (video) {
+                    const old = video; video = null;
+                    old.pause(); old.removeAttribute("src"); old.load();
+                }
+                stage.replaceChildren();
+            }
+            function refresh() {
+                if (!video) return;
+                action("play").textContent = video.paused ? "Play" : "Pause";
+                action("sound").textContent = video.muted ? "Turn sound on" : "Mute sound";
+                action("sound").setAttribute("aria-pressed", String(!video.muted));
+                const duration = video.duration;
+                seek.disabled = !Number.isFinite(duration) || duration <= 0;
+                seek.value = seek.disabled ? 0 : Math.round(video.currentTime / duration * 1000);
+                time.textContent = stamp(video.currentTime) + " / " + stamp(duration);
+            }
+            function play() {
+                if (!video) return;
+                const current = video;
+                const attempt = current.play();
+                if (attempt) attempt.catch(error => {
+                    if (video !== current || !dialog.open || error.name === "AbortError") return;
+                    if (error.name === "NotAllowedError") {
+                        say("Tap Play to start the video. You can turn sound on when it plays.");
+                    } else {
+                        say("This video could not be played. Try the other format or open the original promo.");
+                    }
+                    refresh();
+                });
+            }
+            function loadFormat() {
+                release(); say(""); seek.value = 0; seek.disabled = true;
+                time.textContent = "0:00 / 0:00";
+                video = document.createElement("video");
+                const current = video;
+                video.playsInline = true; video.setAttribute("playsinline", "");
+                video.loop = true; video.muted = muted; video.preload = "metadata";
+                video.setAttribute("aria-label", options.title);
+                ["play", "pause", "timeupdate", "loadedmetadata", "volumechange"].forEach(event => {
+                    current.addEventListener(event, () => { if (video === current) refresh(); });
+                });
+                current.addEventListener("playing", () => { if (video === current) say(""); });
+                current.addEventListener("error", () => {
+                    if (video === current) say("This video is unavailable or unsupported by this browser. Try the other format or open the original promo.");
+                });
+                stage.appendChild(video);
+                // Only this selected source is requested, and only after opening the promo.
+                video.src = options[format];
+                action("format").textContent = format === "vertical" ? "Watch widescreen" : "Watch vertical";
+                refresh(); play();
+            }
+            function cleanup() {
+                if (!dialog.open) return;
+                if (document.fullscreenElement === dialog) document.exitFullscreen().catch(() => {});
+                release(); dialog.close(); window.promoViewerOpen = false;
+                document.body.style.overflow = previousOverflow;
+                resumeVideos.forEach(item => {
+                    if (!document.hidden && item.isConnected && !item.closest("[hidden]")) {
+                        const result = item.play(); if (result) result.catch(() => {});
+                    }
+                });
+                resumeVideos = [];
+                if (trigger && trigger.isConnected) trigger.focus({preventScroll: true});
+            }
+            function close() {
+                cleanup();
+                if (historyOwned && history.state && history.state.kioskImmersivePromo === true) history.back();
+                historyOwned = false;
+            }
+            action("back").addEventListener("click", close);
+            dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
+            window.addEventListener("popstate", () => { if (dialog.open) cleanup(); historyOwned = false; });
+            action("format").addEventListener("click", () => {
+                format = format === "vertical" ? "wide" : "vertical";
+                loadFormat(); // Separate edits can differ in length; switch starts the selected edit.
+            });
+            action("play").addEventListener("click", () => { if (video) video.paused ? play() : video.pause(); });
+            action("sound").addEventListener("click", () => {
+                muted = !muted;
+                if (video) { video.muted = muted; if (video.paused) play(); refresh(); }
+            });
+            seek.addEventListener("input", () => {
+                if (video && Number.isFinite(video.duration)) video.currentTime = Number(seek.value) / 1000 * video.duration;
+            });
+            action("fullscreen").addEventListener("click", () => {
+                if (document.fullscreenElement === dialog) document.exitFullscreen().catch(() => {});
+                else if (dialog.requestFullscreen) dialog.requestFullscreen().catch(() => {
+                    say("Full screen is not available here. The player still fills your browser window.");
+                });
+            });
+            document.addEventListener("fullscreenchange", () => {
+                action("fullscreen").textContent = document.fullscreenElement === dialog ? "Exit full screen" : "Full screen";
+            });
+            document.addEventListener("visibilitychange", () => { if (document.hidden && video) video.pause(); });
+            // Pause on checkout / original-promo navigation, including opening another tab.
+            ["purchase", "fallback"].forEach(name => {
+                action(name).addEventListener("click", () => { if (video) video.pause(); });
+            });
+            return {
+                open(value) {
+                    options = value; trigger = document.activeElement; muted = true;
+                    dialog.querySelector(".promo-title").textContent = options.title;
+                    ["purchase", "fallback"].forEach(name => {
+                        const link = action(name);
+                        link.hidden = !options[name]; link.removeAttribute("href");
+                        if (options[name]) link.href = options[name];
+                        link.target = "_blank"; link.rel = "noopener noreferrer";
+                    });
+                    action("format").hidden = !(options.vertical && options.wide);
+                    action("fullscreen").hidden = !dialog.requestFullscreen;
+                    previousOverflow = document.body.style.overflow;
+                    document.body.style.overflow = "hidden"; window.promoViewerOpen = true;
+                    resumeVideos = Array.from(document.querySelectorAll("video.artwork-video")).filter(item => !item.paused);
+                    resumeVideos.forEach(item => item.pause());
+                    dialog.showModal();
+                    try {
+                        history.pushState({kioskImmersivePromo: true}, "");
+                        historyOwned = true;
+                    } catch (_) { historyOwned = false; }
+                    format = options.vertical ? "vertical" : "wide";
+                    loadFormat(); action("back").focus();
+                }
+            };
+        }
+        function renderArtistStatement(container, statement, videoURL, promoOptions) {
             container.replaceChildren();
 
             const statementText = String(statement || "").trim();
@@ -743,8 +980,9 @@
                 container.appendChild(document.createTextNode(statementText));
             }
 
-            const normalizedVideoURL = normalizeWebsiteURL(videoURL);
-            if (normalizedVideoURL) {
+            const normalizedVideoURL = safePromoURL(videoURL);
+            const immersive = promoOptions && (promoOptions.vertical || promoOptions.wide);
+            if (normalizedVideoURL || immersive) {
                 if (statementText) {
                     container.appendChild(document.createTextNode(" "));
                 }
@@ -754,10 +992,18 @@
                 );
 
                 const promoLink = document.createElement("a");
-                promoLink.href = normalizedVideoURL;
+                promoLink.href = normalizedVideoURL || "#promo";
                 promoLink.textContent = "here";
                 promoLink.target = "_blank";
                 promoLink.rel = "noopener noreferrer";
+                if (immersive) {
+                    promoLink.removeAttribute("target");
+                    promoLink.setAttribute("aria-label", "Watch " + promoOptions.title);
+                    promoLink.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        openImmersivePromo(promoOptions);
+                    });
+                }
                 container.appendChild(promoLink);
                 container.appendChild(document.createTextNode("."));
             }
@@ -809,7 +1055,7 @@
             }
 
             function play() {
-                if (!video || failed || !active || document.hidden ||
+                if (!video || failed || !active || document.hidden || window.promoViewerOpen ||
                     video.closest("[hidden]")) return;
                 const attempt = video.play();
                 if (attempt) attempt.catch(error => {
@@ -1018,7 +1264,8 @@
             renderArtistStatement(
                 artistStatement,
                 sculpture.artistStatement,
-                sculpture.promoVideoURL
+                sculpture.promoVideoURL,
+                getPromoOptions(sculpture, checkoutInfo && checkoutInfo.checkoutURL, designName.textContent)
             );
 
             smsSection.hidden = shouldHideSms(galleryInfo);
@@ -1163,7 +1410,10 @@
                         renderArtistStatement(
                             iterationStatement,
                             size.artistStatement,
-                            size.promoVideoURL
+                            size.promoVideoURL,
+                            getPromoOptions(size, iterationCheckoutMap.get(
+                                String(size.iterationGroupID || "").trim()
+                            ), size.displayLabel || size.iterationName)
                         );
                         iterationDetail.appendChild(iterationStatement);
                     }

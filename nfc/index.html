@@ -40,8 +40,29 @@
             border-radius: 8px;
         }
 
+        video.artwork-video {
+            width: auto;
+            max-width: min(100%, 720px);
+            max-height: 720px;
+            background: #fff;
+        }
+
         .artist-statement { margin-bottom: 40px; }
+        .artwork-dimensions {
+            margin: 16px auto 20px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        .artwork-dimensions span { display: block; }
         .artist-statement a { color: #2459a6; text-decoration: underline; }
+
+        .finish-name {
+            margin-top: -15px;
+            margin-bottom: 30px;
+            color: #555;
+            font-size: 28px;
+            font-weight: 700;
+        }
 
         .sms-section {
             margin: 35px auto;
@@ -86,6 +107,90 @@
             margin-bottom: 25px;
             font-size: 34px;
             font-weight: 700;
+        }
+
+        .size-price-list {
+            width: 100%;
+            max-width: 650px;
+            margin: 35px auto 25px;
+            border-top: 1px solid #d8d8d8;
+        }
+
+        .size-price-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
+            align-items: baseline;
+            padding: 15px 0;
+            border-bottom: 1px solid #d8d8d8;
+            font-size: 30px;
+            line-height: 1.3;
+            text-align: left;
+        }
+
+        .size-price-amount {
+            font-weight: 700;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        button.size-price-row {
+            width: 100%;
+            border-top: 0;
+            border-right: 0;
+            border-left: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .iteration-price-entry {
+            border-bottom: 1px solid #d8d8d8;
+        }
+
+        .iteration-price-entry > .size-price-row {
+            border-bottom: 0;
+        }
+
+        .iteration-size-trigger:hover,
+        .iteration-size-trigger:focus-visible {
+            background: #f0f5fb;
+            outline: 2px solid #2459a6;
+            outline-offset: -2px;
+        }
+
+        .iteration-hint {
+            display: block;
+            margin-top: 5px;
+            color: #2459a6;
+            font-size: 15px;
+            line-height: 1.25;
+        }
+
+        .iteration-detail {
+            padding: 12px 18px 28px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .iteration-detail .artwork-image {
+            width: 100%;
+            max-width: 520px;
+            max-height: 480px;
+            margin-bottom: 22px;
+        }
+
+        .iteration-detail .artist-statement {
+            margin-bottom: 0;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        .iteration-purchase-button {
+            margin-top: 22px;
+            margin-bottom: 0;
+            font-size: 22px;
         }
 
         .purchase-button {
@@ -195,6 +300,149 @@
             cursor: pointer;
         }
 
+        /*
+            Desktop and laptop presentation.
+
+            Fine-pointer/hover detection avoids changing the established
+            phone and touch-tablet presentation. A consistent desktop content
+            width prevents narrow source GIFs from compressing the text and
+            gallery contact information. The primary artwork remains limited
+            to 480 pixels and is never wider than the content column.
+        */
+        @media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+            body {
+                padding: clamp(18px, 3vh, 34px) 28px 36px;
+            }
+
+            .content {
+                max-width: 520px;
+            }
+
+            .content.webm-playing {
+                max-width: 760px;
+            }
+
+            .artwork-video,
+            .iteration-detail .artwork-video {
+                width: auto;
+                max-width: min(100%, 720px);
+                max-height: 720px;
+                background: #fff;
+            }
+
+            h1 {
+                margin-bottom: clamp(12px, 2vh, 22px);
+                font-size: clamp(32px, 4.5vh, 43px);
+            }
+
+            h2 {
+                margin-bottom: 22px;
+                font-size: clamp(28px, 3.8vh, 36px);
+            }
+
+            h3 {
+                margin-bottom: 16px;
+                font-size: 27px;
+            }
+
+            p {
+                margin-bottom: clamp(14px, 2vh, 22px);
+                font-size: clamp(17px, 2.35vh, 21px);
+                line-height: 1.4;
+            }
+
+            .finish-name {
+                margin-top: -8px;
+                margin-bottom: clamp(12px, 2vh, 20px);
+                font-size: 21px;
+            }
+
+            .artwork-image {
+                width: auto;
+                max-width: min(100%, 480px);
+                max-height: 48vh;
+                max-height: min(48dvh, 480px);
+                margin-bottom: clamp(14px, 2.5vh, 24px);
+            }
+
+            .artist-statement {
+                margin-bottom: clamp(18px, 3vh, 30px);
+            }
+
+            .sms-section {
+                margin: 25px auto;
+                padding: 24px 22px;
+            }
+
+            .sms-section > p {
+                font-size: 19px;
+            }
+
+            .button {
+                padding: 16px 28px;
+                font-size: 24px;
+            }
+
+            .price {
+                margin-top: 24px;
+                margin-bottom: 18px;
+                font-size: 28px;
+            }
+
+            .size-price-list {
+                margin: 24px auto 20px;
+            }
+
+            .size-price-row {
+                padding: 11px 0;
+                font-size: 21px;
+            }
+
+            .iteration-detail .artwork-image {
+                width: auto;
+                max-width: 100%;
+                max-height: 40vh;
+                max-height: min(40dvh, 420px);
+            }
+
+            .purchase-button {
+                margin-bottom: 24px;
+                padding: 15px 26px;
+                font-size: 22px;
+            }
+
+            .gallery-section {
+                margin-top: 24px;
+                padding-top: 10px;
+            }
+
+            .gallery-logo {
+                max-height: 16vh;
+                max-height: min(16dvh, 125px);
+                margin-bottom: 16px;
+            }
+
+            .gallery-contact {
+                margin-bottom: 14px;
+                font-size: 20px;
+            }
+
+            .gallery-website-button {
+                margin: 6px auto 18px;
+                padding: 13px 22px;
+                font-size: 19px;
+            }
+
+            .selection-link {
+                margin-top: 28px;
+                font-size: 17px;
+            }
+
+            .analytics-notice {
+                margin-top: 24px;
+            }
+        }
+
         @media (max-width: 768px) {
             body { padding: 45px 20px 40px; }
             h1 { font-size: 42px; }
@@ -204,6 +452,7 @@
             .sms-section > p { font-size: 22px; }
             .button { padding: 22px 35px; font-size: 29px; }
             .price { font-size: 30px; }
+            .size-price-row { font-size: 25px; }
             .purchase-button { padding: 18px 28px; font-size: 23px; }
             .gallery-contact, .gallery-website-button { font-size: 21px; }
             .selection-link { font-size: 18px; }
@@ -216,12 +465,63 @@
             p { font-size: 20px; }
             .button { width: 100%; max-width: 360px; padding: 20px 16px; font-size: 26px; }
             .price { font-size: 27px; }
+            .size-price-row { gap: 16px; padding: 13px 0; font-size: 22px; }
             .purchase-button { width: 100%; max-width: 360px; padding: 18px 16px; font-size: 22px; }
             dialog { padding: 24px 20px; }
             dialog h2 { font-size: 26px; }
             dialog p { font-size: 17px; }
             .dialog-actions { display: block; }
             .dialog-actions .button, .secondary-button { width: 100%; margin-top: 10px; }
+        }
+        /* Apply after the image rules so video can use its 720px export. */
+        video.artwork-video,
+        .iteration-detail video.artwork-video {
+            width: auto;
+            max-width: min(100%, 720px);
+            max-height: 720px;
+            background: #fff;
+        }
+
+        /* Immersive promo is a modal browser-viewport player, not a navigation. */
+        .promo-viewer {
+            position: fixed; inset: 0; margin: 0; padding: 0; border: 0;
+            width: 100%; max-width: none; height: 100vh; height: 100dvh;
+            max-height: none; background: #000; color: #fff; overflow: auto;
+            text-align: left; box-sizing: border-box;
+        }
+        .promo-viewer::backdrop { background: #000; }
+        .promo-viewer:fullscreen { width: 100%; height: 100%; }
+        .promo-stage { position: absolute; inset: 0; }
+        .promo-stage video { width: 100%; height: 100%; object-fit: contain; }
+        .promo-top, .promo-bottom {
+            position: absolute; z-index: 2; left: 0; right: 0;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 16px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+        }
+        .promo-top { top: 0; padding-top: max(16px, env(safe-area-inset-top)); background: linear-gradient(#000c, transparent); }
+        .promo-bottom { bottom: 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, #000e); }
+        .promo-viewer .promo-action {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-height: 44px; padding: 10px 14px; margin: 0; border-radius: 8px;
+            background: #141414e8; border: 1px solid #aaa; color: #fff;
+            font: 500 15px/1.3 Arial, sans-serif; text-decoration: none; cursor: pointer;
+        }
+        .promo-viewer .promo-action:hover { background: #383838; }
+        .promo-viewer :focus-visible { outline: 3px solid #8acbff; outline-offset: 3px; }
+        .promo-viewer [hidden] { display: none !important; }
+        .promo-viewer .promo-purchase { background: #fff; color: #111; }
+        .promo-title { flex: 1 1 180px; font: 500 16px/1.3 Arial, sans-serif; margin: 0; }
+        .promo-seek { flex: 1 1 160px; min-width: 100px; height: 40px; accent-color: #fff; }
+        .promo-time { font: 14px Arial, sans-serif; font-variant-numeric: tabular-nums; }
+        .promo-message {
+            position: absolute; top: 40%; left: 8%; right: 8%; z-index: 1;
+            text-align: center; background: #111e; padding: 18px; border-radius: 10px;
+        }
+        .promo-message p { font-size: 17px; line-height: 1.4; margin: 0 0 12px; }
+        @media (max-width: 600px) {
+            .promo-title { flex-basis: 100%; order: 2; }
+            .promo-top, .promo-bottom { gap: 8px; }
+            .promo-viewer .promo-action { font-size: 14px; padding: 10px 12px; }
         }
     </style>
 </head>
@@ -230,6 +530,7 @@
     <main class="content">
         <section id="enhancedContent" hidden>
             <h1 id="designName"></h1>
+            <p id="finishName" class="finish-name" hidden></p>
             <img id="artworkImage" class="artwork-image" src="" alt="" hidden>
             <p id="artistStatement" class="artist-statement"></p>
         </section>
@@ -262,6 +563,9 @@
         <section id="matchedDetails" hidden>
             <p id="retailPrice" class="price"></p>
 
+            <div id="sizePriceList" class="size-price-list"
+                 aria-label="Available sizes and prices" hidden></div>
+
             <a id="purchaseButton" class="purchase-button" href="#"
                target="_blank" rel="noopener noreferrer" hidden>
                 Purchase This Sculpture
@@ -288,7 +592,10 @@
             to view the complete collection of Lyman Whitaker's kinetic works.
         </p>
 
-        <details class="analytics-notice">
+        <details 
+	    id="analyticsNotice"	
+	    class="analytics-notice"
+	>
             <summary>Privacy and anonymous analytics</summary>
             <p>
                 We record the sculpture and gallery viewed, whether QR or NFC was
@@ -300,6 +607,13 @@
                 The participating gallery may be notified that this sculpture was
                 viewed, but the notification does not identify you.
             </p>
+	    <p>
+    		To prevent repeated scan notifications when you revisit or restore
+    		the same sculpture page, this site stores a scan-specific timestamp
+    		in your browser. It is used for 30 days, remains on your device,
+    		and is not transmitted to Whitaker Studio or used to identify you.
+    		Expired entries are removed the next time a kiosk page is opened.
+	    </p>
         </details>
 
         <p id="statusMessage" class="status-message" hidden></p>
@@ -331,9 +645,15 @@
     </dialog>
 
     <script>
-        const NFC_ASSET_ROOT = "/nfc/assets/";
-        const ASSET_VERSION = "?v=20260810-1";
+        // Share the QR asset library; NFC does not need a duplicate copy.
+        const NFC_ASSET_ROOT = "/qr/assets/";
+        const ASSET_VERSION = "?v=20260921-1";
         const SCULPTURE_DATA_URL = NFC_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
+        const PRODUCT_GROUP_DATA_URL = NFC_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
+        const PRODUCT_SALES_GROUP_DATA_URL =
+            NFC_ASSET_ROOT + "data/product-sales-groups.json" + ASSET_VERSION;
+        const PRODUCT_SALES_GROUP_CHECKOUT_DATA_URL =
+            NFC_ASSET_ROOT + "data/product-sales-group-checkouts.json" + ASSET_VERSION;
         const GALLERY_DATA_URL = NFC_ASSET_ROOT + "data/galleries.json" + ASSET_VERSION;
         const CHECKOUT_DATA_URL = NFC_ASSET_ROOT + "data/checkouts.json" + ASSET_VERSION;
         const LOG_ENDPOINT = "https://whitakerstudio.net/api/qrnfclog";
@@ -371,6 +691,15 @@
                 .trim();
         }
 
+        function ensureMessageInstruction(value) {
+            const instruction = "Send this message for details.";
+            const pattern = /\s*Send\s+this\s+message\s+for\s+details\.?\s*$/i;
+            if (pattern.test(value)) {
+                return String(value).replace(pattern, " " + instruction).trim();
+            }
+            return (String(value || "").trim() + " " + instruction).trim();
+        }
+
         function formatDesignName(value) {
             const uppercaseWords = ["sm", "med", "lg", "xl", "xxl", "ss"];
             return String(value || "").toLowerCase().split(/\s+/).map(function (word) {
@@ -386,6 +715,27 @@
 
         function normalizeGalleryKey(value) {
             return String(value || "").trim().toUpperCase();
+        }
+
+        function formatSculptureDimensions(size) {
+            const measurements = [
+                { value: Number(size.overallHeightInches), direction: "tall" },
+                { value: Number(size.widthInches), direction: "wide" }
+            ].filter(function (measurement) {
+                return Number.isFinite(measurement.value) && measurement.value > 0;
+            });
+            if (!measurements.length) return [];
+            return [
+                { factor: 1, unit: "inches" },
+                { factor: 2.54, unit: "cm" }
+            ].map(function (system) {
+                return measurements.map(function (measurement) {
+                    const value = (measurement.value * system.factor).toLocaleString(
+                        "en-US", { maximumFractionDigits: 1 }
+                    );
+                    return value + " " + system.unit + " " + measurement.direction;
+                }).join(" × ");
+            });
         }
 
         function formatPrice(value) {
@@ -415,6 +765,11 @@
                 String(value || "").trim() === "1";
         }
 
+        function shouldHideSms(galleryInfo) {
+            return document.documentElement.dataset.suppressSms === "true" ||
+                isTruthyFlag(galleryInfo && galleryInfo.hideCustomerSMS);
+        }
+
         function getAssetImageURL(value) {
             const fileName = String(value || "")
                 .replace(/\\/g, "/").split("/").pop();
@@ -423,9 +778,366 @@
                 : "";
         }
 
+
+        // Direct media URLs stay external. Never run them through getAssetImageURL.
+        function safePromoURL(value) {
+            try {
+                const url = new URL(String(value || "").trim());
+                return /^https?:$/.test(url.protocol) && !url.username && !url.password
+                    ? url.href : "";
+            } catch (_) { return ""; }
+        }
+
+        function getPromoOptions(record, checkoutURL, title) {
+            return {
+                vertical: safePromoURL(record.promoWebmVertical),
+                wide: safePromoURL(record.promoWebmWide),
+                fallback: safePromoURL(record.promoVideoURL),
+                purchase: safePromoURL(checkoutURL),
+                title: title || record.displayName || record.displayLabel || "Sculpture video"
+            };
+        }
+
+        let immersivePromo = null;
+        function openImmersivePromo(options) {
+            if (!immersivePromo) immersivePromo = createImmersivePromo();
+            immersivePromo.open(options);
+        }
+
+        function createImmersivePromo() {
+            const dialog = document.createElement("dialog");
+            if (typeof dialog.showModal !== "function") {
+                return { open(options) {
+                    window.location.assign(options.fallback || options.vertical || options.wide);
+                } };
+            }
+            dialog.className = "promo-viewer";
+            dialog.setAttribute("aria-labelledby", "promo-title");
+            // Fixed markup only. All data is assigned with textContent / validated URLs.
+            dialog.innerHTML = `
+                <div class="promo-stage"></div>
+                <div class="promo-top">
+                    <button type="button" class="promo-action" data-action="back">Back to product</button>
+                    <h2 id="promo-title" class="promo-title"></h2>
+                    <button type="button" class="promo-action" data-action="format"></button>
+                    <a class="promo-action promo-purchase" data-action="purchase" hidden>Purchase</a>
+                </div>
+                <div class="promo-message" hidden role="status">
+                    <p></p><a class="promo-action" data-action="fallback" hidden>Open original promo</a>
+                </div>
+                <div class="promo-bottom">
+                    <button type="button" class="promo-action" data-action="play">Play</button>
+                    <button type="button" class="promo-action" data-action="sound">Turn sound on</button>
+                    <input class="promo-seek" type="range" min="0" max="1000" value="0" aria-label="Video position" disabled>
+                    <span class="promo-time">0:00 / 0:00</span>
+                    <button type="button" class="promo-action" data-action="fullscreen">Full screen</button>
+                </div>`;
+            document.body.appendChild(dialog);
+            const action = name => dialog.querySelector('[data-action="' + name + '"]');
+            const stage = dialog.querySelector(".promo-stage");
+            const message = dialog.querySelector(".promo-message");
+            const seek = dialog.querySelector(".promo-seek");
+            const time = dialog.querySelector(".promo-time");
+            let options, video, format, muted = true, trigger, previousOverflow, resumeVideos = [];
+            let historyOwned = false;
+            const stamp = seconds => {
+                const n = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+                return Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
+            };
+            function say(text) {
+                message.querySelector("p").textContent = text;
+                message.hidden = !text;
+            }
+            function release() {
+                if (video) {
+                    const old = video; video = null;
+                    old.pause(); old.removeAttribute("src"); old.load();
+                }
+                stage.replaceChildren();
+            }
+            function refresh() {
+                if (!video) return;
+                action("play").textContent = video.paused ? "Play" : "Pause";
+                action("sound").textContent = video.muted ? "Turn sound on" : "Mute sound";
+                action("sound").setAttribute("aria-pressed", String(!video.muted));
+                const duration = video.duration;
+                seek.disabled = !Number.isFinite(duration) || duration <= 0;
+                seek.value = seek.disabled ? 0 : Math.round(video.currentTime / duration * 1000);
+                time.textContent = stamp(video.currentTime) + " / " + stamp(duration);
+            }
+            function play() {
+                if (!video) return;
+                const current = video;
+                const attempt = current.play();
+                if (attempt) attempt.catch(error => {
+                    if (video !== current || !dialog.open || error.name === "AbortError") return;
+                    if (error.name === "NotAllowedError") {
+                        say("Tap Play to start the video. You can turn sound on when it plays.");
+                    } else {
+                        say("This video could not be played. Try the other format or open the original promo.");
+                    }
+                    refresh();
+                });
+            }
+            function loadFormat() {
+                release(); say(""); seek.value = 0; seek.disabled = true;
+                time.textContent = "0:00 / 0:00";
+                video = document.createElement("video");
+                const current = video;
+                video.playsInline = true; video.setAttribute("playsinline", "");
+                video.loop = true; video.muted = muted; video.preload = "metadata";
+                video.setAttribute("aria-label", options.title);
+                ["play", "pause", "timeupdate", "loadedmetadata", "volumechange"].forEach(event => {
+                    current.addEventListener(event, () => { if (video === current) refresh(); });
+                });
+                current.addEventListener("playing", () => { if (video === current) say(""); });
+                current.addEventListener("error", () => {
+                    if (video === current) say("This video is unavailable or unsupported by this browser. Try the other format or open the original promo.");
+                });
+                stage.appendChild(video);
+                // Only this selected source is requested, and only after opening the promo.
+                video.src = options[format];
+                action("format").textContent = format === "vertical" ? "Watch widescreen" : "Watch vertical";
+                refresh(); play();
+            }
+            function cleanup() {
+                if (!dialog.open) return;
+                if (document.fullscreenElement === dialog) document.exitFullscreen().catch(() => {});
+                release(); dialog.close(); window.promoViewerOpen = false;
+                document.body.style.overflow = previousOverflow;
+                resumeVideos.forEach(item => {
+                    if (!document.hidden && item.isConnected && !item.closest("[hidden]")) {
+                        const result = item.play(); if (result) result.catch(() => {});
+                    }
+                });
+                resumeVideos = [];
+                if (trigger && trigger.isConnected) trigger.focus({preventScroll: true});
+            }
+            function close() {
+                cleanup();
+                if (historyOwned && history.state && history.state.kioskImmersivePromo === true) history.back();
+                historyOwned = false;
+            }
+            action("back").addEventListener("click", close);
+            dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
+            window.addEventListener("popstate", () => { if (dialog.open) cleanup(); historyOwned = false; });
+            action("format").addEventListener("click", () => {
+                format = format === "vertical" ? "wide" : "vertical";
+                loadFormat(); // Separate edits can differ in length; switch starts the selected edit.
+            });
+            action("play").addEventListener("click", () => { if (video) video.paused ? play() : video.pause(); });
+            action("sound").addEventListener("click", () => {
+                muted = !muted;
+                if (video) { video.muted = muted; if (video.paused) play(); refresh(); }
+            });
+            seek.addEventListener("input", () => {
+                if (video && Number.isFinite(video.duration)) video.currentTime = Number(seek.value) / 1000 * video.duration;
+            });
+            action("fullscreen").addEventListener("click", () => {
+                if (document.fullscreenElement === dialog) document.exitFullscreen().catch(() => {});
+                else if (dialog.requestFullscreen) dialog.requestFullscreen().catch(() => {
+                    say("Full screen is not available here. The player still fills your browser window.");
+                });
+            });
+            document.addEventListener("fullscreenchange", () => {
+                action("fullscreen").textContent = document.fullscreenElement === dialog ? "Exit full screen" : "Full screen";
+            });
+            document.addEventListener("visibilitychange", () => { if (document.hidden && video) video.pause(); });
+            // Pause on checkout / original-promo navigation, including opening another tab.
+            ["purchase", "fallback"].forEach(name => {
+                action(name).addEventListener("click", () => { if (video) video.pause(); });
+            });
+            return {
+                open(value) {
+                    options = value; trigger = document.activeElement; muted = true;
+                    dialog.querySelector(".promo-title").textContent = options.title;
+                    ["purchase", "fallback"].forEach(name => {
+                        const link = action(name);
+                        link.hidden = !options[name]; link.removeAttribute("href");
+                        if (options[name]) link.href = options[name];
+                        link.target = "_blank"; link.rel = "noopener noreferrer";
+                    });
+                    action("format").hidden = !(options.vertical && options.wide);
+                    action("fullscreen").hidden = !dialog.requestFullscreen;
+                    previousOverflow = document.body.style.overflow;
+                    document.body.style.overflow = "hidden"; window.promoViewerOpen = true;
+                    resumeVideos = Array.from(document.querySelectorAll("video.artwork-video")).filter(item => !item.paused);
+                    resumeVideos.forEach(item => item.pause());
+                    dialog.showModal();
+                    try {
+                        history.pushState({kioskImmersivePromo: true}, "");
+                        historyOwned = true;
+                    } catch (_) { historyOwned = false; }
+                    format = options.vertical ? "vertical" : "wide";
+                    loadFormat(); action("back").focus();
+                }
+            };
+        }
+        function renderArtistStatement(container, statement, videoURL, promoOptions) {
+            container.replaceChildren();
+
+            const statementText = String(statement || "").trim();
+            if (statementText) {
+                container.appendChild(document.createTextNode(statementText));
+            }
+
+            const normalizedVideoURL = safePromoURL(videoURL);
+            const immersive = promoOptions && (promoOptions.vertical || promoOptions.wide);
+            if (normalizedVideoURL || immersive) {
+                if (statementText) {
+                    container.appendChild(document.createTextNode(" "));
+                }
+
+                container.appendChild(
+                    document.createTextNode("A short video of the piece is available ")
+                );
+
+                const promoLink = document.createElement("a");
+                promoLink.href = normalizedVideoURL || "#promo";
+                promoLink.textContent = "here";
+                promoLink.target = "_blank";
+                promoLink.rel = "noopener noreferrer";
+                if (immersive) {
+                    promoLink.removeAttribute("target");
+                    promoLink.setAttribute("aria-label", "Watch " + promoOptions.title);
+                    promoLink.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        openImmersivePromo(promoOptions);
+                    });
+                }
+                container.appendChild(promoLink);
+                container.appendChild(document.createTextNode("."));
+            }
+        }
+
+        function supportsWebM() {
+            return document.createElement("video")
+                .canPlayType('video/webm; codecs="vp9"') !== "";
+        }
+
+        function updateMediaLayout() {
+            document.querySelector(".content").classList.toggle(
+                "webm-playing",
+                Array.from(document.querySelectorAll("video.artwork-video")).some(
+                    video => !video.hidden && !video.paused &&
+                        !video.closest("[hidden]")
+                )
+            );
+        }
+
+        // Called only for the main artwork or after a detail row is expanded.
+        // No GIF request is made unless video is unavailable or fails.
+        function renderArtworkImage(imageElement, imageValue, altText, webmValue) {
+            const imageURL = getAssetImageURL(imageValue);
+            const videoURL = getAssetImageURL(webmValue);
+            let video = null;
+            let failed = false;
+            let active = true;
+            let observer = null;
+            imageElement.hidden = true;
+            imageElement.alt = altText;
+            imageElement.removeAttribute("src");
+
+            function showImage() {
+                if (failed) return;
+                failed = true;
+                if (observer) observer.disconnect();
+                if (video) {
+                    video.pause();
+                    video.hidden = true;
+                    video.removeAttribute("src");
+                    video.load();
+                }
+                updateMediaLayout();
+                if (!imageURL) return;
+                imageElement.onload = () => { imageElement.hidden = false; };
+                imageElement.onerror = () => { imageElement.hidden = true; };
+                imageElement.src = imageURL;
+            }
+
+            function play() {
+                if (!video || failed || !active || document.hidden || window.promoViewerOpen ||
+                    video.closest("[hidden]")) return;
+                const attempt = video.play();
+                if (attempt) attempt.catch(error => {
+                    // Collapsing a row can interrupt a pending play request.
+                    if (active && error.name !== "AbortError") showImage();
+                });
+            }
+
+            if (videoURL && supportsWebM()) {
+                video = document.createElement("video");
+                video.className = "artwork-image artwork-video";
+                video.setAttribute("aria-label", altText);
+                video.muted = true;
+                video.defaultMuted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.setAttribute("playsinline", "");
+                video.preload = "none";
+                imageElement.before(video);
+                video.addEventListener("error", showImage);
+                video.addEventListener("playing", updateMediaLayout);
+                video.addEventListener("pause", updateMediaLayout);
+                video.src = videoURL;
+                if ("IntersectionObserver" in window) {
+                    observer = new IntersectionObserver(entries => {
+                        if (entries[0].isIntersecting) play();
+                        else video.pause();
+                    });
+                    observer.observe(video);
+                } else {
+                    play();
+                }
+            } else {
+                showImage();
+            }
+
+            const controller = {
+                resume() { active = true; play(); },
+                pause() {
+                    active = false;
+                    if (video) video.pause();
+                    updateMediaLayout();
+                }
+            };
+            document.addEventListener("visibilitychange", () => {
+                if (video && document.hidden) video.pause();
+                else if (video && video.getBoundingClientRect().bottom > 0 &&
+                    video.getBoundingClientRect().top < window.innerHeight) play();
+            });
+            return controller;
+        }
+
         function findSculpture(records, key) {
             return records.find(function (item) {
                 return normalizeSculptureKey(item.lookupKey) === key;
+            });
+        }
+
+        function findProductGroup(records, productGroupID, finishGroupID) {
+            const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
+
+            return records.find(function (item) {
+                return String(
+                    item.productGroupID !== undefined
+                        ? item.productGroupID
+                        : item.lookupKey
+                ).trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID;
+            });
+        }
+
+        function findProductSalesGroup(records, productSalesGroupID) {
+            const requestedID = String(productSalesGroupID || "").trim();
+
+            return records.find(function (item) {
+                return String(
+                    item.productSalesGroupID !== undefined
+                        ? item.productSalesGroupID
+                        : item.lookupKey
+                ).trim() === requestedID;
             });
         }
 
@@ -444,20 +1156,82 @@
             }) || null;
         }
 
+        function findProductGroupCheckout(
+            records,
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
+            if (!Array.isArray(records)) return null;
+
+            const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
+
+            return records.find(function (item) {
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    String(item.productGroupID || "").trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID &&
+                    !String(item.iterationGroupID || "").trim() &&
+                    Boolean(String(item.checkoutURL || "").trim());
+            }) || null;
+        }
+
+        function findProductGroupIterationCheckouts(
+            records,
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
+            if (!Array.isArray(records)) return [];
+
+            const requestedID = String(productGroupID || "").trim();
+            const requestedFinishID = String(finishGroupID || "").trim();
+
+            return records.filter(function (item) {
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    String(item.productGroupID || "").trim() === requestedID &&
+                    String(item.finishGroupID || "").trim() === requestedFinishID &&
+                    Boolean(String(item.iterationGroupID || "").trim()) &&
+                    Boolean(String(item.checkoutURL || "").trim());
+            });
+        }
+
+        function findProductSalesGroupCheckout(
+            records,
+            galleryKey,
+            productSalesGroupID
+        ) {
+            if (!Array.isArray(records)) return null;
+
+            const requestedID = String(productSalesGroupID || "").trim();
+
+            return records.find(function (item) {
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    String(item.productSalesGroupID || "").trim() === requestedID;
+            }) || null;
+        }
+
         function setEnhancedSmsLayout(isEnhanced) {
             document.getElementById("openingMessage").hidden = isEnhanced;
             document.getElementById("smsDescription").hidden = isEnhanced;
             document.getElementById("smsFallbackInstruction").hidden = isEnhanced;
         }
 
-        function populateEnhancedPage(sculpture, galleryInfo, checkoutInfo) {
+        function populateEnhancedPage(
+            sculpture,
+            galleryInfo,
+            checkoutInfo,
+            iterationCheckouts
+        ) {
             const enhancedContent = document.getElementById("enhancedContent");
             const matchedDetails = document.getElementById("matchedDetails");
             const designName = document.getElementById("designName");
+            const finishName = document.getElementById("finishName");
             const artworkImage = document.getElementById("artworkImage");
             const artistStatement = document.getElementById("artistStatement");
             const smsSection = document.getElementById("smsSection");
             const retailPrice = document.getElementById("retailPrice");
+            const sizePriceList = document.getElementById("sizePriceList");
             const purchaseButton = document.getElementById("purchaseButton");
             const galleryLogo = document.getElementById("galleryLogo");
             const galleryName = document.getElementById("galleryName");
@@ -467,49 +1241,283 @@
 
             designName.textContent = sculpture.displayName || sculpture.lookupKey ||
                 "Lyman Whitaker Wind Sculpture";
-            artistStatement.textContent = sculpture.artistStatement || "";
 
-            const promoVideoURL = normalizeWebsiteURL(sculpture.promoVideoURL);
-            if (promoVideoURL) {
-                if (artistStatement.textContent) {
-                    artistStatement.appendChild(document.createTextNode(" "));
+            const isProductGroup = Array.isArray(sculpture.sizes);
+            const iterationCheckoutMap = new Map();
+
+            (Array.isArray(iterationCheckouts) ? iterationCheckouts : []).forEach(
+                function (item) {
+                    const iterationID = String(
+                        item.iterationGroupID || ""
+                    ).trim();
+                    const iterationURL = normalizeWebsiteURL(item.checkoutURL);
+
+                    if (iterationID && iterationURL && !iterationCheckoutMap.has(iterationID)) {
+                        iterationCheckoutMap.set(iterationID, iterationURL);
+                    }
                 }
-                artistStatement.appendChild(
-                    document.createTextNode("A short video of the piece is available ")
-                );
-                const promoLink = document.createElement("a");
-                promoLink.href = promoVideoURL;
-                promoLink.textContent = "here";
-                artistStatement.appendChild(promoLink);
-                artistStatement.appendChild(document.createTextNode("."));
+            );
+
+            const finishDisplayName = String(sculpture.finishName || "").trim();
+            finishName.textContent = finishDisplayName;
+            finishName.hidden = !isProductGroup || !finishDisplayName;
+
+            renderArtistStatement(
+                artistStatement,
+                sculpture.artistStatement,
+                sculpture.promoVideoURL,
+                getPromoOptions(sculpture, checkoutInfo && checkoutInfo.checkoutURL, designName.textContent)
+            );
+
+            smsSection.hidden = shouldHideSms(galleryInfo);
+
+            sizePriceList.replaceChildren();
+            sizePriceList.hidden = true;
+
+            if (isProductGroup) {
+                retailPrice.hidden = true;
+                retailPrice.textContent = "";
+
+                const orderedSizes = sculpture.sizes.slice().sort(function (left, right) {
+                    const leftIterationID = String(
+                        left.iterationGroupID || ""
+                    ).trim();
+                    const rightIterationID = String(
+                        right.iterationGroupID || ""
+                    ).trim();
+
+                    if (Boolean(leftIterationID) !== Boolean(rightIterationID)) {
+                        return leftIterationID ? 1 : -1;
+                    }
+
+                    if (leftIterationID && rightIterationID) {
+                        const leftNumericID = Number(leftIterationID);
+                        const rightNumericID = Number(rightIterationID);
+
+                        if (
+                            Number.isFinite(leftNumericID) &&
+                            Number.isFinite(rightNumericID) &&
+                            leftNumericID !== rightNumericID
+                        ) {
+                            return leftNumericID - rightNumericID;
+                        }
+
+                        const iterationComparison = String(
+                            left.iterationName || ""
+                        ).localeCompare(String(right.iterationName || ""));
+
+                        if (iterationComparison !== 0) return iterationComparison;
+                    }
+
+                    const leftOrder = Number(left.displayOrder);
+                    const rightOrder = Number(right.displayOrder);
+
+                    if (Number.isFinite(leftOrder) && Number.isFinite(rightOrder)) {
+                        if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+                    } else if (Number.isFinite(leftOrder)) {
+                        return -1;
+                    } else if (Number.isFinite(rightOrder)) {
+                        return 1;
+                    }
+
+                    return String(left.sizeDescription || "").localeCompare(
+                        String(right.sizeDescription || "")
+                    );
+                });
+
+                orderedSizes.forEach(function (size) {
+                    const sizeDescription = String(
+                        size.displayLabel ||
+                        size.sizeDescription ||
+                        ""
+                    ).trim();
+                    const formattedSizePrice = formatPrice(size.retailPrice);
+
+                    if (!sizeDescription || !formattedSizePrice) return;
+
+                    const isIteration = Boolean(
+                        String(size.iterationGroupID || "").trim() ||
+                        String(size.iterationName || "").trim()
+                    );
+
+                    const isExpandable = isIteration ||
+                        Boolean(getAssetImageURL(size.webmVideo) && supportsWebM());
+
+                    const row = document.createElement(
+                        isExpandable ? "button" : "div"
+                    );
+                    row.className = "size-price-row";
+
+                    if (isExpandable) {
+                        row.type = "button";
+                        row.classList.add("iteration-size-trigger");
+                        row.setAttribute("aria-expanded", "false");
+                    }
+
+                    const description = document.createElement("span");
+                    description.className = "size-price-description";
+                    description.textContent = sizeDescription;
+
+                    let iterationHint = null;
+                    if (isExpandable) {
+                        iterationHint = document.createElement("span");
+                        iterationHint.className = "iteration-hint";
+                        iterationHint.textContent = "View image and details";
+                        description.appendChild(iterationHint);
+                    }
+
+                    const amount = document.createElement("span");
+                    amount.className = "size-price-amount";
+                    amount.textContent = formattedSizePrice;
+
+                    row.appendChild(description);
+                    row.appendChild(amount);
+
+                    if (!isExpandable) {
+                        sizePriceList.appendChild(row);
+                        return;
+                    }
+
+                    const entry = document.createElement("div");
+                    entry.className = "iteration-price-entry";
+
+                    const iterationDetail = document.createElement("div");
+                    iterationDetail.className = "iteration-detail";
+                    iterationDetail.hidden = true;
+
+                    const iterationImage = document.createElement("img");
+                    iterationImage.className = "artwork-image";
+                    iterationImage.hidden = true;
+
+                    let detailMedia = null;
+                    iterationDetail.appendChild(iterationImage);
+
+                    const dimensionLines = formatSculptureDimensions(size);
+                    if (dimensionLines.length) {
+                        const dimensions = document.createElement("p");
+                        dimensions.className = "artwork-dimensions";
+                        dimensionLines.forEach(function (line) {
+                            const text = document.createElement("span");
+                            text.textContent = line;
+                            dimensions.appendChild(text);
+                        });
+                        iterationDetail.appendChild(dimensions);
+                    }
+
+                    // Size-only expansions share the main design description.
+                    if (isIteration) {
+                        const iterationStatement = document.createElement("p");
+                        iterationStatement.className = "artist-statement";
+                        renderArtistStatement(
+                            iterationStatement,
+                            size.artistStatement,
+                            size.promoVideoURL,
+                            getPromoOptions(size, iterationCheckoutMap.get(
+                                String(size.iterationGroupID || "").trim()
+                            ), size.displayLabel || size.iterationName)
+                        );
+                        iterationDetail.appendChild(iterationStatement);
+                    }
+
+                    const iterationCheckoutURL = iterationCheckoutMap.get(
+                        String(size.iterationGroupID || "").trim()
+                    );
+
+                    if (iterationCheckoutURL) {
+                        const iterationPurchaseButton = document.createElement("a");
+                        const iterationDisplayName = [
+                            String(sculpture.displayName || "").trim(),
+                            String(size.iterationName || "").trim()
+                        ].filter(Boolean).join(" ");
+
+                        iterationPurchaseButton.className =
+                            "purchase-button iteration-purchase-button";
+                        iterationPurchaseButton.href = iterationCheckoutURL;
+                        iterationPurchaseButton.target = "_blank";
+                        iterationPurchaseButton.rel = "noopener noreferrer";
+                        iterationPurchaseButton.textContent = iterationDisplayName
+                            ? "Purchase " + iterationDisplayName
+                            : "Purchase This Iteration";
+
+                        iterationDetail.appendChild(iterationPurchaseButton);
+                    }
+
+                    entry.appendChild(row);
+                    entry.appendChild(iterationDetail);
+                    sizePriceList.appendChild(entry);
+
+                    row.addEventListener("click", function () {
+                        const shouldOpen = iterationDetail.hidden;
+
+                        sizePriceList.querySelectorAll(".iteration-detail").forEach(
+                            function (openDetail) {
+                                if (openDetail === iterationDetail) return;
+                                if (openDetail.mediaController) {
+                                    openDetail.mediaController.pause();
+                                }
+                                openDetail.hidden = true;
+
+                                const otherTrigger = openDetail.previousElementSibling;
+                                if (otherTrigger) {
+                                    otherTrigger.setAttribute("aria-expanded", "false");
+                                    const otherHint = otherTrigger.querySelector(
+                                        ".iteration-hint"
+                                    );
+                                    if (otherHint) {
+                                        otherHint.textContent = "View image and details";
+                                    }
+                                }
+                            }
+                        );
+
+                        iterationDetail.hidden = !shouldOpen;
+                        if (shouldOpen) {
+                            if (!detailMedia) {
+                                detailMedia = renderArtworkImage(
+                                    iterationImage, size.image,
+                                    sizeDescription + " in motion", size.webmVideo
+                                );
+                                iterationDetail.mediaController = detailMedia;
+                            } else detailMedia.resume();
+                        } else if (detailMedia) detailMedia.pause();
+                        row.setAttribute(
+                            "aria-expanded",
+                            shouldOpen ? "true" : "false"
+                        );
+                        iterationHint.textContent = shouldOpen
+                            ? "Hide image and details"
+                            : "View image and details";
+                    });
+                });
+
+                sizePriceList.hidden = !sizePriceList.children.length;
+            } else {
+                const formattedPrice = formatPrice(sculpture.retailPrice);
+                retailPrice.hidden = !formattedPrice;
+                retailPrice.textContent = formattedPrice;
             }
-
-            smsSection.hidden = isTruthyFlag(galleryInfo.hideCustomerSMS);
-
-            const formattedPrice = formatPrice(sculpture.retailPrice);
-            retailPrice.hidden = !formattedPrice;
-            if (formattedPrice) retailPrice.textContent = formattedPrice;
 
             const checkoutURL = checkoutInfo
                 ? normalizeWebsiteURL(checkoutInfo.checkoutURL)
                 : "";
             purchaseButton.hidden = !checkoutURL;
-            if (checkoutURL) purchaseButton.href = checkoutURL;
-            else purchaseButton.removeAttribute("href");
+            purchaseButton.textContent = isProductGroup
+                ? "Purchase This Design"
+                : "Purchase This Sculpture";
 
-            if (sculpture.image) {
-                const finalImageURL = getAssetImageURL(sculpture.image);
-                artworkImage.alt = (sculpture.displayName ||
-                    "Lyman Whitaker wind sculpture") + " in motion";
-                artworkImage.onload = function () { artworkImage.hidden = false; };
-                artworkImage.onerror = function () {
-                    console.error("Sculpture image failed to load:", finalImageURL);
-                    artworkImage.hidden = true;
-                };
-                artworkImage.src = finalImageURL;
+            if (checkoutURL) {
+                purchaseButton.href = checkoutURL;
             } else {
-                artworkImage.hidden = true;
+                purchaseButton.removeAttribute("href");
             }
+
+            renderArtworkImage(
+                artworkImage,
+                sculpture.image,
+                (sculpture.displayName || "Lyman Whitaker wind sculpture") +
+                    " in motion",
+                sculpture.webmVideo
+            );
 
             const galleryDisplayName = galleryInfo.name || "Gallery Information";
             galleryName.textContent = galleryDisplayName;
@@ -583,7 +1591,7 @@
 
                 if (galleryInfo) {
                     document.getElementById("smsSection").hidden =
-                        isTruthyFlag(galleryInfo.hideCustomerSMS);
+                        shouldHideSms(galleryInfo);
                 }
 
                 if (!sculpture || !galleryInfo) {
@@ -596,38 +1604,399 @@
                 );
                 populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
                 setEnhancedSmsLayout(true);
-                return sculpture;
+                return {
+                    sculpture: sculpture,
+                    galleryInfo: galleryInfo
+                };
             } catch (error) {
-                console.error("Enhanced NFC page data could not be loaded:", error);
+                console.error("Enhanced QR page data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
                 return null;
             }
         }
 
-        function logAnonymousScan(gallery, design, osTag) {
-            /*
-             * No VisitorID, localStorage value, full user-agent, phone number,
-             * or customer identifier is created or transmitted here.
-             */
-            fetch(LOG_ENDPOINT, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                keepalive: true,
-                body: JSON.stringify({
-                    gallery: gallery,
-                    design: design,
-                    os: osTag,
-                    nfc: true,
-                    qr: false
-                })
-            }).then(function (response) {
-                if (!response.ok) {
-                    console.error("Anonymous scan logging failed:", response.status);
-                }
-            }).catch(function (error) {
-                console.error("Anonymous scan logging request failed:", error);
-            });
+        async function loadOptionalProductSalesGroupCheckoutData() {
+            try {
+                const response = await fetch(
+                    PRODUCT_SALES_GROUP_CHECKOUT_DATA_URL,
+                    { cache: "no-cache" }
+                );
+                if (!response.ok) return [];
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.warn(
+                    "Product-sales-group checkout JSON could not be loaded:",
+                    error
+                );
+                return [];
+            }
         }
+
+        async function loadProductGroupContent(
+            galleryKey,
+            productGroupID,
+            finishGroupID
+        ) {
+            try {
+                const responses = await Promise.all([
+                    fetch(PRODUCT_GROUP_DATA_URL, { cache: "no-cache" }),
+                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
+                ]);
+
+                if (!responses[0].ok || !responses[1].ok) {
+                    throw new Error(
+                        "Required product-group or gallery data could not be loaded."
+                    );
+                }
+
+                const data = await Promise.all([
+                    responses[0].json(),
+                    responses[1].json()
+                ]);
+
+                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
+                    throw new Error("Required JSON data was not an array.");
+                }
+
+                const productGroup = findProductGroup(
+                    data[0],
+                    productGroupID,
+                    finishGroupID
+                );
+                const galleryInfo = findGallery(data[1], galleryKey);
+
+                if (galleryInfo) {
+                    document.getElementById("smsSection").hidden =
+                        shouldHideSms(galleryInfo);
+                }
+
+                if (!productGroup || !galleryInfo) {
+                    setEnhancedSmsLayout(false);
+                    return null;
+                }
+
+                const checkoutRecords = await loadOptionalCheckoutData();
+                const checkoutInfo = findProductGroupCheckout(
+                    checkoutRecords,
+                    galleryKey,
+                    productGroupID,
+                    finishGroupID
+                );
+
+                const iterationCheckouts = findProductGroupIterationCheckouts(
+                    checkoutRecords,
+                    galleryKey,
+                    productGroupID,
+                    finishGroupID
+                );
+
+                populateEnhancedPage(
+                    productGroup,
+                    galleryInfo,
+                    checkoutInfo,
+                    iterationCheckouts
+                );
+
+                setEnhancedSmsLayout(true);
+                return {
+                    productGroup: productGroup,
+                    galleryInfo: galleryInfo
+                };
+            } catch (error) {
+                console.error("Product-group QR data could not be loaded:", error);
+                setEnhancedSmsLayout(false);
+                return null;
+            }
+        }
+
+        async function loadProductSalesGroupContent(
+            galleryKey,
+            productSalesGroupID
+        ) {
+            try {
+                const responses = await Promise.all([
+                    fetch(PRODUCT_SALES_GROUP_DATA_URL, { cache: "no-cache" }),
+                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
+                ]);
+
+                if (!responses[0].ok || !responses[1].ok) {
+                    throw new Error(
+                        "Required product-sales-group or gallery data could not be loaded."
+                    );
+                }
+
+                const data = await Promise.all([
+                    responses[0].json(),
+                    responses[1].json()
+                ]);
+
+                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
+                    throw new Error("Required JSON data was not an array.");
+                }
+
+                const productSalesGroup = findProductSalesGroup(
+                    data[0],
+                    productSalesGroupID
+                );
+                const galleryInfo = findGallery(data[1], galleryKey);
+
+                if (galleryInfo) {
+                    document.getElementById("smsSection").hidden =
+                        shouldHideSms(galleryInfo);
+                }
+
+                if (!productSalesGroup || !galleryInfo) {
+                    setEnhancedSmsLayout(false);
+                    return null;
+                }
+
+                const checkoutInfo = findProductSalesGroupCheckout(
+                    await loadOptionalProductSalesGroupCheckoutData(),
+                    galleryKey,
+                    productSalesGroupID
+                );
+
+                populateEnhancedPage(
+                    productSalesGroup,
+                    galleryInfo,
+                    checkoutInfo
+                );
+
+                setEnhancedSmsLayout(true);
+
+                return {
+                    productSalesGroup: productSalesGroup,
+                    checkoutInfo: checkoutInfo,
+                    galleryInfo: galleryInfo
+                };
+            } catch (error) {
+                console.error(
+                    "Product-sales-group QR data could not be loaded:",
+                    error
+                );
+                setEnhancedSmsLayout(false);
+                return null;
+            }
+        }
+
+       const SCAN_ALERT_STORAGE_PREFIX =
+    "whitaker-scan-alert:";
+
+const SCAN_ALERT_SUPPRESSION_MS =
+    30 * 24 * 60 * 60 * 1000;
+
+function createScanAlertStorageKey(
+    gallery,
+    design,
+    scanMethod
+) {
+    /*
+     * This is not a visitor identifier.
+     *
+     * It identifies only this gallery, sculpture, and scan method
+     * within this browser.
+     */
+    const keyValue = [
+        scanMethod,
+        String(gallery || "")
+            .trim()
+            .toLowerCase(),
+        String(design || "")
+            .trim()
+            .toLowerCase()
+    ].join("|");
+
+    return (
+        SCAN_ALERT_STORAGE_PREFIX +
+        encodeURIComponent(keyValue)
+    );
+}
+
+function removeExpiredScanAlertMarkers() {
+    const now = Date.now();
+
+    try {
+        /*
+         * Work backward because entries may be removed
+         * while iterating.
+         */
+        for (
+            let index = localStorage.length - 1;
+            index >= 0;
+            index--
+        ) {
+            const key =
+                localStorage.key(index);
+
+            if (
+                !key ||
+                key.indexOf(
+                    SCAN_ALERT_STORAGE_PREFIX
+                ) !== 0
+            ) {
+                continue;
+            }
+
+            const timestamp =
+                Number(
+                    localStorage.getItem(key)
+                );
+
+            const isInvalid =
+                !Number.isFinite(timestamp);
+
+            const isExpired =
+                Number.isFinite(timestamp) &&
+                now - timestamp >=
+                    SCAN_ALERT_SUPPRESSION_MS;
+
+            /*
+             * Also remove implausible future timestamps in case
+             * the device clock was changed.
+             */
+            const isFuture =
+                Number.isFinite(timestamp) &&
+                timestamp > now + 300000;
+
+            if (
+                isInvalid ||
+                isExpired ||
+                isFuture
+            ) {
+                localStorage.removeItem(key);
+            }
+        }
+    } catch (error) {
+        /*
+         * Some privacy modes disable localStorage.
+         * The page and scan logging will still work.
+         */
+    }
+}
+
+function logAnonymousScanOnce(
+    gallery,
+    design,
+    osTag,
+    scanMethod
+) {
+    const now = Date.now();
+
+    const storageKey =
+        createScanAlertStorageKey(
+            gallery,
+            design,
+            scanMethod
+        );
+
+    let markerWasCreated = false;
+
+    removeExpiredScanAlertMarkers();
+
+    try {
+        const previousTimestamp =
+            Number(
+                localStorage.getItem(
+                    storageKey
+                )
+            );
+
+        if (
+            Number.isFinite(
+                previousTimestamp
+            ) &&
+            previousTimestamp <= now &&
+            now - previousTimestamp <
+                SCAN_ALERT_SUPPRESSION_MS
+        ) {
+            /*
+             * This gallery/sculpture/method already generated
+             * an alert in this browser during the last 30 days.
+             *
+             * The page still loads normally.
+             */
+            return;
+        }
+
+        /*
+         * Set the marker before sending so two nearly simultaneous
+         * page loads are less likely to create duplicate alerts.
+         */
+        localStorage.setItem(
+            storageKey,
+            String(now)
+        );
+
+        markerWasCreated = true;
+
+    } catch (error) {
+        /*
+         * If browser storage is unavailable, continue with normal
+         * anonymous logging. No page functionality is interrupted.
+         */
+    }
+
+    fetch(
+        LOG_ENDPOINT,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            keepalive: true,
+
+            body: JSON.stringify({
+                gallery: gallery,
+                design: design,
+                os: osTag,
+
+                nfc:
+                    scanMethod === "nfc",
+
+                qr:
+                    scanMethod === "qr"
+            })
+        }
+    )
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error(
+                "Scan logging returned HTTP " +
+                response.status
+            );
+        }
+    })
+    .catch(function (error) {
+        /*
+         * If the request was unsuccessful, remove the new marker.
+         * The next visit can then try sending the alert again.
+         */
+        if (markerWasCreated) {
+            try {
+                if (
+                    localStorage.getItem(
+                        storageKey
+                    ) === String(now)
+                ) {
+                    localStorage.removeItem(
+                        storageKey
+                    );
+                }
+            } catch (storageError) {
+                // Storage may be unavailable.
+            }
+        }
+
+        console.error(
+            "Anonymous scan logging failed:",
+            error
+        );
+    });
+}
 
         function configureSmsConfirmation(finalSmsLink) {
             const smsButton = document.getElementById("smsButton");
@@ -658,8 +2027,206 @@
 
         async function initializePage() {
             const urlParams = new URLSearchParams(window.location.search);
+            const scanAlertEnabled = urlParams.get("a") !== "0";
+
+            /*
+             * a=0 identifies a non-tracked presentation. Sending an SMS
+             * necessarily identifies the sender's phone number, so suppress
+             * the complete SMS option for these links as well.
+             */
+            document.documentElement.dataset.suppressSms =
+                scanAlertEnabled ? "false" : "true";
+
+            if (!scanAlertEnabled) {
+                document.getElementById("analyticsNotice").hidden = true;
+                document.getElementById("smsSection").hidden = true;
+            }
+
             const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
-            const rawDesign = cleanParameter(urlParams.get("d"), "Artist", 200);
+            const galleryKey = normalizeGalleryKey(gallery);
+            const productSalesGroupID = cleanParameter(
+                urlParams.get("psg"),
+                "",
+                20
+            );
+            const productGroupID = cleanParameter(
+                urlParams.get("pg"),
+                "",
+                20
+            );
+            const finishGroupID = cleanParameter(
+                urlParams.get("f"),
+                "",
+                20
+            );
+            const hasGroupParameter =
+                productGroupID !== "" || finishGroupID !== "";
+            const hasProductGroup =
+                /^\d+$/.test(productGroupID) &&
+                /^\d+$/.test(finishGroupID);
+            const hasProductSalesGroupParameter =
+                productSalesGroupID !== "";
+            const hasProductSalesGroup =
+                /^\d+$/.test(productSalesGroupID);
+            const osTag = getOSTag();
+
+            if (hasProductSalesGroupParameter && hasGroupParameter) {
+                const statusMessage = document.getElementById("statusMessage");
+                statusMessage.textContent =
+                    "This link contains conflicting sculpture-group options. " +
+                    "Please use the gallery link below or try scanning again.";
+                statusMessage.hidden = false;
+                return;
+            }
+
+            if (hasProductSalesGroupParameter && !hasProductSalesGroup) {
+                const statusMessage = document.getElementById("statusMessage");
+                statusMessage.textContent =
+                    "This product grouping could not be identified. Please use " +
+                    "the gallery link below or try scanning again.";
+                statusMessage.hidden = false;
+                return;
+            }
+
+            if (hasGroupParameter && !hasProductGroup) {
+                const statusMessage = document.getElementById("statusMessage");
+                statusMessage.textContent =
+                    "This price-list link is missing a valid design or finish. " +
+                    "Please use the gallery link below or try scanning again.";
+                statusMessage.hidden = false;
+                return;
+            }
+
+            /*
+             * Product-sales-group mode represents one complete, saleable
+             * arrangement, so it behaves like a standard d= sculpture while
+             * retaining its separate ID namespace.
+             */
+            if (hasProductSalesGroup) {
+                const salesGroupResult = await loadProductSalesGroupContent(
+                    galleryKey,
+                    productSalesGroupID
+                );
+
+                if (!salesGroupResult) {
+                    const statusMessage = document.getElementById("statusMessage");
+                    statusMessage.textContent =
+                        "This product grouping could not be found. Please use " +
+                        "the gallery link below or try again later.";
+                    statusMessage.hidden = false;
+                    return;
+                }
+
+                const productSalesGroup =
+                    salesGroupResult.productSalesGroup;
+                const checkoutInfo = salesGroupResult.checkoutInfo;
+                const canonicalGallery = cleanParameter(
+                    salesGroupResult.galleryInfo &&
+                        salesGroupResult.galleryInfo.galleryID,
+                    gallery,
+                    30
+                );
+                const salesGroupDisplayName =
+                    String(productSalesGroup.displayName || "").trim() ||
+                    "Product Sales Group " + productSalesGroupID;
+                const smsLookupValue =
+                    String(
+                        checkoutInfo && checkoutInfo.smsMessage
+                            ? checkoutInfo.smsMessage
+                            : productSalesGroup.abbreviation ||
+                              salesGroupDisplayName
+                    ).trim();
+                const smsDesign = ensureMessageInstruction(smsLookupValue);
+                const messageBody =
+                    "*" + canonicalGallery + "* " + smsDesign + " " + osTag;
+
+                if (scanAlertEnabled) {
+                    configureSmsConfirmation(
+                        createSmsLink("+14352362244", messageBody)
+                    );
+                }
+
+                if (scanAlertEnabled) {
+                    logAnonymousScanOnce(
+                        canonicalGallery,
+                        salesGroupDisplayName,
+                        osTag,
+                        "nfc"
+                    );
+                }
+
+                return;
+            }
+
+            /*
+             * Product-group mode is used by price-list QR codes.
+             * Existing d= links continue through the standard branch below.
+             */
+            if (hasProductGroup) {
+                /*
+                 * Product-group pages represent multiple sizes, so the SMS
+                 * automation cannot unambiguously identify one sculpture.
+                 * Keep SMS available only on standard d= pages.
+                 */
+                document.getElementById("smsSection").hidden = true;
+
+                const productGroupResult = await loadProductGroupContent(
+                    galleryKey,
+                    productGroupID,
+                    finishGroupID
+                );
+
+                /* populateEnhancedPage applies the gallery's normal SMS rule;
+                   product-group mode always overrides it. */
+                document.getElementById("smsSection").hidden = true;
+
+                if (!productGroupResult) {
+                    const statusMessage = document.getElementById("statusMessage");
+                    statusMessage.textContent =
+                        "This sculpture group could not be found. Please use the " +
+                        "gallery link below or try again later.";
+                    statusMessage.hidden = false;
+                    return;
+                }
+
+                const productGroup = productGroupResult.productGroup;
+                const canonicalGallery = cleanParameter(
+                    productGroupResult.galleryInfo &&
+                        productGroupResult.galleryInfo.galleryID,
+                    gallery,
+                    30
+                );
+
+                const groupDisplayName =
+                    String(productGroup.displayName || "").trim() ||
+                    "Product Group " + productGroupID;
+                const finishDisplayName =
+                    String(productGroup.finishName || "").trim();
+                const groupAndFinishName = finishDisplayName
+                    ? groupDisplayName + " " + finishDisplayName
+                    : groupDisplayName;
+
+                if (scanAlertEnabled) {
+                    logAnonymousScanOnce(
+                        canonicalGallery,
+                        groupAndFinishName,
+                        osTag,
+                        "nfc"
+                    );
+                }
+
+                return;
+            }
+
+            /*
+             * Standard sculpture mode. This preserves the behavior of all
+             * existing QR codes that use d= with a design or order-record ID.
+             */
+            const rawDesign = cleanParameter(
+                urlParams.get("d"),
+                "Artist",
+                200
+            );
             const cleanedDisplayDesign = removeMessageInstruction(rawDesign);
             const displayDesign = cleanedDisplayDesign
                 ? formatDesignName(cleanedDisplayDesign)
@@ -669,23 +2236,43 @@
                 "Text us for automated, interactive information about the " +
                 displayDesign + ".";
 
-            const osTag = getOSTag();
-            const messageBody = "*" + gallery + "* " + rawDesign + " " + osTag;
-            const finalSmsLink = createSmsLink("+14352362244", messageBody);
-
-            configureSmsConfirmation(finalSmsLink);
-
-            const matchedSculpture = await loadEnhancedContent(
-                normalizeGalleryKey(gallery),
+            const enhancedResult = await loadEnhancedContent(
+                galleryKey,
                 normalizeSculptureKey(cleanedDisplayDesign)
             );
+
+            const matchedSculpture = enhancedResult
+                ? enhancedResult.sculpture
+                : null;
+            const canonicalGallery = cleanParameter(
+                enhancedResult && enhancedResult.galleryInfo
+                    ? enhancedResult.galleryInfo.galleryID
+                    : "",
+                gallery,
+                30
+            );
+            const smsDesign = ensureMessageInstruction(rawDesign);
+            const messageBody =
+                "*" + canonicalGallery + "* " + smsDesign + " " + osTag;
+            const finalSmsLink = createSmsLink("+14352362244", messageBody);
+
+            if (scanAlertEnabled) {
+                configureSmsConfirmation(finalSmsLink);
+            }
 
             const loggedDesignName =
                 matchedSculpture && matchedSculpture.displayName
                     ? String(matchedSculpture.displayName).trim()
                     : cleanedDisplayDesign;
 
-            logAnonymousScan(gallery, loggedDesignName, osTag);
+            if (scanAlertEnabled) {
+                logAnonymousScanOnce(
+                    canonicalGallery,
+                    loggedDesignName,
+                    osTag,
+                    "nfc"
+                );
+            }
 
             /* Messages is never opened automatically. */
         }
