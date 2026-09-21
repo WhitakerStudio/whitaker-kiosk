@@ -498,7 +498,15 @@
             display: flex; flex-wrap: nowrap; align-items: center; gap: 8px;
             padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
         }
-        .promo-top { top: 0; padding-top: max(16px, env(safe-area-inset-top)); background: linear-gradient(#000c, transparent); }
+        .promo-top { top: 0; padding-top: max(16px, env(safe-area-inset-top)); padding-right: calc(max(12px, env(safe-area-inset-right)) + 52px); background: linear-gradient(#000c, transparent); }
+        .promo-top, .promo-bottom { pointer-events: none; }
+        .promo-top > *, .promo-bottom > * { pointer-events: auto; }
+        .promo-viewer .promo-volume {
+            position: absolute; z-index: 4;
+            top: max(16px, env(safe-area-inset-top));
+            right: max(12px, env(safe-area-inset-right));
+            background: #14141455; border-color: transparent;
+        }
         .promo-bottom { bottom: 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, #000e); }
         .promo-viewer .promo-action {
             display: inline-flex; align-items: center; justify-content: center;
@@ -518,7 +526,7 @@
         .promo-viewer .promo-play {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 1; width: 72px; height: 72px; border-radius: 50%;
-            background: #151515c9; padding: 20px;
+            background: #15151560; border-color: #ffffff70; padding: 20px;
         }
         .promo-viewer .promo-play svg { width: 30px; height: 30px; }
         .promo-seek { flex: 1 1 100px; min-width: 40px; width: 100%; height: 40px; accent-color: #fff; }
@@ -826,9 +834,12 @@
             dialog.setAttribute("aria-labelledby", "promo-title");
             // Fixed markup only. All data is assigned with textContent / validated URLs.
             dialog.innerHTML = `
-                <div class="promo-stage" role="button" tabindex="0" aria-label="Pause video"></div>
+                <div class="promo-stage" role="button" tabindex="0" aria-label="Show video controls" aria-expanded="false"></div>
                 <button type="button" class="promo-action promo-play" data-action="play" aria-label="Play video" title="Play video" hidden>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path class="promo-play-icon" d="M8 5v14l11-7z"/>
+                        <path class="promo-pause-icon" hidden d="M6 5h4v14H6zm8 0h4v14h-4z"/>
+                    </svg>
                 </button>
                 <div class="promo-top">
                     <button type="button" class="promo-action promo-back" data-action="back">
@@ -837,13 +848,13 @@
                     </button>
                     <button type="button" class="promo-action promo-format" data-action="format"></button>
                     <a class="promo-action promo-purchase" data-action="purchase" hidden>Purchase</a>
-                    <button type="button" class="promo-action promo-icon" data-action="sound" aria-label="Turn sound on" title="Turn sound on">
+                </div>
+                    <button type="button" class="promo-action promo-icon promo-volume" data-action="sound" aria-label="Turn sound on" title="Turn sound on">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path class="promo-muted-icon" d="M4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73L19.73 21 21 19.73 4.27 3zM12 4 9.91 6.09 12 8.18V4zm4.5 8c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zM14 3.23v2.06c2.89.86 5 3.54 5 6.71 0 .94-.2 1.82-.54 2.64l1.51 1.51A8.9 8.9 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77z"/>
                             <path class="promo-audible-icon" hidden d="M3 9v6h4l5 5V4L7 9H3zm11-1.03v8.06a4.5 4.5 0 0 0 0-8.06zm0-4.74v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/>
                         </svg>
                     </button>
-                </div>
                 <div class="promo-message" hidden role="status">
                     <p></p><a class="promo-action" data-action="fallback" hidden>Open original promo</a>
                 </div>
@@ -860,6 +871,9 @@
             const message = dialog.querySelector(".promo-message");
             const seek = dialog.querySelector(".promo-seek");
             const time = dialog.querySelector(".promo-time");
+            const topControls = dialog.querySelector(".promo-top");
+            const bottomControls = dialog.querySelector(".promo-bottom");
+            let controlsVisible = false;
             let options, video, format, muted = true, trigger, previousOverflow, resumeVideos = [];
             let historyOwned = false;
             const stamp = seconds => {
@@ -869,6 +883,16 @@
             function say(text) {
                 message.querySelector("p").textContent = text;
                 message.hidden = !text;
+                if (text) setControlsVisible(true);
+            }
+            function setControlsVisible(visible) {
+                controlsVisible = visible;
+                topControls.hidden = !visible;
+                bottomControls.hidden = !visible;
+                action("play").hidden = !visible;
+                stage.setAttribute("aria-expanded", String(visible));
+                stage.setAttribute("aria-label", visible ? "Hide video controls" : "Show video controls");
+                if (!visible && dialog.open) stage.focus({preventScroll: true});
             }
             function release() {
                 if (video) {
@@ -879,9 +903,12 @@
             }
             function refresh() {
                 if (!video) return;
-                action("play").hidden = !video.paused;
-                stage.setAttribute("aria-label", video.paused ? "Video paused. Use the Play button to resume." : "Pause video");
-                if (!video.paused && document.activeElement === action("play")) stage.focus({preventScroll: true});
+                action("play").hidden = !controlsVisible;
+                const playbackLabel = video.paused ? "Play video" : "Pause video";
+                action("play").setAttribute("aria-label", playbackLabel);
+                action("play").title = playbackLabel;
+                dialog.querySelector(".promo-play-icon").toggleAttribute("hidden", !video.paused);
+                dialog.querySelector(".promo-pause-icon").toggleAttribute("hidden", video.paused);
                 const soundLabel = video.muted ? "Turn sound on" : "Mute sound";
                 action("sound").setAttribute("aria-label", soundLabel);
                 action("sound").title = soundLabel;
@@ -901,6 +928,7 @@
                     if (video !== current || !dialog.open || error.name === "AbortError") return;
                     if (error.name === "NotAllowedError") {
                         say(""); // The central Play overlay is the retry affordance.
+                        setControlsVisible(true);
                     } else {
                         say("This video could not be played. Try the other format or open the original promo.");
                     }
@@ -956,14 +984,17 @@
                 format = format === "vertical" ? "wide" : "vertical";
                 loadFormat(); // Separate edits can differ in length; switch starts the selected edit.
             });
-            action("play").addEventListener("click", play);
-            // Only the video surface pauses playback; toolbar/seek actions are siblings.
-            const pauseFromSurface = () => { if (video && !video.paused) video.pause(); };
-            stage.addEventListener("click", pauseFromSurface);
+            action("play").addEventListener("click", () => {
+                if (video) video.paused ? play() : video.pause();
+            });
+            // Surface taps toggle controls, never playback. Controls are siblings,
+            // so operating the seek bar, speaker, or buttons cannot toggle the surface.
+            const toggleControls = () => setControlsVisible(!controlsVisible);
+            stage.addEventListener("click", toggleControls);
             stage.addEventListener("keydown", event => {
                 if (event.key === " " || event.key === "Enter") {
                     event.preventDefault();
-                    pauseFromSurface();
+                    toggleControls();
                 }
             });
             action("sound").addEventListener("click", () => {
@@ -1013,7 +1044,8 @@
                         historyOwned = true;
                     } catch (_) { historyOwned = false; }
                     format = options.vertical ? "vertical" : "wide";
-                    loadFormat(); action("back").focus();
+                    setControlsVisible(false);
+                    loadFormat(); stage.focus({preventScroll: true});
                 }
             };
         }
