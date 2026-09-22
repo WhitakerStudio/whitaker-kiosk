@@ -665,7 +665,9 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260921-1";
+        const ASSET_VERSION = "?v=20260922-1";
+        const MARKETING_GROUP_DATA_URL =
+            QR_ASSET_ROOT + "data/marketing-groups.json" + ASSET_VERSION;
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
         const PRODUCT_GROUP_DATA_URL = QR_ASSET_ROOT + "data/product-groups.json" + ASSET_VERSION;
         const PRODUCT_SALES_GROUP_DATA_URL =
@@ -819,12 +821,13 @@
         let immersivePromo = null;
         let primaryPromoOptions = null;
         let directPromoAttempted = false;
+        let forcePromoFirst = false;
 
         async function initializePageAndPromo() {
             // Finish the existing category, SMS, and scan-log setup first.
             await initializePage();
             const view = new URLSearchParams(window.location.search).get("view");
-            if (String(view || "").trim().toLowerCase() !== "promo" ||
+            if ((!forcePromoFirst && String(view || "").trim().toLowerCase() !== "promo") ||
                 directPromoAttempted || !primaryPromoOptions ||
                 !(primaryPromoOptions.vertical || primaryPromoOptions.wide)) return;
             directPromoAttempted = true;
@@ -1337,6 +1340,7 @@
                 "Lyman Whitaker Wind Sculpture";
 
             const isProductGroup = Array.isArray(sculpture.sizes);
+            const isMarketingGroup = Array.isArray(sculpture.products);
             const iterationCheckoutMap = new Map();
 
             (Array.isArray(iterationCheckouts) ? iterationCheckouts : []).forEach(
@@ -1366,16 +1370,22 @@
                 primaryPromoOptions
             );
 
-            smsSection.hidden = shouldHideSms(galleryInfo);
+            smsSection.hidden = isMarketingGroup || shouldHideSms(galleryInfo);
 
             sizePriceList.replaceChildren();
+            sizePriceList.setAttribute("aria-label", isMarketingGroup
+                ? "Products in this collection" : "Available sizes and prices");
             sizePriceList.hidden = true;
 
-            if (isProductGroup) {
+            if (isProductGroup || isMarketingGroup) {
                 retailPrice.hidden = true;
                 retailPrice.textContent = "";
 
-                const orderedSizes = sculpture.sizes.slice().sort(function (left, right) {
+                const orderedSizes = (isMarketingGroup ? sculpture.products : sculpture.sizes)
+                    .slice().sort(function (left, right) {
+                    if (isMarketingGroup) {
+                        return Number(left.displayOrder || 0) - Number(right.displayOrder || 0);
+                    }
                     const leftIterationID = String(
                         left.iterationGroupID || ""
                     ).trim();
@@ -1428,16 +1438,19 @@
                         size.sizeDescription ||
                         ""
                     ).trim();
-                    const formattedSizePrice = formatPrice(size.retailPrice);
+                    const formattedSizePrice = size.retailPrice == null
+                        ? "" : formatPrice(size.retailPrice);
 
-                    if (!sizeDescription || !formattedSizePrice) return;
+                    if (!sizeDescription || (!isMarketingGroup && !formattedSizePrice)) return;
 
-                    const isIteration = Boolean(
+                    const isIteration = !isMarketingGroup && Boolean(
                         String(size.iterationGroupID || "").trim() ||
                         String(size.iterationName || "").trim()
                     );
 
-                    const isExpandable = isIteration ||
+                    const memberCheckoutURL = isMarketingGroup
+                        ? normalizeWebsiteURL(size.checkoutURL) : "";
+                    const isExpandable = isIteration || Boolean(memberCheckoutURL) ||
                         Boolean(getAssetImageURL(size.webmVideo) && supportsWebM());
 
                     const row = document.createElement(
@@ -1516,13 +1529,13 @@
                         iterationDetail.appendChild(iterationStatement);
                     }
 
-                    const iterationCheckoutURL = iterationCheckoutMap.get(
+                    const iterationCheckoutURL = isMarketingGroup ? memberCheckoutURL : iterationCheckoutMap.get(
                         String(size.iterationGroupID || "").trim()
                     );
 
                     if (iterationCheckoutURL) {
                         const iterationPurchaseButton = document.createElement("a");
-                        const iterationDisplayName = [
+                        const iterationDisplayName = isMarketingGroup ? sizeDescription : [
                             String(sculpture.displayName || "").trim(),
                             String(size.iterationName || "").trim()
                         ].filter(Boolean).join(" ");
@@ -1803,6 +1816,63 @@
             } catch (error) {
                 console.error("Product-group QR data could not be loaded:", error);
                 setEnhancedSmsLayout(false);
+                return null;
+            }
+        }
+
+        // Match by product ID and iteration, never an unrelated iteration of
+        // the same Design/Finish pairing. Generic design links are a fallback.
+        function findMarketingMemberCheckout(records, galleryKey, product) {
+            const iterationID = String(product.iterationGroupID || "").trim();
+            const matches = (Array.isArray(records) ? records : []).filter(function (item) {
+                const checkoutIteration = String(item.iterationGroupID || "").trim();
+                return normalizeGalleryKey(item.galleryKey) === galleryKey &&
+                    String(item.productID) === String(product.productID) &&
+                    (!checkoutIteration || checkoutIteration === iterationID) &&
+                    Boolean(normalizeWebsiteURL(item.checkoutURL));
+            });
+            return matches.find(function (item) {
+                return String(item.iterationGroupID || "").trim() === iterationID;
+            }) || matches[0] || null;
+        }
+
+        async function loadMarketingGroupContent(galleryKey, marketingGroupID) {
+            try {
+                const responses = await Promise.all([
+                    fetch(MARKETING_GROUP_DATA_URL, { cache: "no-cache" }),
+                    fetch(GALLERY_DATA_URL, { cache: "no-cache" })
+                ]);
+                if (responses.some(function (response) { return !response.ok; })) {
+                    throw new Error("Required marketing-group or gallery data could not be loaded.");
+                }
+                const data = await Promise.all(responses.map(function (response) {
+                    return response.json();
+                }));
+                if (!Array.isArray(data[0]) || !Array.isArray(data[1])) {
+                    throw new Error("Required JSON data was not an array.");
+                }
+                const marketingGroup = data[0].find(function (item) {
+                    return String(item.marketingGroupID) === marketingGroupID;
+                });
+                const galleryInfo = findGallery(data[1], galleryKey);
+                if (!marketingGroup || !galleryInfo || !Array.isArray(marketingGroup.products)) {
+                    return null;
+                }
+                const checkouts = await loadOptionalCheckoutData();
+                const presentation = Object.assign({}, marketingGroup, {
+                    products: marketingGroup.products.map(function (product) {
+                        const checkout = findMarketingMemberCheckout(checkouts, galleryKey, product);
+                        return Object.assign({}, product, {
+                            checkoutURL: checkout ? checkout.checkoutURL : ""
+                        });
+                    })
+                });
+                // A collection has no combined purchase button or SMS request.
+                populateEnhancedPage(presentation, galleryInfo, null);
+                setEnhancedSmsLayout(true);
+                return { marketingGroup: presentation, galleryInfo: galleryInfo };
+            } catch (error) {
+                console.error("Marketing-group data could not be loaded:", error);
                 return null;
             }
         }
@@ -2141,6 +2211,39 @@ function logAnonymousScanOnce(
 
             const gallery = cleanParameter(urlParams.get("g"), "ws", 30);
             const galleryKey = normalizeGalleryKey(gallery);
+            // Keep mg separate from d/pg/psg so existing printed tags are unchanged.
+            if (urlParams.has("mg")) {
+                document.documentElement.dataset.suppressSms = "true";
+                document.getElementById("smsSection").hidden = true;
+                const marketingGroupID = String(urlParams.get("mg") || "").trim();
+                const conflicting = ["d", "pg", "psg", "f"].some(function (key) {
+                    return urlParams.has(key);
+                });
+                const statusMessage = document.getElementById("statusMessage");
+                if (!/^\d+$/.test(marketingGroupID) || conflicting) {
+                    statusMessage.textContent =
+                        "This link needs a valid mg number without d, pg, psg, or f options.";
+                    statusMessage.hidden = false;
+                    return;
+                }
+                const result = await loadMarketingGroupContent(galleryKey, marketingGroupID);
+                if (!result) {
+                    statusMessage.textContent =
+                        "This collection could not be found. Please try again later or use the collection link below.";
+                    statusMessage.hidden = false;
+                    return;
+                }
+                forcePromoFirst = true;
+                if (scanAlertEnabled) {
+                    logAnonymousScanOnce(
+                        cleanParameter(result.galleryInfo.galleryID, gallery, 30),
+                        result.marketingGroup.displayName || "Marketing Group " + marketingGroupID,
+                        getOSTag(),
+                        "qr"
+                    );
+                }
+                return;
+            }
             const productSalesGroupID = cleanParameter(
                 urlParams.get("psg"),
                 "",
