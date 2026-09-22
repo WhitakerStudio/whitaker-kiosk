@@ -817,6 +817,19 @@
         }
 
         let immersivePromo = null;
+        let primaryPromoOptions = null;
+        let directPromoAttempted = false;
+
+        async function initializePageAndPromo() {
+            // Finish the existing category, SMS, and scan-log setup first.
+            await initializePage();
+            const view = new URLSearchParams(window.location.search).get("view");
+            if (String(view || "").trim().toLowerCase() !== "promo" ||
+                directPromoAttempted || !primaryPromoOptions ||
+                !(primaryPromoOptions.vertical || primaryPromoOptions.wide)) return;
+            directPromoAttempted = true;
+            openImmersivePromo(primaryPromoOptions);
+        }
         function openImmersivePromo(options) {
             if (!immersivePromo) immersivePromo = createImmersivePromo();
             immersivePromo.open(options);
@@ -1035,7 +1048,13 @@
                     action("fullscreen").hidden = !dialog.requestFullscreen;
                     previousOverflow = document.body.style.overflow;
                     document.body.style.overflow = "hidden"; window.promoViewerOpen = true;
-                    resumeVideos = Array.from(document.querySelectorAll("video.artwork-video")).filter(item => !item.paused);
+                    resumeVideos = Array.from(document.querySelectorAll("video.artwork-video")).filter(item => {
+                        if (item.hidden || item.closest("[hidden]")) return false;
+                        const bounds = item.getBoundingClientRect();
+                        // Direct entry can open before the background video's
+                        // first play. Resume visible artwork on return in that case.
+                        return !item.paused || (bounds.bottom > 0 && bounds.top < window.innerHeight);
+                    });
                     resumeVideos.forEach(item => item.pause());
                     dialog.showModal();
                     try {
@@ -1337,11 +1356,14 @@
             finishName.textContent = finishDisplayName;
             finishName.hidden = !isProductGroup || !finishDisplayName;
 
+            primaryPromoOptions = getPromoOptions(
+                sculpture, checkoutInfo && checkoutInfo.checkoutURL, designName.textContent
+            );
             renderArtistStatement(
                 artistStatement,
                 sculpture.artistStatement,
                 sculpture.promoVideoURL,
-                getPromoOptions(sculpture, checkoutInfo && checkoutInfo.checkoutURL, designName.textContent)
+                primaryPromoOptions
             );
 
             smsSection.hidden = shouldHideSms(galleryInfo);
@@ -2352,7 +2374,7 @@ function logAnonymousScanOnce(
             /* Messages is never opened automatically. */
         }
 
-        document.addEventListener("DOMContentLoaded", initializePage);
+        document.addEventListener("DOMContentLoaded", initializePageAndPromo);
     </script>
 </body>
 </html>
