@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Artwork loop recovery trial: 2026-09-28 -->
+    <!-- WebM-first artwork; direct GIF/picture fallback on detected stall: 2026-09-28 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyman Whitaker Wind Sculpture</title>
@@ -1167,8 +1167,6 @@
             let watchTimer = null;
             let lastTime = 0;
             let lastProgressAt = 0;
-            let healthySince = 0;
-            let recoveryAttempts = 0;
             let playRequest = 0;
             imageElement.hidden = true;
             imageElement.alt = altText;
@@ -1186,7 +1184,6 @@
             function stopWatch() {
                 if (watchTimer !== null) window.clearTimeout(watchTimer);
                 watchTimer = null;
-                healthySince = 0;
             }
 
             function suspend() {
@@ -1205,35 +1202,20 @@
 
             function checkProgress() {
                 watchTimer = null;
-                if (!shouldPlay()) {
-                    healthySince = 0;
-                    return;
-                }
+                if (!shouldPlay()) return;
                 const now = Date.now();
                 const currentTime = video.currentTime;
                 // A backwards jump is normal when the native loop restarts.
                 if (Math.abs(currentTime - lastTime) > 0.01) {
                     lastTime = currentTime;
                     lastProgressAt = now;
-                    if (!healthySince) healthySince = now;
-                    // Only sustained playback earns a fresh retry budget.
-                    if (now - healthySince >= 10000) recoveryAttempts = 0;
                 } else {
-                    healthySince = 0;
                     // Do not mistake initial loading / network buffering for a loop stall.
                     if (video.readyState < 2) lastProgressAt = now;
                     else if (now - lastProgressAt >= 5000) {
-                        if (recoveryAttempts >= 2) {
-                            showImage();
-                            return;
-                        }
-                        recoveryAttempts++;
-                        lastProgressAt = now;
-                        // Re-seek the existing source: no cache-busting or repeated downloads.
-                        try { video.currentTime = 0; } catch (_) { /* Retry remains bounded. */ }
-                        lastTime = video.currentTime;
-                        play();
-                        // play() starts the next check, unless it fell back or was suspended.
+                        // Once a visible video stalls, use the existing image fallback.
+                        // Do not re-seek/retry it, including after scrolling back into view.
+                        showImage();
                         return;
                     }
                 }
@@ -1842,7 +1824,7 @@
                 });
                 if (list.children.length) {
                     document.getElementById("relatedGroupingsHeading").textContent =
-                         (sculpture.displayName || "This sculpture") +
+                        (sculpture.displayName || "This sculpture") +
                         " in displays and groupings";
                     section.hidden = false;
                 }
