@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Sculpture looping diagnostic</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 24px auto; padding: 0 18px; max-width: 560px; font: 16px/1.45 system-ui, sans-serif; color: #222; }
+        h1 { font-size: 24px; margin-bottom: 8px; }
+        p { margin: 10px 0; }
+        label { display: block; margin-top: 12px; }
+        select, button { font: inherit; padding: 10px; max-width: 100%; }
+        select { width: 100%; }
+        button { margin: 12px 0; }
+        video { display: block; width: 100%; height: 34vh; object-fit: contain; background: white; }
+        pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: #f3f5f7; font: 13px/1.45 monospace; }
+        details { margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Sculpture looping test</h1>
+    <p>This is a separate diagnostic page. It sends no scan alerts and adds no visitor identifiers or browser storage. It only requests the public dataset and selected video; normal hosting logs may still apply.</p>
+    <form method="get">
+        <label for="design">Design</label>
+        <select id="design" name="d"><option value="Windflower">Loading designs…</option></select>
+        <label for="mode">Loop method</label>
+        <select id="mode" name="mode">
+            <option value="native">A — Native browser looping</option>
+            <option value="manual">B — JavaScript restart after each play</option>
+        </select>
+        <button id="start" type="submit" disabled>Start a fresh test</button>
+    </form>
+    <p id="status" role="status">Loading…</p>
+    <div id="stage"></div>
+    <button id="toggle" type="button" disabled>Pause / resume</button>
+    <pre id="stats">Waiting for video.</pre>
+    <p>Keep the video visible for one minute. Then try the other method for one minute. Screenshot the readings if it freezes. This page intentionally has no scroll observer, recovery timer, or GIF fallback.</p>
+    <details><summary>Recent media events (kept only on this page)</summary><pre id="events"></pre></details>
+    <script>
+        const params = new URLSearchParams(location.search);
+        const mode = params.get("mode") === "manual" ? "manual" : "native";
+        const key = value => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+        const requested = key(params.get("d") || "Windflower");
+        const byID = id => document.getElementById(id);
+        const mediaRoot = "https://kiosk.whitakerstudio.com/qr/assets/";
+        const recent = [];
+        let video = null, running = true, repeats = 0, priorTime = 0;
+        let frames = 0, lastFrameAt = null, lastAdvanceAt = null, frameAPI = false;
+        let statusTimer = null;
+        byID("mode").value = mode;
+
+        function note(message) {
+            recent.push(new Date().toLocaleTimeString() + " " + message);
+            if (recent.length > 24) recent.shift();
+            byID("events").textContent = recent.join("\n");
+        }
+
+        function play() {
+            if (!video || !running || document.hidden) return;
+            // An ended clip can also be resumed after returning from another app.
+            if (video.ended) video.currentTime = 0;
+            const attempt = video.play();
+            if (attempt) attempt.catch(error => {
+                if (!running || document.hidden || error.name === "AbortError") return;
+                byID("status").textContent = "Playback rejected: " + error.name + ". Tap Pause / resume to retry.";
+                note("play rejected: " + error.name);
+            });
+        }
+
+        function frame() {
+            frames++;
+            lastFrameAt = performance.now();
+            video.requestVideoFrameCallback(frame);
+        }
+
+        function refresh() {
+            if (!video) return;
+            const secondsSince = timestamp => timestamp === null ? "none yet" :
+                ((performance.now() - timestamp) / 1000).toFixed(1) + " seconds";
+            byID("stats").textContent = [
+                "Method: " + mode,
+                "Repeats observed: " + repeats,
+                "Position: " + video.currentTime.toFixed(2) + " / " + video.duration.toFixed(2) + " seconds",
+                "Paused: " + video.paused + " | Ended: " + video.ended + " | Seeking: " + video.seeking,
+                "Ready state: " + video.readyState + " | Network state: " + video.networkState,
+                "Last timeline movement: " + secondsSince(lastAdvanceAt),
+                "Presented frames: " + (frameAPI ? frames : "API unavailable"),
+                "Last presented frame: " + (frameAPI ? secondsSince(lastFrameAt) : "API unavailable"),
+                "Media error: " + (video.error ? video.error.code + " " + video.error.message : "none")
+            ].join("\n");
+        }
+
+        async function start() {
+            const response = await fetch(mediaRoot + "data/sculptures.json", {cache: "no-cache"});
+            if (!response.ok) throw new Error("Dataset request failed: " + response.status);
+            const records = JSON.parse((await response.text()).replace(/^\uFEFF/, ""));
+            const designs = records.filter(record => record.webmVideo);
+            byID("design").replaceChildren();
+            for (const record of designs) {
+                const option = document.createElement("option");
+                option.value = record.lookupKey;
+                option.textContent = record.displayName || record.lookupKey;
+                option.selected = key(record.lookupKey) === requested;
+                byID("design").appendChild(option);
+            }
+            byID("start").disabled = false;
+            const record = designs.find(item => key(item.lookupKey) === requested);
+            if (!record) throw new Error("No WebM for this design. Select another design above.");
+            const filename = String(record.webmVideo).replace(/\\/g, "/").split("/").pop();
+            if (!filename) throw new Error("No video filename.");
+            video = document.createElement("video");
+            video.muted = true;
+            video.defaultMuted = true;
+            video.playsInline = true;
+            video.setAttribute("playsinline", "");
+            video.setAttribute("aria-label", record.displayName || "Sculpture");
+            video.loop = mode === "native";
+            video.preload = "none";
+            byID("stage").appendChild(video);
+            for (const name of ["loadedmetadata", "playing", "pause", "waiting", "stalled", "seeking", "seeked", "error"]) {
+                video.addEventListener(name, () => note(name + " @ " + video.currentTime.toFixed(2)));
+            }
+            video.addEventListener("timeupdate", () => {
+                const current = video.currentTime;
+                if (Math.abs(current - priorTime) > 0.01) lastAdvanceAt = performance.now();
+                if (mode === "native" && current < priorTime - 0.1) repeats++;
+                priorTime = current;
+            });
+            video.addEventListener("ended", () => {
+                note("ended");
+                if (mode === "manual") {
+                    repeats++;
+                    // With loop=false, use the completed-play event rather than native looping.
+                    // No load(), source replacement, or watchdog is used here.
+                    play();
+                }
+            });
+            frameAPI = typeof video.requestVideoFrameCallback === "function";
+            if (frameAPI) video.requestVideoFrameCallback(frame);
+            video.src = mediaRoot + "images/" + encodeURIComponent(filename);
+            byID("toggle").disabled = false;
+            byID("status").textContent = (record.displayName || record.lookupKey) + " — " + mode + " looping";
+            statusTimer = window.setInterval(refresh, 1000);
+            play();
+        }
+
+        byID("toggle").addEventListener("click", () => {
+            if (!video) return;
+            if (video.paused) { running = true; play(); }
+            else { running = false; video.pause(); }
+        });
+        document.addEventListener("visibilitychange", () => {
+            if (!video) return;
+            note(document.hidden ? "page hidden" : "page visible");
+            if (document.hidden) video.pause();
+            else play();
+        });
+        window.addEventListener("pagehide", () => {
+            if (video) video.pause();
+            window.clearInterval(statusTimer);
+            statusTimer = null;
+        });
+        window.addEventListener("pageshow", () => {
+            if (video && statusTimer === null) statusTimer = window.setInterval(refresh, 1000);
+            play();
+        });
+        start().catch(error => { byID("status").textContent = error.message; });
+    </script>
+</body>
+</html>
