@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Artwork loop recovery trial: 2026-09-28 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyman Whitaker Wind Sculpture</title>
@@ -1163,13 +1164,88 @@
             let failed = false;
             let active = true;
             let observer = null;
+            let inView = !("IntersectionObserver" in window);
+            let watchTimer = null;
+            let lastTime = 0;
+            let lastProgressAt = 0;
+            let healthySince = 0;
+            let recoveryAttempts = 0;
+            let playRequest = 0;
             imageElement.hidden = true;
             imageElement.alt = altText;
             imageElement.removeAttribute("src");
 
+            function shouldPlay() {
+                if (!video || failed || !active || !inView || document.hidden ||
+                    window.promoViewerOpen || video.hidden || video.closest("[hidden]") ||
+                    !video.isConnected) return false;
+                const rect = video.getBoundingClientRect();
+                return rect.bottom > 0 && rect.top < window.innerHeight &&
+                    rect.right > 0 && rect.left < window.innerWidth;
+            }
+
+            function stopWatch() {
+                if (watchTimer !== null) window.clearTimeout(watchTimer);
+                watchTimer = null;
+                healthySince = 0;
+            }
+
+            function suspend() {
+                // Invalidate pending play failures caused by an intentional pause.
+                playRequest++;
+                stopWatch();
+                if (video) video.pause();
+            }
+
+            function startWatch() {
+                if (watchTimer !== null || !shouldPlay()) return;
+                lastTime = video.currentTime;
+                lastProgressAt = Date.now();
+                watchTimer = window.setTimeout(checkProgress, 1000);
+            }
+
+            function checkProgress() {
+                watchTimer = null;
+                if (!shouldPlay()) {
+                    healthySince = 0;
+                    return;
+                }
+                const now = Date.now();
+                const currentTime = video.currentTime;
+                // A backwards jump is normal when the native loop restarts.
+                if (Math.abs(currentTime - lastTime) > 0.01) {
+                    lastTime = currentTime;
+                    lastProgressAt = now;
+                    if (!healthySince) healthySince = now;
+                    // Only sustained playback earns a fresh retry budget.
+                    if (now - healthySince >= 10000) recoveryAttempts = 0;
+                } else {
+                    healthySince = 0;
+                    // Do not mistake initial loading / network buffering for a loop stall.
+                    if (video.readyState < 2) lastProgressAt = now;
+                    else if (now - lastProgressAt >= 5000) {
+                        if (recoveryAttempts >= 2) {
+                            showImage();
+                            return;
+                        }
+                        recoveryAttempts++;
+                        lastProgressAt = now;
+                        // Re-seek the existing source: no cache-busting or repeated downloads.
+                        try { video.currentTime = 0; } catch (_) { /* Retry remains bounded. */ }
+                        lastTime = video.currentTime;
+                        play();
+                        // play() starts the next check, unless it fell back or was suspended.
+                        return;
+                    }
+                }
+                watchTimer = window.setTimeout(checkProgress, 1000);
+            }
+
             function showImage() {
                 if (failed) return;
                 failed = true;
+                playRequest++;
+                stopWatch();
                 if (observer) observer.disconnect();
                 if (video) {
                     video.pause();
@@ -1185,12 +1261,14 @@
             }
 
             function play() {
-                if (!video || failed || !active || document.hidden || window.promoViewerOpen ||
-                    video.closest("[hidden]")) return;
+                if (!shouldPlay()) return;
+                const request = ++playRequest;
+                startWatch();
                 const attempt = video.play();
                 if (attempt) attempt.catch(error => {
                     // Collapsing a row can interrupt a pending play request.
-                    if (active && error.name !== "AbortError") showImage();
+                    if (request === playRequest && shouldPlay() &&
+                        error.name !== "AbortError") showImage();
                 });
             }
 
@@ -1206,13 +1284,17 @@
                 video.preload = "none";
                 imageElement.before(video);
                 video.addEventListener("error", showImage);
-                video.addEventListener("playing", updateMediaLayout);
+                video.addEventListener("playing", () => {
+                    updateMediaLayout();
+                    startWatch();
+                });
                 video.addEventListener("pause", updateMediaLayout);
                 video.src = videoURL;
                 if ("IntersectionObserver" in window) {
                     observer = new IntersectionObserver(entries => {
-                        if (entries[0].isIntersecting) play();
-                        else video.pause();
+                        inView = entries[entries.length - 1].isIntersecting;
+                        if (inView) play();
+                        else suspend();
                     });
                     observer.observe(video);
                 } else {
@@ -1226,15 +1308,17 @@
                 resume() { active = true; play(); },
                 pause() {
                     active = false;
-                    if (video) video.pause();
+                    suspend();
                     updateMediaLayout();
                 }
             };
             document.addEventListener("visibilitychange", () => {
-                if (video && document.hidden) video.pause();
-                else if (video && video.getBoundingClientRect().bottom > 0 &&
-                    video.getBoundingClientRect().top < window.innerHeight) play();
+                if (document.hidden) suspend();
+                else play();
             });
+            // Safari can restore an existing page from its back/forward cache.
+            window.addEventListener("pagehide", suspend);
+            window.addEventListener("pageshow", () => { if (video) play(); });
             return controller;
         }
 
