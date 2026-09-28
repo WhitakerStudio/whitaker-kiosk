@@ -243,6 +243,31 @@
 
         .selection-link a { color: #2459a6; text-decoration: underline; }
 
+        .related-groupings {
+            margin: 35px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid #ddd;
+            max-width: 500px;
+            overflow-wrap: anywhere;
+        }
+        .related-groupings h2 {
+            margin: 0 0 12px;
+            font-size: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        .related-groupings ul { list-style: none; padding: 0; margin: 0; }
+        .related-groupings a {
+            display: inline-block;
+            padding: 10px 4px;
+            min-height: 44px;
+            font-size: 18px;
+            line-height: 1.4;
+            color: #2459a6;
+            text-decoration: underline;
+        }
+        .related-groupings a:focus-visible { outline: 2px solid #2459a6; outline-offset: 3px; }
+
         .analytics-notice {
             max-width: 700px;
             margin: 35px auto 0;
@@ -605,6 +630,12 @@
             </div>
         </section>
 
+        <section id="relatedGroupings" class="related-groupings"
+                 aria-labelledby="relatedGroupingsHeading" hidden>
+            <h2 id="relatedGroupingsHeading"></h2>
+            <ul id="relatedGroupingsList"></ul>
+        </section>
+
         <p class="selection-link">
             Prefer to browse instead? Click
             <a href="https://kiosk.whitakerstudio.com/">here</a>
@@ -665,7 +696,7 @@
 
     <script>
         const QR_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260922-1";
+        const ASSET_VERSION = "?v=20260926-1";
         const MARKETING_GROUP_DATA_URL =
             QR_ASSET_ROOT + "data/marketing-groups.json" + ASSET_VERSION;
         const SCULPTURE_DATA_URL = QR_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
@@ -1681,6 +1712,62 @@
             }
         }
 
+        // Optional recommendations for individual d= pages only. Match actual
+        // Product_ID, including when the d lookup itself is an Order_Record_ID.
+        async function loadRelatedMarketingGroups(sculpture, galleryKey) {
+            const section = document.getElementById("relatedGroupings");
+            const list = document.getElementById("relatedGroupingsList");
+            section.hidden = true;
+            list.replaceChildren();
+            const productID = String(sculpture.productID || "").trim();
+            if (!/^\d+$/.test(productID) || productID === "0") return;
+
+            try {
+                const response = await fetch(MARKETING_GROUP_DATA_URL, { cache: "no-cache" });
+                if (!response.ok) return;
+                const groups = await response.json();
+                if (!Array.isArray(groups)) return;
+                const seen = new Set();
+                const currentURL = new URL(window.location.href);
+                groups.forEach(function (group) {
+                    const id = String(group.marketingGroupID || "").trim();
+                    const title = String(group.displayName || "").trim();
+                    if (!/^\d+$/.test(id) || id === "0" || !title || seen.has(id) ||
+                        !(safePromoURL(group.promoWebmVertical) || safePromoURL(group.promoWebmWide)) ||
+                        !Array.isArray(group.products) ||
+                        !group.products.some(function (member) {
+                            return String(member.productID || "").trim() === productID;
+                        })) return;
+                    seen.add(id);
+                    // Stay on the current QR/NFC route, dropping d and any other
+                    // category parameters. mg automatically starts the promo.
+                    const destination = new URL(currentURL.href);
+                    destination.search = "";
+                    destination.hash = "";
+                    destination.searchParams.set("g", galleryKey);
+                    destination.searchParams.set("mg", id);
+                    if (currentURL.searchParams.get("a") === "0") {
+                        destination.searchParams.set("a", "0");
+                    }
+                    const item = document.createElement("li");
+                    const link = document.createElement("a");
+                    link.textContent = title;
+                    link.href = destination.href;
+                    item.appendChild(link);
+                    list.appendChild(item);
+                });
+                if (list.children.length) {
+                    document.getElementById("relatedGroupingsHeading").textContent =
+                        "See " + (sculpture.displayName || "this sculpture") +
+                        " in displays and groupings";
+                    section.hidden = false;
+                }
+            } catch (error) {
+                // Missing optional data never blocks sculpture details or promo.
+                console.warn("Related marketing groupings could not be loaded:", error);
+            }
+        }
+
         async function loadEnhancedContent(galleryKey, sculptureKey) {
             try {
                 const responses = await Promise.all([
@@ -1714,6 +1801,10 @@
                 );
                 populateEnhancedPage(sculpture, galleryInfo, checkoutInfo);
                 setEnhancedSmsLayout(true);
+                // Do not delay the page's existing SMS/logging or promo-first setup.
+                void loadRelatedMarketingGroups(
+                    sculpture, normalizeGalleryKey(galleryInfo.galleryID || galleryKey)
+                );
                 return {
                     sculpture: sculpture,
                     galleryInfo: galleryInfo
