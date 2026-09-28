@@ -55,6 +55,14 @@
             line-height: 1.5;
         }
         .artwork-dimensions span { display: block; }
+        .shipping-note {
+            margin: 12px auto 20px;
+            font-size: 18px;
+            line-height: 1.5;
+            font-weight: 400;
+            color: #555;
+        }
+        #shippingNote { margin-top: -12px; }
         .artist-statement a { color: #2459a6; text-decoration: underline; }
 
         .finish-name {
@@ -607,6 +615,7 @@
 
         <section id="matchedDetails" hidden>
             <p id="retailPrice" class="price"></p>
+            <p id="shippingNote" class="shipping-note" hidden></p>
 
             <div id="sizePriceList" class="size-price-list"
                  aria-label="Available sizes and prices" hidden></div>
@@ -698,7 +707,7 @@
     <script>
         // Share the QR asset library; NFC does not need a duplicate copy.
         const NFC_ASSET_ROOT = "/qr/assets/";
-        const ASSET_VERSION = "?v=20260926-1";
+        const ASSET_VERSION = "?v=20260928-shipping-1";
         const MARKETING_GROUP_DATA_URL =
             NFC_ASSET_ROOT + "data/marketing-groups.json" + ASSET_VERSION;
         const SCULPTURE_DATA_URL = NFC_ASSET_ROOT + "data/sculptures.json" + ASSET_VERSION;
@@ -804,6 +813,23 @@
         function createSmsLink(phone, messageBody) {
             const separator = isIOSDevice() ? "&body=" : "?body=";
             return "sms:" + phone + separator + encodeURIComponent(messageBody);
+        }
+
+        function formatShippingNote(record) {
+            if (isTruthyFlag(record.shippingQuoteRequired)) {
+                return "Shipping quote required for this piece.";
+            }
+            // Older exports lack shipping fields: do not invent a free rate or
+            // calculate from the displayed price, which may be a unique sale price.
+            const value = record.shippingCharge;
+            if (value == null || typeof value === "boolean" || String(value).trim() === "") return "";
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount < 0) return "";
+            return "Shipping within the contiguous United States " +
+                amount.toLocaleString("en-US", {
+                    style: "currency", currency: "USD",
+                    minimumFractionDigits: 2, maximumFractionDigits: 2
+                });
         }
 
         function normalizeWebsiteURL(value) {
@@ -1426,6 +1452,7 @@
             const artistStatement = document.getElementById("artistStatement");
             const smsSection = document.getElementById("smsSection");
             const retailPrice = document.getElementById("retailPrice");
+            const shippingNote = document.getElementById("shippingNote");
             const sizePriceList = document.getElementById("sizePriceList");
             const purchaseButton = document.getElementById("purchaseButton");
             const galleryLogo = document.getElementById("galleryLogo");
@@ -1439,6 +1466,9 @@
 
             const isProductGroup = Array.isArray(sculpture.sizes);
             const isMarketingGroup = Array.isArray(sculpture.products);
+            shippingNote.textContent = isProductGroup || isMarketingGroup
+                ? "" : formatShippingNote(sculpture);
+            shippingNote.hidden = !shippingNote.textContent;
             const iterationCheckoutMap = new Map();
 
             (Array.isArray(iterationCheckouts) ? iterationCheckouts : []).forEach(
@@ -1610,6 +1640,16 @@
                             dimensions.appendChild(text);
                         });
                         iterationDetail.appendChild(dimensions);
+                    }
+
+                    if (isProductGroup) {
+                        const shippingText = formatShippingNote(size);
+                        if (shippingText) {
+                            const shipping = document.createElement("p");
+                            shipping.className = "shipping-note";
+                            shipping.textContent = shippingText;
+                            iterationDetail.appendChild(shipping);
+                        }
                     }
 
                     // Size-only expansions share the main design description.
