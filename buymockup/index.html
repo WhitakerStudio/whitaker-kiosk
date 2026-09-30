@@ -174,7 +174,9 @@
         catch { throw new Error('The server returned an unreadable response. Please try again later.'); }
         if (!response.ok) {
           const errors = Array.isArray(body?.errors) ? body.errors.filter(x=>typeof x==='string') : [];
-          throw new Error(errors.length ? errors.join(' ') : 'The request could not be completed. Please try again later.');
+          const error = new Error(errors.length ? errors.join(' ') : 'The request could not be completed. Please try again later.');
+          error.status = response.status;
+          throw error;
         }
         return body;
       } catch (error) {
@@ -309,6 +311,21 @@
       }
       $('layout').append(section);
     }
+    let checkoutBrowserUuid = null;
+    function getBrowserUuid() {
+      // Checkout continuity only, scoped to this offer and tab. Not scan analytics.
+      // sessionStorage survives reloads; the server controls reservation expiration.
+      if (checkoutBrowserUuid) return checkoutBrowserUuid;
+      const storageKey = 'whitaker_checkout_uuid:' + new URLSearchParams({g:route.gallery,[route.kind]:key(route.item)});
+      const uuidV4Pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      try {
+        const saved = sessionStorage.getItem(storageKey);
+        if (saved && uuidV4Pattern.test(saved)) return checkoutBrowserUuid = saved;
+      } catch { /* Storage may be blocked; retain continuity for this loaded page. */ }
+      checkoutBrowserUuid = crypto.randomUUID();
+      try { sessionStorage.setItem(storageKey, checkoutBrowserUuid); } catch {}
+      return checkoutBrowserUuid;
+    }
     async function startCheckout() {
       if (busy || returned || !pricing || $('continue').disabled) return;
       const destination = $('destination').value;
@@ -323,18 +340,18 @@
       try {
         const Stripe = await loadStripe();
         stripeInstance ||= Stripe(STRIPE_PUBLIC_KEY);
-        let sessionPromise;
+        // Request directly so Virgo's reservation errors are not swallowed by Stripe.
+        const browserUuid = getBrowserUuid();
+        sessionRequested = true;
+        const body = await jsonRequest(offerURL(),{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({destination, browser_uuid:browserUuid})
+        });
+        if (typeof body?.client_secret !== 'string' || !body.client_secret.trim()) throw new Error('The server did not return a checkout session.');
+        const clientSecret = body.client_secret;
         const instance = await stripeInstance.initEmbeddedCheckout({
-          // Cache this attempt: even if Stripe calls twice, create just one request.
-          fetchClientSecret: () => sessionPromise ||= (async () => {
-            sessionRequested = true;
-            const body = await jsonRequest(offerURL(),{
-              method:'POST', headers:{'Content-Type':'application/json'},
-              body:JSON.stringify({destination})
-            });
-            if (typeof body?.client_secret !== 'string' || !body.client_secret.trim()) throw new Error('The server did not return a checkout session.');
-            return body.client_secret;
-          })(),
+          // Stripe may call more than once; always return the same session secret.
+          fetchClientSecret: () => Promise.resolve(clientSecret),
           onComplete: () => { showReturnMessage(); destroyCheckout(); }
         });
         if (returned) { instance.destroy(); return; }
@@ -347,7 +364,7 @@
         if (returned) return;
         busy=false; $('checkout').hidden=true;
         $('checkout-error').textContent = (error.message || 'Checkout could not be loaded.') +
-          (sessionRequested ? ' If checkout was already started, an item may still be reserved. Check pricing again before retrying; contact the gallery if the issue persists.' : '');
+          (sessionRequested && !(error.status >= 400 && error.status < 500) ? ' If checkout was already started, an item may still be reserved. Check pricing again before retrying; contact the gallery if the issue persists.' : '');
         $('checkout-error').hidden=false;
         await loadPricing();
       }
