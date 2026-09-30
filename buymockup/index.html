@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Sculpture purchase · Design preview</title>
+  <title>Sculpture purchase</title>
   <style>
-    :root { --ink:#222c31; --muted:#606a6f; --accent:#79502e; --accent-hover:#5f3c21; --line:#dce1e3; --surface:#f4f6f7; --radius:12px; }
+    :root { --ink:#222c31; --muted:#606a6f; --accent:#79502e; --accent-hover:#5f3c21; --line:#dce1e3; --surface:#f4f6f7; --radius:12px; --error:#a4271e; --error-bg:#fbeae9; --error-border:#f0c4c0; }
     * { box-sizing:border-box; }
     [hidden] { display:none !important; }
     body { margin:0; color:var(--ink); background:white; font:16px/1.55 Arial,Helvetica,sans-serif; }
@@ -14,7 +14,6 @@
     a { color:inherit; text-underline-offset:4px; }
     button,a,select { -webkit-tap-highlight-color:transparent; }
     :focus-visible { outline:3px solid #3474ad; outline-offset:4px; }
-    .preview-strip { text-align:center; padding:9px 20px; background:var(--ink); color:white; font-size:13px; letter-spacing:.035em; }
     header { margin:auto; max-width:1120px; padding:30px 24px 25px; border-bottom:1px solid var(--line); text-align:center; }
     .brand-logo { display:block; max-width:min(100%,460px); max-height:100px; width:auto; height:auto; margin:auto; object-fit:contain; }
     .brand-name { font:32px/1.2 Georgia,serif; margin:0; }
@@ -30,7 +29,7 @@
     .motion { display:block; margin:8px auto 0; background:white; color:var(--muted); border:0; text-decoration:underline; cursor:pointer; font-size:14px; padding:8px; }
     .art-footer { border-top:1px solid var(--line); margin-top:26px; padding-top:18px; display:flex; gap:20px; justify-content:space-between; font-size:14px; color:var(--muted); }
     .art-footer p { margin:0; }
-    .summary { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
+    .summary,.confirmation { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
     h2 { font-size:23px; line-height:1.3; margin:0 0 24px; font-weight:500; }
     .choice { display:block; margin:0 0 22px; }
     .choice span { display:block; font-size:14px; font-weight:700; margin-bottom:7px; }
@@ -50,19 +49,26 @@
     .primary:hover { background:var(--accent-hover); }
     .primary:disabled { opacity:.55; cursor:not-allowed; }
     .payment-note { text-align:center; margin:12px 0 0; }
+    .pricing-error { background:var(--error-bg); border:1px solid var(--error-border); border-left:4px solid var(--error); border-radius:8px; color:var(--error); padding:14px 16px; margin:0 0 22px; }
+    .pricing-error p { margin:0 0 10px; }
+    .pricing-error p:last-child { margin-bottom:0; }
+    .pricing-error ul { margin:0 0 10px; padding-left:20px; }
+    .pricing-error button { background:white; color:var(--error); border:1px solid var(--error); border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:700; font-size:14px; }
+    .pricing-error button:hover { background:var(--error-bg); }
     .assistance { text-align:center; padding:19px 12px 0; font-size:14px; color:var(--muted); }
     .assistance a { white-space:nowrap; }
     footer { max-width:1072px; margin:auto; padding:22px 24px; border-top:1px solid var(--line); text-align:center; font-size:13px; color:var(--muted); }
     .status { max-width:700px; margin:50px auto; text-align:center; }
-    dialog { width:min(500px,calc(100% - 32px)); border:1px solid var(--line); border-radius:14px; padding:30px; color:var(--ink); box-shadow:0 24px 90px #0003; }
-    dialog::backdrop { background:#15242cb3; }
-    dialog p { margin:0 0 22px; }
-    @media(max-width:760px) { header { padding:24px 22px 20px; } .brand-logo { max-width:min(100%,340px); max-height:80px; } main { padding:28px 20px 32px; } .layout { grid-template-columns:1fr; gap:28px; } .media-stage { height:320px; min-height:0; } .summary { padding:24px; } h1 { font-size:40px; } .art-footer { margin-top:18px; } }
-    @media(max-width:380px) { .summary { padding:18px; } .line { gap:10px; } }
+    @media(max-width:760px) { header { padding:24px 22px 20px; } .brand-logo { max-width:min(100%,340px); max-height:80px; } main { padding:28px 20px 32px; } .layout { grid-template-columns:1fr; gap:28px; } .media-stage { height:320px; min-height:0; } .summary,.confirmation { padding:24px; } h1 { font-size:40px; } .art-footer { margin-top:18px; } }
+    @media(max-width:380px) { .summary,.confirmation { padding:18px; } .line { gap:10px; } }
+    .sandbox { margin:0; padding:9px 20px; background:#222c31; color:white; text-align:center; font-size:13px; }
+    #checkout { margin-top:20px; min-width:0; }
+    #checkout-error { margin-top:16px; }
+    #confirmation-wrapper { align-self:start; }
   </style>
 </head>
 <body>
-  <div class="preview-strip">DESIGN PREVIEW · No orders or payments are submitted</div>
+  <p id="sandbox" class="sandbox" hidden>Sandbox testing · Use test payment details only</p>
   <header>
     <img id="logo" class="brand-logo" alt="" hidden>
     <p id="brand" class="brand-name">Your gallery</p>
@@ -80,165 +86,333 @@
         <p id="dimensions" class="media-caption" hidden></p>
         <div class="art-footer"><p>Designed by<br><strong>Lyman Whitaker</strong></p><p>Crafted by<br><strong>Whitaker Studio</strong></p></div>
       </section>
-      <section aria-labelledby="summary-title">
+      <section id="summary-wrapper" aria-labelledby="summary-title">
         <div class="summary">
           <h2 id="summary-title">Purchase details</h2>
-          <label id="size-field" class="choice" hidden><span>Size / variation</span><select id="size"></select></label>
-          <label class="choice"><span>Shipping destination</span><select id="destination"><option value="contiguous">Contiguous United States</option><option value="alaska">Alaska</option><option value="hawaii">Hawaii</option><option value="other">U.S. territories / international</option></select></label>
+          <label class="choice"><span>Shipping destination</span><select id="destination" disabled><option value="contiguous">Contiguous United States</option><option value="alaska">Alaska</option><option value="hawaii">Hawaii</option><option value="other">U.S. territories / international</option></select></label>
+          <div id="pricing-error" role="alert" class="pricing-error" hidden></div>
           <dl aria-live="polite">
-            <div class="line"><dt>Sculpture</dt><dd id="price">—</dd></div>
-            <div class="line"><dt>Shipping</dt><dd id="shipping">—</dd></div>
+            <div class="line"><dt>Sculpture</dt><dd id="price">Loading…</dd></div>
+            <div class="line"><dt>Shipping</dt><dd id="shipping">Loading…</dd></div>
             <div class="line"><dt>Sales tax</dt><dd>Calculated at checkout</dd></div>
-            <div class="line total"><dt id="total-label">Subtotal before tax</dt><dd id="total">—</dd></div>
+            <div class="line total"><dt id="total-label">Subtotal before tax</dt><dd id="total">Loading…</dd></div>
           </dl>
           <p id="shipping-note" class="small shipping-note"></p>
-          <div class="lead"><h3>Handcrafted for you</h3><p>Your sculpture is handcrafted and will ship in about 4–6 weeks. We’ll email you an estimated shipment date after your order is confirmed. Transit time is additional.</p></div>
-          <button id="continue" class="primary" type="button">Continue to payment</button>
+          <div class="lead"><h3 id="lead-title">Handcrafted for you</h3><p id="lead-copy">Your sculpture is handcrafted and will ship in about 4–6 weeks. We’ll email you an estimated shipment date after your order is confirmed. Transit time is additional.</p></div>
+
+          <button id="continue" class="primary" type="button" hidden disabled>Continue to payment</button>
+          <div id="checkout-error" class="pricing-error" role="alert" hidden></div>
+
+          <div id="checkout"></div>
           <p class="small payment-note">Shipping address and payment details come next.</p>
         </div>
         <p id="assistance" class="assistance" hidden>Questions about your sculpture? <a id="phone"></a></p>
       </section>
     </div>
   </main>
-  <footer>This is a purchase-page concept. Prices and delivery estimates are for review; nothing can be purchased here.</footer>
-  <dialog id="handoff" aria-labelledby="handoff-title"><h2 id="handoff-title">Payment preview</h2><p id="handoff-copy"></p><form method="dialog"><button class="primary">Back to sculpture</button></form></dialog>
+  <footer>Payment is handled securely by Stripe. Review the final amount and shipping terms before submitting payment.</footer>
+
   <script>
     'use strict';
-    // Shared media only; no copied assets, analytics, cookies, or browser storage.
-    // Absolute URL also permits previewing this file outside the kiosk hostname.
+    // Layout/media: Whitaker Studio. Offer validation, totals and sessions: Virgo.
     const ASSET_ROOT = 'https://kiosk.whitakerstudio.com/qr/assets/';
+    const OFFER_ENDPOINT = 'https://www.whitakerstudio.com/orders/published-scan-offer/';
+    // Adam's public SANDBOX key, not a secret. Coordinate key + backend mode before live use.
+    const STRIPE_PUBLIC_KEY = 'pk_test_51UJKO8FWpaGsvZpauv1Wgvw2dzDfygkvqAXmcrWfJTSOBWl9mlT3X4C7ECbdhrOyUzO8hWTaYRbhprPPxS0kNHAC00nH5PdKyU';
     const $ = id => document.getElementById(id);
     const key = value => String(value ?? '').trim().toLowerCase();
-    const money = value => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(value);
-    const number = value => value == null || value === '' ? NaN : Number(value);
-    let product, gallery, group, selected, currentVideo, mediaGeneration = 0;
-    let quoted = true;
-    const params = new URLSearchParams(location.search);
-    // No parameters opens a real-asset example. Explicit unknown keys show an error.
-    const demo = !params.has('d') && !params.has('pg') && !params.has('psg');
-    const galleryKey = params.get('g') || 'WI';
+    const money = cents => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents / 100);
+    let route, product, gallery, pricing = null, busy = false, returned = false;
+    let checkout = null, stripePromise = null, stripeInstance = null, pricingGeneration = 0;
+    let mediaCleanup = () => {};
+    $('sandbox').hidden = !STRIPE_PUBLIC_KEY.startsWith('pk_test_');
+
+    function readRoute(search) {
+      const p = new URLSearchParams(search);
+      for (const name of ['g','d','psg','checkout_id']) {
+        if (p.getAll(name).length > 1) throw new Error('This purchase link contains duplicate parameters.');
+      }
+      if (p.has('pg') || p.has('pid') || p.has('mg')) {
+        throw new Error('Please choose a specific sculpture and size before opening checkout. Group-browsing links are not purchase links.');
+      }
+      const g = (p.get('g') || '').trim();
+      const d = (p.get('d') || '').trim();
+      const psg = (p.get('psg') || '').trim();
+      if (!/^[a-z0-9]{2}$/i.test(g) || p.has('d') === p.has('psg') ||
+          (p.has('d') && (!d || d.length > 255)) ||
+          (p.has('psg') && !/^[1-9]\d*$/.test(psg))) {
+        throw new Error('Use a purchase link with g and either d or psg, but not both.');
+      }
+      if (p.has('checkout_id') && !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(p.get('checkout_id') || '')) {
+        throw new Error('The checkout return reference is invalid. Please contact the gallery before trying another payment.');
+      }
+      return {gallery:g.toUpperCase(), kind:p.has('d')?'d':'psg', item:d || psg, returning:p.has('checkout_id')};
+    }
+    function offerURL() {
+      // Only the agreed selectors go to Virgo; never client prices or Stripe secrets.
+      return OFFER_ENDPOINT + '?' + new URLSearchParams({g:route.gallery,[route.kind]:route.item});
+    }
+    async function jsonRequest(url, options = {}) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 25000);
+      try {
+        const response = await fetch(url, {...options, credentials:'omit', cache:'no-store', signal:controller.signal});
+        let body;
+        try { body = JSON.parse((await response.text()).replace(/^\uFEFF/,'')); }
+        catch { throw new Error('The server returned an unreadable response. Please try again later.'); }
+        if (!response.ok) {
+          const errors = Array.isArray(body?.errors) ? body.errors.filter(x=>typeof x==='string') : [];
+          throw new Error(errors.length ? errors.join(' ') : 'The request could not be completed. Please try again later.');
+        }
+        return body;
+      } catch (error) {
+        if (error.name === 'AbortError') throw new Error('The request timed out. Please check your connection.');
+        throw error;
+      } finally { clearTimeout(timeout); }
+    }
     async function data(file) {
-      const response = await fetch(ASSET_ROOT + 'data/' + file, {credentials:'omit'});
-      if (!response.ok) throw new Error('Could not load ' + file);
-      const records = JSON.parse((await response.text()).replace(/^\uFEFF/,''));
-      if (!Array.isArray(records)) throw new Error('Unexpected data format');
+      const records = await jsonRequest(ASSET_ROOT + 'data/' + file);
+      if (!Array.isArray(records)) throw new Error('The sculpture data could not be read.');
       return records;
     }
     function asset(value) {
-      // Legacy exports sometimes include a Windows path. Match the QR page's leaf-name handling.
       const leaf = String(value || '').replace(/\\/g,'/').split('/').pop();
       return leaf ? ASSET_ROOT + 'images/' + encodeURIComponent(leaf) : '';
     }
+    function priceCents(value, allowZero = true) {
+      if (!['string','number'].includes(typeof value) || !/^\d+(?:\.\d{1,2})?$/.test(String(value))) return null;
+      const cents = Math.round(Number(value) * 100);
+      return Number.isSafeInteger(cents) && cents >= (allowZero ? 0 : 1) ? cents : null;
+    }
+    function readPricing(body) {
+      const sale = priceCents(body?.sale_price, false);
+      const shipping = body?.shipping_charge === null ? null : priceCents(body?.shipping_charge);
+      if (sale === null || (body?.shipping_charge !== null && shipping === null) ||
+          (body?.currency != null && String(body.currency).toUpperCase() !== 'USD') ||
+          !Number.isSafeInteger(sale + (shipping || 0))) {
+        throw new Error('The server returned incomplete or invalid pricing. Checkout is unavailable; please contact the gallery.');
+      }
+      return {sale,shipping};
+    }
+    function renderPricing() {
+      if (!pricing || busy || returned) return;
+      const included = $('destination').value === 'contiguous' && pricing.shipping !== null;
+      $('price').textContent = money(pricing.sale);
+      $('shipping').textContent = included ? money(pricing.shipping) : 'Billed separately';
+      $('total-label').textContent = included ? 'Subtotal before tax' : 'Sculpture price only';
+      $('total').textContent = money(pricing.sale + (included ? pricing.shipping : 0));
+      $('shipping-note').textContent = included
+        ? 'Shipping shown is for the contiguous United States. Final shipping and tax are confirmed before payment.'
+        : 'Shipping is NOT included in this payment. A shipping quote and separate payment request will follow.';
+      $('continue').hidden = false;
+      $('continue').disabled = false;
+      $('destination').disabled = false;
+    }
+    async function loadPricing() {
+      if (busy || returned) return;
+      const generation = ++pricingGeneration;
+      pricing = null;
+      $('continue').hidden = true; $('continue').disabled = true; $('destination').disabled = true;
+      $('pricing-error').hidden = true; $('pricing-error').replaceChildren();
+      for (const id of ['price','shipping','total']) $(id).textContent = 'Loading…';
+      $('shipping-note').textContent = '';
+      try {
+        const body = await jsonRequest(offerURL());
+        if (generation !== pricingGeneration || returned) return;
+        pricing = readPricing(body);
+        renderPricing();
+      } catch (error) {
+        if (generation !== pricingGeneration || returned) return;
+        for (const id of ['price','shipping','total']) $(id).textContent = '—';
+        const text = document.createElement('p'); text.textContent = error.message || 'Unable to load pricing.';
+        const retry = document.createElement('button'); retry.type='button'; retry.textContent='Retry pricing';
+        retry.addEventListener('click', loadPricing);
+        $('pricing-error').replaceChildren(text,retry); $('pricing-error').hidden=false;
+      }
+    }
+    function loadStripe() {
+      if (window.Stripe) return Promise.resolve(window.Stripe);
+      if (stripePromise) return stripePromise;
+      stripePromise = new Promise((resolve,reject) => {
+        const tag = document.createElement('script');
+        let settled = false;
+        const finish = (error) => {
+          if (settled) return; settled = true; clearTimeout(timeout);
+          if (error) { tag.remove(); stripePromise=null; reject(error); }
+          else resolve(window.Stripe);
+        };
+        const timeout = setTimeout(()=>finish(new Error('Stripe could not load. Check your connection and try again.')),20000);
+        tag.src='https://js.stripe.com/v3/'; tag.async=true;
+        tag.addEventListener('load',()=>finish(window.Stripe ? null : new Error('Stripe could not initialize.')),{once:true});
+        tag.addEventListener('error',()=>finish(new Error('Stripe could not load. Please try again.')),{once:true});
+        document.head.append(tag);
+      });
+      return stripePromise;
+    }
+    function destroyCheckout() {
+      const previous = checkout; checkout = null;
+      if (previous) previous.destroy();
+    }
+    function showReturnMessage() {
+      // Neither a query parameter nor a browser callback is proof of payment.
+      // No status endpoint was supplied by Virgo. Do not invent one or claim "paid".
+      returned = true; pricingGeneration++;
+      $('summary-wrapper').hidden = true;
+      if ($('confirmation-wrapper')) return;
+      const section=document.createElement('section'); section.id='confirmation-wrapper'; section.className='confirmation';
+      section.setAttribute('aria-labelledby','confirmation-title');
+      const title=document.createElement('h2'); title.id='confirmation-title'; title.textContent='Checkout status';
+      const text=document.createElement('p');
+      text.textContent='If you submitted payment, please check your email for confirmation and next steps. This page cannot yet verify your payment status. Please contact the gallery before attempting another payment if you are unsure.';
+      section.append(title,text);
+      if (gallery?.phone) {
+        const contact=document.createElement('a'); contact.textContent='Contact the gallery: '+gallery.phone;
+        contact.href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,''); section.append(contact);
+      }
+      $('layout').append(section);
+    }
+    async function startCheckout() {
+      if (busy || returned || !pricing || $('continue').disabled) return;
+      busy = true; $('continue').disabled=true; $('continue').hidden=true; $('destination').disabled=true;
+      $('checkout-error').hidden=true; $('checkout').hidden=false; $('checkout').textContent='Loading secure checkout…';
+      const destination = $('destination').value;
+      let sessionRequested = false;
+      try {
+        const Stripe = await loadStripe();
+        stripeInstance ||= Stripe(STRIPE_PUBLIC_KEY);
+        let sessionPromise;
+        const instance = await stripeInstance.initEmbeddedCheckout({
+          // Cache this attempt: even if Stripe calls twice, create just one request.
+          fetchClientSecret: () => sessionPromise ||= (async () => {
+            sessionRequested = true;
+            const body = await jsonRequest(offerURL(),{
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({destination})
+            });
+            if (typeof body?.client_secret !== 'string' || !body.client_secret.trim()) throw new Error('The server did not return a checkout session.');
+            return body.client_secret;
+          })(),
+          onComplete: () => { showReturnMessage(); destroyCheckout(); }
+        });
+        if (returned) { instance.destroy(); return; }
+        checkout = instance;
+        $('checkout').replaceChildren();
+        checkout.mount('#checkout');
+        $('checkout').scrollIntoView({behavior:'smooth',block:'start'});
+      } catch (error) {
+        destroyCheckout();
+        if (returned) return;
+        busy=false; $('checkout').hidden=true;
+        $('checkout-error').textContent = (error.message || 'Checkout could not be loaded.') +
+          (sessionRequested ? ' If checkout was already started, an item may still be reserved. Check pricing again before retrying; contact the gallery if the issue persists.' : '');
+        $('checkout-error').hidden=false;
+        await loadPricing();
+      }
+    }
     function renderMedia(record) {
-      const generation = ++mediaGeneration;
-      if (currentVideo) { currentVideo.pause(); currentVideo.removeAttribute('src'); currentVideo.load(); }
-      currentVideo = null;
-      $('media').replaceChildren(); $('motion').hidden = true;
-      const imageURL = asset(record.image || product.image);
-      const fallback = () => {
-        if (generation !== mediaGeneration) return;
-        if (currentVideo) { currentVideo.pause(); currentVideo.removeAttribute('src'); currentVideo.load(); currentVideo = null; }
-        $('media').replaceChildren(); $('motion').hidden = true;
-        if (!imageURL) { $('media').textContent = 'Sculpture preview unavailable'; return; }
-        const image = new Image(); image.alt = $('title').textContent;
-        image.onerror = () => { if (generation === mediaGeneration) $('media').textContent = 'Sculpture preview unavailable'; };
-        image.src = imageURL; $('media').append(image);
-      };
-      const video = document.createElement('video');
-      const webm = asset(record.webmVideo);
-      if (!webm || !video.canPlayType('video/webm; codecs="vp9"')) { fallback(); return; }
-      currentVideo = video;
-      video.muted = true; video.defaultMuted = true; video.loop = true; video.playsInline = true; video.preload = 'metadata';
-      video.setAttribute('aria-label', $('title').textContent + ' in motion');
+      mediaCleanup();
+      $('media').replaceChildren(); $('motion').hidden=true;
+      const imageURL=asset(record.image), webm=asset(record.webmVideo);
+      let video=null, observer=null, watch=null, failed=false, visible=true;
+      let userPaused=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let lastTime=0, movedAt=Date.now(), playGeneration=0;
+      const stopWatch=()=>{clearInterval(watch); watch=null;};
+      function fallback() {
+        if(failed) return; failed=true; playGeneration++; stopWatch(); observer?.disconnect();
+        if(video) {video.pause();video.removeAttribute('src');video.load();}
+        $('media').replaceChildren(); $('motion').hidden=true;
+        if(!imageURL) {$('media').textContent='Sculpture preview unavailable';return;}
+        const img=new Image();img.alt=product.displayName || 'Sculpture';
+        img.onerror=()=>{$('media').textContent='Sculpture preview unavailable';};
+        img.src=imageURL; $('media').append(img);
+      }
+      function pause() {playGeneration++;stopWatch();video?.pause();}
+      function play() {
+        if(!video || failed || !visible || document.hidden || userPaused) return;
+        const generation=++playGeneration;
+        lastTime=video.currentTime;movedAt=Date.now();
+        video.play().then(()=>{
+          if(generation!==playGeneration || failed) return;
+          $('motion').textContent='Pause motion';stopWatch();
+          watch=setInterval(()=>{
+            if(failed || !visible || document.hidden || userPaused) return;
+            if(video.readyState<2 || Math.abs(video.currentTime-lastTime)>0.01) {lastTime=video.currentTime;movedAt=Date.now();}
+            else if(Date.now()-movedAt>=5000) fallback(); // No restart retries.
+          },1000);
+        }).catch(error=>{
+          if(generation!==playGeneration || failed) return;
+          if(error.name==='NotAllowedError') {userPaused=true;$('motion').textContent='Play motion';}
+          else if(error.name!=='AbortError') fallback();
+        });
+      }
+      const onVisibility=()=>document.hidden ? pause() : play();
+      const onMotion=()=>{userPaused=!userPaused;$('motion').textContent=userPaused?'Play motion':'Pause motion';userPaused?pause():play();};
+      mediaCleanup=()=>{failed=true;pause();observer?.disconnect();document.removeEventListener('visibilitychange',onVisibility);$('motion').removeEventListener('click',onMotion);if(video){video.removeAttribute('src');video.load();}};
+      video=document.createElement('video');
+      if(!webm || !video.canPlayType('video/webm; codecs="vp9"')) {fallback();return;}
+      video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;video.preload='metadata';
+      video.setAttribute('aria-label',(product.displayName || 'Sculpture')+' in motion');
       video.addEventListener('error',fallback,{once:true});
-      video.src = webm; $('media').append(video);
-      $('motion').hidden = false;
-      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      $('motion').textContent = reduced ? 'Play motion' : 'Pause motion';
-      if (!reduced) video.play().catch(() => { if (generation === mediaGeneration) $('motion').textContent = 'Play motion'; });
+      video.src=webm;$('media').append(video);$('motion').hidden=false;
+      $('motion').textContent=userPaused?'Play motion':'Pause motion';
+      $('motion').addEventListener('click',onMotion);document.addEventListener('visibilitychange',onVisibility);
+      if('IntersectionObserver' in window) {
+        visible=false;observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;visible?play():pause();},{threshold:0.05});
+        observer.observe(video);
+      } else play();
     }
-    $('motion').onclick = () => {
-      if (!currentVideo) return;
-      if (currentVideo.paused) currentVideo.play().then(() => {$('motion').textContent='Pause motion';}).catch(() => {$('motion').textContent='Playback unavailable';});
-      else {currentVideo.pause(); $('motion').textContent='Play motion';}
-    };
-    document.addEventListener('visibilitychange', () => { if (document.hidden && currentVideo) {currentVideo.pause(); $('motion').textContent='Play motion';} });
-    function shippingEstimate(record, destination) {
-      // PREVIEW ONLY. Virgo must supply server-authoritative sale price, retail shipping basis,
-      // eligibility, tax and shipping. Unknown sizes and sales groupings require a quote here.
-      const size = key(record.sizeDescription).replace(/[-_]/g,' ').replace(/\s+/g,' ');
-      const eligible = ['mini','miniature','small','sm','medium','med','large','lg','extra large','xl','sub huge'].includes(size);
-      const retail = number(record.retailPrice);
-      return destination === 'contiguous' && eligible && Number.isFinite(retail) && retail > 0
-        ? Math.round(retail * 10) / 100 : null;
-    }
-    function updateSummary() {
-      const retail = number(selected.retailPrice);
-      const validPrice = Number.isFinite(retail) && retail > 0;
-      const shipping = shippingEstimate(selected,$('destination').value);
-      quoted = shipping === null || !validPrice;
-      $('price').textContent = validPrice ? money(retail) : 'Confirm with gallery';
-      $('shipping').textContent = quoted ? 'Quote required' : money(shipping);
-      $('total-label').textContent = quoted ? 'Sculpture price only' : 'Subtotal before tax';
-      $('total').textContent = validPrice ? money(retail + (quoted ? 0 : shipping)) : 'To be confirmed';
-      $('shipping-note').textContent = quoted
-        ? 'We’ll will contact you for shipping payment once calculated. The amount above excludes shipping and tax.'
-        : 'Shipping shown is for this size within the contiguous U.S. Final shipping and tax are confirmed before payment.';
-      $('continue').textContent = quoted ? 'Request a shipping quote' : 'Continue to payment';
-      document.querySelector('.payment-note').textContent = quoted ? 'No payment until shipping is confirmed.' : 'Shipping address and payment details come next.';
-    }
-    function renderSelection() {
-      selected = group ? group.sizes[Number($('size').value)] : product;
-      // For a specific product link, attach size metadata without replacing its sale/list price.
-      if (!group && product.sizeMetadata) selected = {...product.sizeMetadata,...product};
-      $('title').textContent = group ? group.displayName : product.displayName;
-      $('variant').textContent = [selected.displayLabel || selected.sizeDescription, (group || product).finishName].filter(Boolean).join(' · ');
-      const dimensions = [[selected.overallHeightInches,'tall'],[selected.widthInches,'wide']].filter(([n])=>number(n)>0);
-      $('dimensions').hidden = !dimensions.length;
-      $('dimensions').textContent = dimensions.map(([n,label])=>n+' inches '+label).join(' × ');
-      renderMedia(selected); updateSummary();
-    }
-    $('destination').onchange = updateSummary;
-    $('size').onchange = renderSelection;
-    $('continue').onclick = () => {
-      $('handoff-title').textContent = quoted ? 'Shipping quote · Preview only' : 'Payment · Preview only';
-      $('handoff-copy').textContent = quoted
-        ? 'On the finished page, you would provide contact and delivery details to request a shipping quote. This mock-up does not collect or send anything.'
-        : 'On the finished page, Virgo will open Stripe Checkout to collect your shipping address, contact details and payment. Your final total will be confirmed before you pay. No checkout session is created in this mock-up.';
-      $('handoff').showModal();
-    };
     async function init() {
       try {
-        const galleries = await data('galleries.json');
-        gallery = galleries.find(g => key(g.lookupKey) === key(galleryKey));
-        if (!gallery) throw new Error('This gallery was not found. Check the g value in the link.');
-        $('brand').textContent = gallery.name;
-        const logo = asset(gallery.logoImage);
-        if (logo) { $('logo').alt = gallery.name; $('logo').onload=()=>{$('logo').hidden=false;$('brand').hidden=true;}; $('logo').onerror=()=>{$('logo').hidden=true;$('brand').hidden=false;}; $('logo').src=logo; }
-        if (gallery.phone) { $('phone').textContent=gallery.phone; $('phone').href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,''); $('assistance').hidden=false; }
-        if (params.has('psg')) {
-          product = (await data('product-sales-groups.json')).find(p=>String(p.productSalesGroupID ?? p.lookupKey)===params.get('psg'));
-        } else if (params.has('pg') || demo) {
-          const pg = demo ? '3' : params.get('pg'); const finish = params.get('f') || (demo ? '72' : '');
-          group = (await data('product-groups.json')).find(p=>String(p.productGroupID)===pg && String(p.finishGroupID)===finish);
-          if (!group || !Array.isArray(group.sizes) || !group.sizes.length) throw new Error('This design / finish was not found. Check pg and f in the link.');
-          product = group;
-          group.sizes.forEach((s,i)=>{const option=document.createElement('option');option.value=i;option.textContent=s.displayLabel||s.sizeDescription;$('size').append(option);});
-          const requested = group.sizes.findIndex(s=>String(s.productID)===params.get('pid'));
-          $('size').value = String(requested >= 0 ? requested : 0); $('size-field').hidden=false;
+        route=readRoute(location.search);
+        gallery=(await data('galleries.json')).find(g=>key(g.lookupKey)===key(route.gallery));
+        if(!gallery) throw new Error('This gallery was not found. Please check the purchase link.');
+        // Legacy gallery tags use the current owner's offer, as on QR/NFC pages.
+        const canonical=String(gallery.galleryID || route.gallery).trim().toUpperCase();
+        if(!/^[A-Z0-9]{2}$/.test(canonical)) throw new Error('The gallery data is incomplete.');
+        route.gallery=canonical;
+        $('brand').textContent=gallery.name || canonical;
+        const logo=asset(gallery.logoImage);
+        if(logo) {$('logo').alt=gallery.name || canonical;$('logo').onload=()=>{$('logo').hidden=false;$('brand').hidden=true;};$('logo').onerror=()=>{$('logo').hidden=true;$('brand').hidden=false;};$('logo').src=logo;}
+        if(gallery.phone){$('phone').textContent=gallery.phone;$('phone').href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,'');$('assistance').hidden=false;}
+        if(route.kind==='psg') {
+          product=(await data('product-sales-groups.json')).find(p=>String(p.productSalesGroupID ?? p.lookupKey)===route.item);
         } else {
-          product=(await data('sculptures.json')).find(p=>key(p.lookupKey)===key(params.get('d')));
-          if (product) {
-            // Optional enrichment: existing sculpture exports may not carry size or finish.
-            try { for (const pg of await data('product-groups.json')) {const size=pg.sizes?.find(s=>key(s.productLookupKey)===key(product.lookupKey));if(size){ product={...product,finishName:pg.finishName,sizeMetadata:size};break;}} } catch { /* Safe quote-only fallback */ }
+          product=(await data('sculptures.json')).find(p=>key(p.lookupKey)===key(route.item));
+          if(product) {
+            try {
+              for(const group of await data('product-groups.json')) {
+                const size=group.sizes?.find(s=>key(s.productLookupKey)===key(product.lookupKey) ||
+                  (product.productID != null && String(s.productID)===String(product.productID)));
+                if(size){product={...size,...product,finishName:product.finishName || group.finishName};break;}
+              }
+            } catch { /* Optional dimensions/finish enrichment; never used for pricing. */ }
           }
         }
-        if (!product) throw new Error('This sculpture was not found. Check the selection in the link.');
-        renderSelection(); $('status').hidden=true; $('layout').hidden=false;
-        document.title=product.displayName+' · '+gallery.name+' · Purchase preview';
-      } catch(error) { $('status').textContent=error.message+' This preview needs access to the published QR assets.'; }
+        // A completed/returned offer can legitimately have disappeared from current assets.
+        if(!product && route.returning) product={displayName:'Your checkout'};
+        if(!product) throw new Error('This sculpture was not found in the current assets. Please contact the gallery.');
+        $('title').textContent=product.displayName || 'Sculpture';
+        $('variant').textContent=[product.sizeDescription,product.finishName].filter(Boolean).join(' · ');
+        const dimensions=[[product.overallHeightInches,'tall'],[product.widthInches,'wide']].filter(([n])=>Number(n)>0);
+        $('dimensions').hidden=!dimensions.length;
+        $('dimensions').textContent=dimensions.map(([n,label])=>n+' inches '+label).join(' × ');
+        if(route.kind==='d' && /^\d+$/.test(route.item)) {
+          $('lead-title').textContent='Your selected sculpture';
+          $('lead-copy').textContent='Please contact the gallery for the condition and expected shipping schedule of this specific piece. Transit time is additional.';
+        }
+        $('status').hidden=true;$('layout').hidden=false;
+        document.title=$('title').textContent+' · '+(gallery.name || canonical)+' · Purchase';
+        renderMedia(product);
+        if(route.returning) showReturnMessage(); else await loadPricing();
+      } catch(error) {
+        $('status').hidden=false;$('status').textContent=error.message || 'Unable to open this purchase page.';
+        $('continue').hidden=true;$('continue').disabled=true;
+      }
     }
+    $('destination').addEventListener('change',renderPricing);
+    $('continue').addEventListener('click',startCheckout);
     init();
   </script>
 </body>
 </html>
+
