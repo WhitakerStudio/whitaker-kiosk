@@ -42,6 +42,9 @@
     .total dt { color:var(--ink); }
     .small { font-size:14px; color:var(--muted); }
     .shipping-note { margin:14px 0 0; }
+    .pickup-details { margin-top:16px; padding:14px; border:1px solid var(--line); border-radius:6px; background:white; }
+    .pickup-details p { margin:6px 0; }
+    #pickup-address { white-space:pre-line; overflow-wrap:anywhere; }
     .lead { border-left:3px solid var(--accent); padding:2px 0 2px 17px; margin:26px 0; }
     .lead h3 { font-size:16px; margin:0 0 6px; }
     .lead p { font-size:15px; margin:0; color:var(--muted); }
@@ -98,6 +101,12 @@
             <div class="line total"><dt id="total-label">Subtotal before tax</dt><dd id="total">Loading…</dd></div>
           </dl>
           <p id="shipping-note" class="small shipping-note"></p>
+          <div id="pickup-details" class="pickup-details small" hidden>
+            <strong>Pickup location</strong>
+            <p id="pickup-gallery"></p>
+            <p id="pickup-address"></p>
+            <p>The gallery will contact you when your sculpture is ready. Please arrange pickup before visiting.</p>
+          </div>
           <div class="lead"><h3 id="lead-title">Handcrafted for you</h3><p id="lead-copy">Your sculpture is handcrafted and will ship in about 4–6 weeks. We’ll email you an estimated shipment date after your order is confirmed. Transit time is additional.</p></div>
 
           <button id="continue" class="primary" type="button" hidden disabled>Continue to payment</button>
@@ -117,6 +126,9 @@
     // Layout/media: Whitaker Studio. Offer validation, totals and sessions: Virgo.
     const ASSET_ROOT = 'https://kiosk.whitakerstudio.com/qr/assets/';
     const OFFER_ENDPOINT = 'https://www.whitakerstudio.com/orders/published-scan-offer/';
+    // Keep false until Virgo confirms destination="pickup", eligibility, tax and
+    // fulfillment handling. An exported address alone does NOT enable checkout pickup.
+    const PICKUP_CHECKOUT_ENABLED = false;
     // Adam's public SANDBOX key, not a secret. Coordinate key + backend mode before live use.
     const STRIPE_PUBLIC_KEY = 'pk_test_51UJKO8FWpaGsvZpauv1Wgvw2dzDfygkvqAXmcrWfJTSOBWl9mlT3X4C7ECbdhrOyUzO8hWTaYRbhprPPxS0kNHAC00nH5PdKyU';
     const $ = id => document.getElementById(id);
@@ -194,14 +206,39 @@
       }
       return {sale,shipping};
     }
+    function pickupAvailable() {
+      return PICKUP_CHECKOUT_ENABLED && gallery?.pickupAddressStatus === 'available' &&
+        typeof gallery.pickupAddress === 'string' && !!gallery.pickupAddress.trim();
+    }
+    function configurePickup() {
+      $('pickup-gallery').textContent = gallery.name || route.gallery;
+      $('pickup-address').textContent = gallery.pickupAddressStatus === 'available'
+        ? String(gallery.pickupAddress || '').trim() : '';
+      if (pickupAvailable()) {
+        const option=document.createElement('option'); option.value='pickup';
+        option.textContent='Customer pickup — no shipping charge'; $('destination').append(option);
+      }
+    }
     function renderPricing() {
       if (!pricing || busy || returned) return;
+      const pickup = $('destination').value === 'pickup' && pickupAvailable();
       const included = $('destination').value === 'contiguous' && pricing.shipping !== null;
       $('price').textContent = money(pricing.sale);
-      $('shipping').textContent = included ? money(pricing.shipping) : 'Billed separately';
-      $('total-label').textContent = included ? 'Subtotal before tax' : 'Sculpture price only';
+      $('shipping').textContent = pickup ? '$0.00 — customer pickup' : included ? money(pricing.shipping) : 'Billed separately';
+      $('total-label').textContent = included || pickup ? 'Subtotal before tax' : 'Sculpture price only';
       $('total').textContent = money(pricing.sale + (included ? pricing.shipping : 0));
-      $('shipping-note').textContent = included
+      $('pickup-details').hidden = !pickup;
+      if (route.kind === 'd' && /^\d+$/.test(route.item)) {
+        $('lead-copy').textContent = 'Please contact the gallery for the condition and expected ' +
+          (pickup ? 'pickup' : 'shipping') + ' schedule of this specific piece.' + (pickup ? '' : ' Transit time is additional.');
+      } else {
+        $('lead-copy').textContent = pickup
+          ? 'Your sculpture is handcrafted and will be ready for pickup in about 4–6 weeks. We’ll email you an estimated completion date after your order is confirmed.'
+          : 'Your sculpture is handcrafted and will ship in about 4–6 weeks. We’ll email you an estimated shipment date after your order is confirmed. Transit time is additional.';
+      }
+      $('shipping-note').textContent = pickup
+        ? 'No shipping charge. Pickup is at the gallery location below, not delivery to your address. Applicable tax is calculated at checkout.'
+        : included
         ? 'Shipping shown is for the contiguous United States. Final shipping and tax are confirmed before payment.'
         : 'Shipping is NOT included in this payment. A shipping quote and separate payment request will follow.';
       $('continue').hidden = false;
@@ -216,6 +253,7 @@
       $('pricing-error').hidden = true; $('pricing-error').replaceChildren();
       for (const id of ['price','shipping','total']) $(id).textContent = 'Loading…';
       $('shipping-note').textContent = '';
+      $('pickup-details').hidden = true;
       try {
         const body = await jsonRequest(offerURL());
         if (generation !== pricingGeneration || returned) return;
@@ -273,9 +311,14 @@
     }
     async function startCheckout() {
       if (busy || returned || !pricing || $('continue').disabled) return;
+      const destination = $('destination').value;
+      if (!['contiguous','alaska','hawaii','other'].includes(destination) &&
+          !(destination === 'pickup' && pickupAvailable())) {
+        $('checkout-error').textContent='That fulfillment option is not currently available. Please choose a shipping destination.';
+        $('checkout-error').hidden=false; return;
+      }
       busy = true; $('continue').disabled=true; $('continue').hidden=true; $('destination').disabled=true;
       $('checkout-error').hidden=true; $('checkout').hidden=false; $('checkout').textContent='Loading secure checkout…';
-      const destination = $('destination').value;
       let sessionRequested = false;
       try {
         const Stripe = await loadStripe();
@@ -370,6 +413,7 @@
         const canonical=String(gallery.galleryID || route.gallery).trim().toUpperCase();
         if(!/^[A-Z0-9]{2}$/.test(canonical)) throw new Error('The gallery data is incomplete.');
         route.gallery=canonical;
+        configurePickup();
         $('brand').textContent=gallery.name || canonical;
         const logo=asset(gallery.logoImage);
         if(logo) {$('logo').alt=gallery.name || canonical;$('logo').onload=()=>{$('logo').hidden=false;$('brand').hidden=true;};$('logo').onerror=()=>{$('logo').hidden=true;$('brand').hidden=false;};$('logo').src=logo;}
