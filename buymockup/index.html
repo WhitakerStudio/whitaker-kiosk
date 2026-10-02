@@ -62,6 +62,11 @@
     .assistance a { white-space:nowrap; }
     footer { max-width:1072px; margin:auto; padding:22px 24px; border-top:1px solid var(--line); text-align:center; font-size:13px; color:var(--muted); }
     .status { max-width:700px; margin:50px auto; text-align:center; }
+    .custom-item { border-top:1px solid var(--line); padding:20px 0; }
+    .custom-item h2 { font:normal 25px/1.25 Georgia,serif; margin:0 0 7px; overflow-wrap:anywhere; }
+    .custom-item p { margin:0; color:var(--muted); }
+    .custom-item .media-stage { height:300px; min-height:0; margin-top:12px; }
+    .display-preview { margin:0 0 22px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
     @media(max-width:760px) { header { padding:24px 22px 20px; } .brand-logo { max-width:min(100%,340px); max-height:80px; } main { padding:28px 20px 32px; } .layout { grid-template-columns:1fr; gap:28px; } .media-stage { height:320px; min-height:0; } .summary,.confirmation { padding:24px; } h1 { font-size:40px; } .art-footer { margin-top:18px; } }
     @media(max-width:380px) { .summary,.confirmation { padding:18px; } .line { gap:10px; } }
     .sandbox { margin:0; padding:9px 20px; background:#222c31; color:white; text-align:center; font-size:13px; }
@@ -79,15 +84,17 @@
   </header>
   <main>
     <p id="status" class="status" role="status">Loading your sculpture…</p>
+    <p id="display-preview" class="display-preview" hidden>Display preview only · No checkout or payment is available. Prices are not stored in this public display file.</p>
     <div id="layout" class="layout" hidden>
       <section aria-labelledby="title">
-        <p class="eyebrow">Your sculpture</p>
+        <p id="item-eyebrow" class="eyebrow">Your sculpture</p>
         <h1 id="title"></h1>
         <p id="variant" class="variant"></p>
         <div id="media" class="media-stage"></div>
         <button id="motion" type="button" class="motion" hidden>Pause motion</button>
         <p id="dimensions" class="media-caption" hidden></p>
-        <div class="art-footer"><p>Designed by<br><strong>Lyman Whitaker</strong></p><p>Crafted by<br><strong>Whitaker Studio</strong></p></div>
+        <div id="custom-items" hidden></div>
+        <div id="art-footer" class="art-footer"><p>Designed by<br><strong>Lyman Whitaker</strong></p><p>Crafted by<br><strong>Whitaker Studio</strong></p></div>
       </section>
       <section id="summary-wrapper" aria-labelledby="summary-title">
         <div class="summary">
@@ -96,9 +103,9 @@
           <p id="pickup-unavailable" class="small" hidden>Customer pickup is not available online for this location. Please contact the gallery to arrange pickup.</p>
           <div id="pricing-error" role="alert" class="pricing-error" hidden></div>
           <dl aria-live="polite">
-            <div class="line"><dt>Sculpture</dt><dd id="price">Loading…</dd></div>
+            <div class="line"><dt id="price-label">Sculpture</dt><dd id="price">Loading…</dd></div>
             <div class="line"><dt>Shipping</dt><dd id="shipping">Loading…</dd></div>
-            <div class="line"><dt>Sales tax</dt><dd>Calculated at checkout</dd></div>
+            <div class="line"><dt>Sales tax</dt><dd id="tax-note">Calculated at checkout</dd></div>
             <div class="line total"><dt id="total-label">Subtotal before tax</dt><dd id="total">Loading…</dd></div>
           </dl>
           <p id="shipping-note" class="small shipping-note"></p>
@@ -136,14 +143,14 @@
     const $ = id => document.getElementById(id);
     const key = value => String(value ?? '').trim().toLowerCase();
     const money = cents => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents / 100);
-    let route, product, gallery, pickupGallery, pricing = null, busy = false, returned = false;
+    let route, product, gallery, pickupGallery, customOffer = null, pricing = null, busy = false, returned = false;
     let checkout = null, stripePromise = null, stripeInstance = null, pricingGeneration = 0;
     let mediaCleanup = () => {};
     $('sandbox').hidden = !STRIPE_PUBLIC_KEY.startsWith('pk_test_');
 
     function readRoute(search) {
       const p = new URLSearchParams(search);
-      for (const name of ['g','d','psg','checkout_id']) {
+      for (const name of ['g','d','psg','checkout_id','preview']) {
         if (p.getAll(name).length > 1) throw new Error('This purchase link contains duplicate parameters.');
       }
       if (p.has('pg') || p.has('pid') || p.has('mg')) {
@@ -160,7 +167,11 @@
       if (p.has('checkout_id') && !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(p.get('checkout_id') || '')) {
         throw new Error('The checkout return reference is invalid. Please contact the gallery before trying another payment.');
       }
-      return {gallery:g.toUpperCase(), kind:p.has('d')?'d':'psg', item:d || psg, returning:p.has('checkout_id')};
+      if (p.has('preview') && (p.get('preview') !== '1' || !/^\d+$/.test(d) || p.has('checkout_id'))) {
+        throw new Error('Display preview requires a numeric d= custom-offer link and preview=1.');
+      }
+      return {gallery:g.toUpperCase(), kind:p.has('d')?'d':'psg', item:d || psg,
+        returning:p.has('checkout_id'), preview:p.get('preview')==='1'};
     }
     function offerURL() {
       // Only the agreed selectors go to Virgo; never client prices or Stripe secrets.
@@ -173,7 +184,10 @@
         const response = await fetch(url, {...options, credentials:'omit', cache:'no-store', signal:controller.signal});
         let body;
         try { body = JSON.parse((await response.text()).replace(/^\uFEFF/,'')); }
-        catch { throw new Error('The server returned an unreadable response. Please try again later.'); }
+        catch {
+          const error=new Error('The server returned an unreadable response. Please try again later.');
+          error.status=response.status; throw error;
+        }
         if (!response.ok) {
           const errors = Array.isArray(body?.errors) ? body.errors.filter(x=>typeof x==='string') : [];
           const error = new Error(errors.length ? errors.join(' ') : 'The request could not be completed. Please try again later.');
@@ -211,6 +225,7 @@
         throw new Error('The server returned an invalid existing-order reference. Please contact the studio.');
       }
       const existingOrder = hasOrderTarget && orderTarget !== null;
+      if (customOffer && !existingOrder) throw new Error('The server has not identified this as an existing-order payment. Please contact the studio.');
       const sale = priceCents(body?.sale_price, existingOrder);
       const shipping = body?.shipping_charge === null ? null : priceCents(body?.shipping_charge);
       if (sale === null || (body?.shipping_charge !== null && shipping === null) ||
@@ -224,7 +239,7 @@
     function pickupRestrictedByOrder() {
       // Until metadata arrives, numeric d= may be either a display piece or an
       // existing-order balance. Do not offer pickup on an unknown order route.
-      return pricing?.existingOrder ||
+      return !!customOffer || pricing?.existingOrder ||
         (route?.kind === 'd' && /^\d+$/.test(route.item) && !pricing?.hasOrderTarget);
     }
     function pickupAvailable() {
@@ -294,7 +309,7 @@
       }
     }
     async function loadPricing() {
-      if (busy || returned) return;
+      if (busy || returned || route.preview) return;
       const generation = ++pricingGeneration;
       pricing = null;
       $('continue').hidden = true; $('continue').disabled = true; $('destination').disabled = true;
@@ -374,7 +389,7 @@
       return checkoutBrowserUuid;
     }
     async function startCheckout() {
-      if (busy || returned || !pricing || pricing.existingOrder || $('continue').disabled) return;
+      if (busy || returned || route.preview || customOffer || !pricing || pricing.existingOrder || $('continue').disabled) return;
       const destination = $('destination').value;
       if (!['contiguous','alaska','hawaii','other'].includes(destination) &&
           !(destination === 'pickup' && pickupAvailable())) {
@@ -418,7 +433,10 @@
     }
     function renderMedia(record) {
       mediaCleanup();
-      $('media').replaceChildren(); $('motion').hidden=true;
+      mediaCleanup=createMedia(record,$('media'),$('motion'));
+    }
+    function createMedia(record,stage,motion,lazy=false) {
+      stage.replaceChildren(); motion.hidden=true;
       const imageURL=asset(record.image), webm=asset(record.webmVideo);
       let video=null, observer=null, watch=null, failed=false, visible=true;
       let userPaused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -427,11 +445,12 @@
       function fallback() {
         if(failed) return; failed=true; playGeneration++; stopWatch(); observer?.disconnect();
         if(video) {video.pause();video.removeAttribute('src');video.load();}
-        $('media').replaceChildren(); $('motion').hidden=true;
-        if(!imageURL) {$('media').textContent='Sculpture preview unavailable';return;}
-        const img=new Image();img.alt=product.displayName || 'Sculpture';
-        img.onerror=()=>{$('media').textContent='Sculpture preview unavailable';};
-        img.src=imageURL; $('media').append(img);
+        stage.replaceChildren(); motion.hidden=true;
+        if(!imageURL) {stage.textContent='Sculpture preview unavailable';return;}
+        const img=new Image();img.alt=record.displayName || 'Sculpture';
+        if(lazy) img.loading='lazy';
+        img.onerror=()=>{stage.textContent='Sculpture preview unavailable';};
+        img.src=imageURL; stage.append(img);
       }
       function pause() {playGeneration++;stopWatch();video?.pause();}
       function play() {
@@ -440,7 +459,7 @@
         lastTime=video.currentTime;movedAt=Date.now();
         video.play().then(()=>{
           if(generation!==playGeneration || failed) return;
-          $('motion').textContent='Pause motion';stopWatch();
+          motion.textContent='Pause motion';stopWatch();
           watch=setInterval(()=>{
             if(failed || !visible || document.hidden || userPaused) return;
             if(video.readyState<2 || Math.abs(video.currentTime-lastTime)>0.01) {lastTime=video.currentTime;movedAt=Date.now();}
@@ -448,25 +467,79 @@
           },1000);
         }).catch(error=>{
           if(generation!==playGeneration || failed) return;
-          if(error.name==='NotAllowedError') {userPaused=true;$('motion').textContent='Play motion';}
+          if(error.name==='NotAllowedError') {userPaused=true;motion.textContent='Play motion';}
           else if(error.name!=='AbortError') fallback();
         });
       }
       const onVisibility=()=>document.hidden ? pause() : play();
-      const onMotion=()=>{userPaused=!userPaused;$('motion').textContent=userPaused?'Play motion':'Pause motion';userPaused?pause():play();};
-      mediaCleanup=()=>{failed=true;pause();observer?.disconnect();document.removeEventListener('visibilitychange',onVisibility);$('motion').removeEventListener('click',onMotion);if(video){video.removeAttribute('src');video.load();}};
+      const onMotion=()=>{userPaused=!userPaused;motion.textContent=userPaused?'Play motion':'Pause motion';userPaused?pause():play();};
+      const cleanup=()=>{failed=true;pause();observer?.disconnect();document.removeEventListener('visibilitychange',onVisibility);motion.removeEventListener('click',onMotion);if(video){video.removeAttribute('src');video.load();}};
       video=document.createElement('video');
-      if(!webm || !video.canPlayType('video/webm; codecs="vp9"')) {fallback();return;}
-      video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;video.preload='metadata';
-      video.setAttribute('aria-label',(product.displayName || 'Sculpture')+' in motion');
+      if(!webm || !video.canPlayType('video/webm; codecs="vp9"')) {fallback();return cleanup;}
+      video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;video.preload=lazy?'none':'metadata';
+      video.setAttribute('aria-label',(record.displayName || 'Sculpture')+' in motion');
       video.addEventListener('error',fallback,{once:true});
-      video.src=webm;$('media').append(video);$('motion').hidden=false;
-      $('motion').textContent=userPaused?'Play motion':'Pause motion';
-      $('motion').addEventListener('click',onMotion);document.addEventListener('visibilitychange',onVisibility);
+      video.src=webm;stage.append(video);motion.hidden=false;
+      motion.textContent=userPaused?'Play motion':'Pause motion';
+      motion.addEventListener('click',onMotion);document.addEventListener('visibilitychange',onVisibility);
       if('IntersectionObserver' in window) {
         visible=false;observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;visible?play():pause();},{threshold:0.05});
         observer.observe(video);
       } else play();
+      return cleanup;
+    }
+    async function loadCustomDisplay() {
+      if(route.kind!=='d' || !/^\d+$/.test(route.item) || route.returning) return null;
+      let body;
+      try { body=await jsonRequest(ASSET_ROOT+'data/custom-offers/'+encodeURIComponent(route.gallery+'-'+route.item)+'.json'); }
+      catch(error) { if(error.status===404 && !route.preview) return null; throw error; }
+      if(body?.schemaVersion!==1 || body.kind!=='custom-order-display' ||
+          body.galleryKey!==route.gallery || body.productKey!==route.item ||
+          !/^[1-9]\d*$/.test(String(body.sourceOfferID || '')) ||
+          typeof body.displayName!=='string' || !body.displayName.trim() ||
+          !Array.isArray(body.items) || !body.items.length) throw new Error('The custom-offer display is invalid or belongs to a different offer.');
+      for(const item of body.items) {
+        if(!['SCULPTURE','ACCESSORY','SERVICE'].includes(item.kind) || typeof item.title!=='string' || !item.title.trim())
+          throw new Error('A custom-offer display item is invalid.');
+        for(const field of ['image','webmVideo']) if(item[field]!=null &&
+          (typeof item[field]!=='string' || !/^assets\/images\/[^/\\:]+$/.test(item[field]) || item[field].includes('..')))
+          throw new Error('A custom-offer media reference is invalid.');
+      }
+      return body;
+    }
+    function renderCustomDisplay() {
+      mediaCleanup();
+      $('media').hidden=true; $('motion').hidden=true; $('variant').hidden=true; $('dimensions').hidden=true;
+      $('item-eyebrow').textContent='Your existing order';
+      $('summary-title').textContent='Payment details'; $('price-label').textContent='Items and services';
+      $('assistance').firstChild.textContent='Questions about this payment? ';
+      $('lead-title').textContent='Previously arranged with Whitaker Studio';
+      $('lead-copy').textContent='These items and services relate to an existing order. Shipping arrangements remain as agreed with the studio.';
+      $('destination').closest('label').hidden=true; $('destination').disabled=true;
+      $('pickup-unavailable').hidden=true; $('pickup-details').hidden=true;
+      $('art-footer').hidden=!customOffer.items.some(item=>item.kind==='SCULPTURE');
+      const cleanups=[];
+      for(const item of customOffer.items) {
+        const card=document.createElement('article'); card.className='custom-item';
+        const heading=document.createElement('h2'); heading.textContent=item.title; card.append(heading);
+        if(Number(item.quantity)>1) {const quantity=document.createElement('p');quantity.textContent='Quantity: '+item.quantity;card.append(quantity);}
+        if(item.kind==='SCULPTURE') {
+          const stage=document.createElement('div');stage.className='media-stage';
+          const motion=document.createElement('button');motion.type='button';motion.className='motion';motion.hidden=true;
+          card.append(stage,motion);
+          cleanups.push(createMedia({...item,displayName:item.title},stage,motion,true));
+        }
+        $('custom-items').append(card);
+      }
+      mediaCleanup=()=>cleanups.forEach(cleanup=>cleanup());
+      $('custom-items').hidden=false;
+      $('continue').hidden=true; $('continue').disabled=true;
+      if(route.preview) {
+        $('display-preview').hidden=false;
+        for(const id of ['price','shipping','total','tax-note']) $(id).textContent='—';
+        $('shipping-note').textContent='Amounts are not loaded in display preview. Authoritative pricing will come from the payment server, not this display file.';
+        $('payment-note').textContent='Display preview only. No payment session will be created.';
+      }
     }
     async function init() {
       try {
@@ -483,12 +556,17 @@
         pickupGallery=canonical==='PD'
           ? galleries.find(g=>key(g.lookupKey)==='ws')
           : gallery;
+        customOffer=await loadCustomDisplay();
         configurePickup();
         $('brand').textContent=gallery.name || canonical;
         const logo=asset(gallery.logoImage);
         if(logo) {$('logo').alt=gallery.name || canonical;$('logo').onload=()=>{$('logo').hidden=false;$('brand').hidden=true;};$('logo').onerror=()=>{$('logo').hidden=true;$('brand').hidden=false;};$('logo').src=logo;}
         if(gallery.phone){$('phone').textContent=gallery.phone;$('phone').href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,'');$('assistance').hidden=false;}
-        if(route.kind==='psg') {
+        if(customOffer) {
+          product={displayName:customOffer.displayName};
+        } else if(route.preview) {
+          throw new Error('No custom-offer display was found for this preview. Export and upload its display file first.');
+        } else if(route.kind==='psg') {
           product=(await data('product-sales-groups.json')).find(p=>String(p.productSalesGroupID ?? p.lookupKey)===route.item);
         } else {
           product=(await data('sculptures.json')).find(p=>key(p.lookupKey)===key(route.item));
@@ -516,8 +594,8 @@
         }
         $('status').hidden=true;$('layout').hidden=false;
         document.title=$('title').textContent+' · '+(gallery.name || canonical)+' · Purchase';
-        renderMedia(product);
-        if(route.returning) showReturnMessage(); else await loadPricing();
+        if(customOffer) renderCustomDisplay(); else renderMedia(product);
+        if(route.returning) showReturnMessage(); else if(!route.preview) await loadPricing();
       } catch(error) {
         $('status').hidden=false;$('status').textContent=error.message || 'Unable to open this purchase page.';
         $('continue').hidden=true;$('continue').disabled=true;
