@@ -201,21 +201,43 @@
       return Number.isSafeInteger(cents) && cents >= (allowZero ? 0 : 1) ? cents : null;
     }
     function readPricing(body) {
-      const sale = priceCents(body?.sale_price, false);
+      // This is the OFFER's existing-order target, not the source display order.
+      // Virgo should always send order_master_id: null for a new purchase.
+      const hasOrderTarget = Object.prototype.hasOwnProperty.call(body || {}, 'order_master_id');
+      const orderTarget = body?.order_master_id;
+      if (hasOrderTarget && orderTarget !== null &&
+          !((typeof orderTarget === 'string' && /^[1-9]\d*$/.test(orderTarget)) ||
+            (typeof orderTarget === 'number' && Number.isSafeInteger(orderTarget) && orderTarget > 0))) {
+        throw new Error('The server returned an invalid existing-order reference. Please contact the studio.');
+      }
+      const existingOrder = hasOrderTarget && orderTarget !== null;
+      const sale = priceCents(body?.sale_price, existingOrder);
       const shipping = body?.shipping_charge === null ? null : priceCents(body?.shipping_charge);
       if (sale === null || (body?.shipping_charge !== null && shipping === null) ||
+          (existingOrder && (shipping === null || sale + shipping <= 0)) ||
           (body?.currency != null && String(body.currency).toUpperCase() !== 'USD') ||
           !Number.isSafeInteger(sale + (shipping || 0))) {
         throw new Error('The server returned incomplete or invalid pricing. Checkout is unavailable; please contact the gallery.');
       }
-      return {sale,shipping};
+      return {sale,shipping,existingOrder,hasOrderTarget};
+    }
+    function pickupRestrictedByOrder() {
+      // Until metadata arrives, numeric d= may be either a display piece or an
+      // existing-order balance. Do not offer pickup on an unknown order route.
+      return pricing?.existingOrder ||
+        (route?.kind === 'd' && /^\d+$/.test(route.item) && !pricing?.hasOrderTarget);
     }
     function pickupAvailable() {
-      return PICKUP_CHECKOUT_ENABLED && pickupGallery?.pickupAddressStatus === 'available' &&
+      return !pickupRestrictedByOrder() && PICKUP_CHECKOUT_ENABLED && pickupGallery?.pickupAddressStatus === 'available' &&
         typeof pickupGallery.pickupAddress === 'string' && !!pickupGallery.pickupAddress.trim();
     }
     function configurePickup() {
       $('destination').querySelector('option[value="pickup"]')?.remove();
+      if (pickupRestrictedByOrder()) {
+        $('pickup-unavailable').hidden=true;
+        $('pickup-details').hidden=true;
+        return;
+      }
       $('pickup-gallery').textContent = pickupGallery?.name || 'Pickup location';
       $('pickup-address').textContent = pickupGallery?.pickupAddressStatus === 'available'
         ? String(pickupGallery.pickupAddress || '').trim() : '';
@@ -231,8 +253,9 @@
     }
     function renderPricing() {
       if (!pricing || busy || returned) return;
+      const existingOrder = pricing.existingOrder;
       const pickup = $('destination').value === 'pickup' && pickupAvailable();
-      const included = $('destination').value === 'contiguous' && pricing.shipping !== null;
+      const included = existingOrder || ($('destination').value === 'contiguous' && pricing.shipping !== null);
       $('price').textContent = money(pricing.sale);
       $('shipping').textContent = pickup ? '$0.00 — customer pickup' : included ? money(pricing.shipping) : 'Billed separately';
       $('total-label').textContent = included || pickup ? 'Subtotal before tax' : 'Sculpture price only';
@@ -257,6 +280,18 @@
       $('continue').hidden = false;
       $('continue').disabled = false;
       $('destination').disabled = false;
+      if (existingOrder) {
+        // Existing-order balances are not a new shipping/pickup choice. Keep this
+        // workflow gated until Virgo and the local payment transfer support it.
+        $('destination').closest('label').hidden=true;
+        $('destination').disabled=true;
+        $('lead-copy').textContent='Payment toward an existing order. Shipping arrangements have already been established.';
+        $('shipping-note').textContent='Shipping shown is part of the existing order balance; it is not an additional shipping estimate.';
+        $('payment-note').textContent='Online payment for existing-order balances is not enabled yet. Please contact Whitaker Studio.';
+        $('continue').hidden=true; $('continue').disabled=true;
+      } else {
+        $('destination').closest('label').hidden=false;
+      }
     }
     async function loadPricing() {
       if (busy || returned) return;
@@ -271,6 +306,7 @@
         const body = await jsonRequest(offerURL());
         if (generation !== pricingGeneration || returned) return;
         pricing = readPricing(body);
+        configurePickup();
         renderPricing();
       } catch (error) {
         if (generation !== pricingGeneration || returned) return;
@@ -338,7 +374,7 @@
       return checkoutBrowserUuid;
     }
     async function startCheckout() {
-      if (busy || returned || !pricing || $('continue').disabled) return;
+      if (busy || returned || !pricing || pricing.existingOrder || $('continue').disabled) return;
       const destination = $('destination').value;
       if (!['contiguous','alaska','hawaii','other'].includes(destination) &&
           !(destination === 'pickup' && pickupAvailable())) {
