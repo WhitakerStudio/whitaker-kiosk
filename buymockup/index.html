@@ -100,6 +100,7 @@
         <div class="summary">
           <h2 id="summary-title">Purchase details</h2>
           <label class="choice"><span>Delivery or pickup</span><select id="destination" aria-describedby="pickup-unavailable" disabled><option value="contiguous">Contiguous United States</option><option value="alaska">Alaska</option><option value="hawaii">Hawaii</option><option value="other">U.S. territories / international</option></select></label>
+          <p id="fixed-fulfillment" class="small" hidden></p>
           <p id="pickup-unavailable" class="small" hidden>Customer pickup is not available online for this location. Please contact the gallery to arrange pickup.</p>
           <div id="pricing-error" role="alert" class="pricing-error" hidden></div>
           <dl aria-live="polite">
@@ -226,15 +227,27 @@
       }
       const existingOrder = hasOrderTarget && orderTarget !== null;
       if (customOffer && !existingOrder) throw new Error('The server has not identified this as an existing-order payment. Please contact the studio.');
+      const fulfillmentMethod = existingOrder ? body?.fulfillment_method : null;
+      if (existingOrder && !['SHIP','PICKUP'].includes(fulfillmentMethod))
+        throw new Error('The server has not supplied a valid shipping or pickup arrangement for this existing order. Please contact the studio.');
       const sale = priceCents(body?.sale_price, existingOrder);
       const shipping = body?.shipping_charge === null ? null : priceCents(body?.shipping_charge);
       if (sale === null || (body?.shipping_charge !== null && shipping === null) ||
-          (existingOrder && (shipping === null || sale + shipping <= 0)) ||
+          (existingOrder && (shipping === null || sale + shipping <= 0 || (fulfillmentMethod === 'PICKUP' && shipping !== 0))) ||
           (body?.currency != null && String(body.currency).toUpperCase() !== 'USD') ||
           !Number.isSafeInteger(sale + (shipping || 0))) {
         throw new Error('The server returned incomplete or invalid pricing. Checkout is unavailable; please contact the gallery.');
       }
-      return {sale,shipping,existingOrder,hasOrderTarget};
+      return {sale,shipping,existingOrder,hasOrderTarget,fulfillmentMethod};
+    }
+    function showFixedFulfillment(method, preview=false) {
+      const fixed=$('fixed-fulfillment');
+      fixed.hidden=!['SHIP','PICKUP'].includes(method);
+      fixed.textContent=fixed.hidden ? '' : (method==='PICKUP'
+        ? 'Customer pickup — as arranged for your existing order.'
+        : 'Shipping — as arranged for your existing order.') + (preview ? ' (Display preview)' : '');
+      // Branding is WS for every custom offer, not necessarily its pickup venue.
+      // Do not substitute the branding gallery's address for an existing arrangement.
     }
     function pickupRestrictedByOrder() {
       // Until metadata arrives, numeric d= may be either a display piece or an
@@ -269,7 +282,8 @@
     function renderPricing() {
       if (!pricing || busy || returned) return;
       const existingOrder = pricing.existingOrder;
-      const pickup = $('destination').value === 'pickup' && pickupAvailable();
+      const pickup = existingOrder ? pricing.fulfillmentMethod === 'PICKUP'
+        : $('destination').value === 'pickup' && pickupAvailable();
       const included = existingOrder || ($('destination').value === 'contiguous' && pricing.shipping !== null);
       $('price').textContent = money(pricing.sale);
       $('shipping').textContent = pickup ? '$0.00 — customer pickup' : included ? money(pricing.shipping) : 'Billed separately';
@@ -296,15 +310,22 @@
       $('continue').disabled = false;
       $('destination').disabled = false;
       if (existingOrder) {
-        // Existing-order balances are not a new shipping/pickup choice. Keep this
-        // workflow gated until Virgo and the local payment transfer support it.
+        // Virgo now supports fixed fulfillment. The local payment transfer still
+        // rejects existing-order targets, so keep session creation gated for now.
         $('destination').closest('label').hidden=true;
         $('destination').disabled=true;
-        $('lead-copy').textContent='Payment toward an existing order. Shipping arrangements have already been established.';
-        $('shipping-note').textContent='Shipping shown is part of the existing order balance; it is not an additional shipping estimate.';
+        showFixedFulfillment(pricing.fulfillmentMethod);
+        $('pickup-details').hidden=true;
+        $('lead-copy').textContent=pickup
+          ? 'Payment toward an existing order. Customer pickup remains as previously arranged.'
+          : 'Payment toward an existing order. Shipping remains as previously arranged.';
+        $('shipping-note').textContent=pickup
+          ? 'No shipping charge. Customer pickup remains as previously arranged.'
+          : 'Shipping shown is part of the existing order balance; it is not an additional shipping estimate.';
         $('payment-note').textContent='Online payment for existing-order balances is not enabled yet. Please contact Whitaker Studio.';
         $('continue').hidden=true; $('continue').disabled=true;
       } else {
+        showFixedFulfillment(null);
         $('destination').closest('label').hidden=false;
       }
     }
@@ -317,6 +338,7 @@
       for (const id of ['price','shipping','total']) $(id).textContent = 'Loading…';
       $('shipping-note').textContent = '';
       $('pickup-details').hidden = true;
+      showFixedFulfillment(null);
       try {
         const body = await jsonRequest(offerURL());
         if (generation !== pricingGeneration || returned) return;
@@ -497,6 +519,7 @@
           body.galleryKey!==route.gallery || body.productKey!==route.item ||
           !/^[1-9]\d*$/.test(String(body.sourceOfferID || '')) ||
           typeof body.displayName!=='string' || !body.displayName.trim() ||
+          (body.fulfillmentMethod != null && !['SHIP','PICKUP'].includes(body.fulfillmentMethod)) ||
           !Array.isArray(body.items) || !body.items.length) throw new Error('The custom-offer display is invalid or belongs to a different offer.');
       for(const item of body.items) {
         if(!['SCULPTURE','ACCESSORY','SERVICE'].includes(item.kind) || typeof item.title!=='string' || !item.title.trim())
@@ -535,6 +558,9 @@
       $('custom-items').hidden=false;
       $('continue').hidden=true; $('continue').disabled=true;
       if(route.preview) {
+        showFixedFulfillment(customOffer.fulfillmentMethod,true);
+        if(customOffer.fulfillmentMethod==='PICKUP')
+          $('lead-copy').textContent='These items and services relate to an existing order. Customer pickup remains as agreed with the studio.';
         $('display-preview').hidden=false;
         for(const id of ['price','shipping','total','tax-note']) $(id).textContent='—';
         $('shipping-note').textContent='Amounts are not loaded in display preview. Authoritative pricing will come from the payment server, not this display file.';
