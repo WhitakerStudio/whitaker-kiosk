@@ -310,8 +310,7 @@
       $('continue').disabled = false;
       $('destination').disabled = false;
       if (existingOrder) {
-        // Virgo now supports fixed fulfillment. The local payment transfer still
-        // rejects existing-order targets, so keep session creation gated for now.
+        // Existing-order fulfillment and shipping come from Virgo's saved offer.
         $('destination').closest('label').hidden=true;
         $('destination').disabled=true;
         showFixedFulfillment(pricing.fulfillmentMethod);
@@ -322,8 +321,7 @@
         $('shipping-note').textContent=pickup
           ? 'No shipping charge. Customer pickup remains as previously arranged.'
           : 'Shipping shown is part of the existing order balance; it is not an additional shipping estimate.';
-        $('payment-note').textContent='Online payment for existing-order balances is not enabled yet. Please contact Whitaker Studio.';
-        $('continue').hidden=true; $('continue').disabled=true;
+        $('payment-note').textContent='Continue to securely pay your existing order balance. Your previously arranged fulfillment will not change.';
       } else {
         showFixedFulfillment(null);
         $('destination').closest('label').hidden=false;
@@ -411,9 +409,15 @@
       return checkoutBrowserUuid;
     }
     async function startCheckout() {
-      if (busy || returned || route.preview || customOffer || !pricing || pricing.existingOrder || $('continue').disabled) return;
-      const destination = $('destination').value;
-      if (!['contiguous','alaska','hawaii','other'].includes(destination) &&
+      if (busy || returned || route.preview || !pricing || $('continue').disabled) return;
+      // Retain Virgo's established POST contract. For existing SHIP orders the
+      // legacy shipping selector is not a new destination choice: Virgo must use
+      // the saved offer's fixed shipping/fulfillment, including international and
+      // inbound arrangements. Do not infer a customer's country from this value.
+      const destination = pricing.existingOrder
+        ? (pricing.fulfillmentMethod === 'PICKUP' ? 'pickup' : 'contiguous')
+        : $('destination').value;
+      if (!pricing.existingOrder && !['contiguous','alaska','hawaii','other'].includes(destination) &&
           !(destination === 'pickup' && pickupAvailable())) {
         $('checkout-error').textContent='That fulfillment option is not currently available. Please choose an available delivery or pickup option.';
         $('checkout-error').hidden=false; return;
