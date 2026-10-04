@@ -80,7 +80,7 @@
   <header>
     <img id="logo" class="brand-logo" alt="" hidden>
     <p id="brand" class="brand-name">Your gallery</p>
-    <p class="brand-context">Lyman Whitaker · Kinetic sculpture</p>
+    <p id="brand-context" class="brand-context">Lyman Whitaker · Kinetic sculpture</p>
   </header>
   <main>
     <p id="status" class="status" role="status">Loading your sculpture…</p>
@@ -385,10 +385,11 @@
       section.setAttribute('aria-labelledby','confirmation-title');
       const title=document.createElement('h2'); title.id='confirmation-title'; title.textContent='Checkout status';
       const text=document.createElement('p');
-      text.textContent='If you submitted payment, please check your email for confirmation and next steps. This page cannot yet verify your payment status. Please contact the gallery before attempting another payment if you are unsure.';
+      const contactName=customOffer?'studio':'gallery';
+      text.textContent='If you submitted payment, please check your email for confirmation and next steps. This page cannot yet verify your payment status. Please contact the '+contactName+' before attempting another payment if you are unsure.';
       section.append(title,text);
       if (gallery?.phone) {
-        const contact=document.createElement('a'); contact.textContent='Contact the gallery: '+gallery.phone;
+        const contact=document.createElement('a'); contact.textContent='Contact the '+contactName+': '+gallery.phone;
         contact.href='tel:'+String(gallery.phone).replace(/[^0-9+]/g,''); section.append(contact);
       }
       $('layout').append(section);
@@ -459,6 +460,12 @@
     }
     function renderMedia(record) {
       mediaCleanup();
+      if(!asset(record.image) && !asset(record.webmVideo)) {
+        $('item-eyebrow').textContent='Your order';
+        $('brand-context').textContent='Order payments';
+        $('media').hidden=true; $('motion').hidden=true; $('art-footer').hidden=true;
+        return;
+      }
       mediaCleanup=createMedia(record,$('media'),$('motion'));
     }
     function createMedia(record,stage,motion,lazy=false) {
@@ -515,7 +522,7 @@
       return cleanup;
     }
     async function loadCustomDisplay() {
-      if(route.kind!=='d' || !/^\d+$/.test(route.item) || route.returning) return null;
+      if(route.kind!=='d' || !/^\d+$/.test(route.item)) return null;
       let body;
       try { body=await jsonRequest(ASSET_ROOT+'data/custom-offers/'+encodeURIComponent(route.gallery+'-'+route.item)+'.json'); }
       catch(error) { if(error.status===404 && !route.preview) return null; throw error; }
@@ -544,13 +551,15 @@
       $('lead-copy').textContent='These items and services relate to an existing order. Shipping arrangements remain as agreed with the studio.';
       $('destination').closest('label').hidden=true; $('destination').disabled=true;
       $('pickup-unavailable').hidden=true; $('pickup-details').hidden=true;
-      $('art-footer').hidden=!customOffer.items.some(item=>item.kind==='SCULPTURE');
+      const hasArtwork=customOffer.items.some(item=>item.kind==='SCULPTURE' && (asset(item.image) || asset(item.webmVideo)));
+      $('art-footer').hidden=!hasArtwork;
+      if(!hasArtwork) $('brand-context').textContent='Order payments';
       const cleanups=[];
       for(const item of customOffer.items) {
         const card=document.createElement('article'); card.className='custom-item';
         const heading=document.createElement('h2'); heading.textContent=item.title; card.append(heading);
         if(Number(item.quantity)>1) {const quantity=document.createElement('p');quantity.textContent='Quantity: '+item.quantity;card.append(quantity);}
-        if(item.kind==='SCULPTURE') {
+        if(item.kind==='SCULPTURE' && (asset(item.image) || asset(item.webmVideo))) {
           const stage=document.createElement('div');stage.className='media-stage';
           const motion=document.createElement('button');motion.type='button';motion.className='motion';motion.hidden=true;
           card.append(stage,motion);
@@ -586,7 +595,10 @@
         pickupGallery=canonical==='PD'
           ? galleries.find(g=>key(g.lookupKey)==='ws')
           : gallery;
-        customOffer=await loadCustomDisplay();
+        // Keep existing-order titles/items on the return page too. Missing or
+        // unavailable display data must not prevent the neutral checkout status.
+        try {customOffer=await loadCustomDisplay();}
+        catch(error) {if(!route.returning) throw error;}
         configurePickup();
         $('brand').textContent=gallery.name || canonical;
         const logo=asset(gallery.logoImage);
@@ -611,7 +623,7 @@
           }
         }
         // A completed/returned offer can legitimately have disappeared from current assets.
-        if(!product && route.returning) product={displayName:'Your checkout'};
+        if(!product && route.returning) product={displayName:'Order payment'};
         if(!product) throw new Error('This sculpture was not found in the current assets. Please contact the gallery.');
         $('title').textContent=product.displayName || 'Sculpture';
         $('variant').textContent=[product.sizeDescription,product.finishName].filter(Boolean).join(' · ');
